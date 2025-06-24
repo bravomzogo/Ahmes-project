@@ -1,0 +1,36 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    {% include 'main/sidebar.html' %}
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Delete Comment</h1>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <div class="alert alert-danger">
+              <h4>Are you sure you want to delete this comment?</h4>
+              <p><strong>Author:</strong> {{ comment.author_name|default:"Anonymous" }}</p>
+              <p><strong>Date:</strong> {{ comment.created_at|date:"d M Y" }}</p>
+              <p><strong>Comment:</strong> {{ comment.content }}</p>
+              <p>This action cannot be undone.</p>
+            </div>
+            
+            <div class="text-end">
+              <button type="submit" class="btn btn-danger">Confirm Delete</button>
+              <a href="{% url 'manage_comments' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h2 class="text-center section-title" data-aos="fade-up">About AHMES Secondary School</h2>
+    <div class="row">
+      <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+        <img src="{% static 'images/about.jpg' %}" alt="About AHMES" class="img-fluid rounded">
+      </div>
+      <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+        <h3>Our History</h3>
+        <p>AHMES secondary school officially opened its doors in 2007, and has been a center of academic excellence for both boys and girls at the secondary level. We offer O – level and A – level education in both science, business and social sciences subjects.</p>
+        
+        <h3 class="mt-4">Our Mission</h3>
+        <p>To provide quality mental, physical and spiritual education to the youth, bring the youth together through teamwork in academics, sports and culture regardless of gender, status, race, religion and political ideology.</p>
+        
+        <h3 class="mt-4">Our Vision</h3>
+        <p>To be the leading institution in providing holistic education that produces well-rounded individuals who excel academically and contribute positively to society.</p>
+      </div>
+    </div>
+    
+    <div class="row mt-5">
+      <div class="col-12" data-aos="fade-up">
+        <h3 class="text-center">Our Core Values</h3>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="feature-box">
+          <div class="feature-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <h4>Academic Excellence</h4>
+          <p>We strive for the highest standards in teaching and learning to ensure our students achieve their full potential.</p>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="feature-box">
+          <div class="feature-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h4>Community</h4>
+          <p>We foster a supportive environment where students, staff, and parents work together as a community.</p>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
+        <div class="feature-box">
+          <div class="feature-icon">
+            <i class="fas fa-hand-holding-heart"></i>
+          </div>
+          <h4>Integrity</h4>
+          <p>We uphold the highest ethical standards in all our interactions and decision-making processes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-light">
+  <div class="container">
+    <h2 class="text-center section-title" data-aos="fade-up">Our Achievements</h2>
+    <div class="row">
+      <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Academic Performance</h5>
+            <p class="card-text">
+              Consistently ranked in the top 10 schools in Tanzania for NECTA examination results since 2016.
+            </p>
+            <ul>
+              <li>100% pass rate in Form Four examinations for the past 5 years</li>
+              <li>95% of our Form Six students qualify for university admission</li>
+              <li>15 national scholarship recipients in the past 3 years</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Sports & Extracurriculars</h5>
+            <p class="card-text">
+              Our students excel beyond the classroom in various competitions:
+            </p>
+            <ul>
+              <li>National Science Olympiad winners (2019, 2021)</li>
+              <li>Regional football champions (2020, 2022)</li>
+              <li>Debate competition national finalists (2021, 2023)</li>
+              <li>Music and drama festival regional champions</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

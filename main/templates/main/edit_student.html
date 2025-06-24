@@ -1,0 +1,90 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    {% include 'main/sidebar.html' %}
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Edit Student</h1>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">First Name</label>
+                  {{ form.first_name }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Last Name</label>
+                  {{ form.last_name }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Gender</label>
+                  {{ form.gender }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Date of Birth</label>
+                  {{ form.date_of_birth }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Admission Number</label>
+                  {{ form.admission_number }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Campus</label>
+                  {{ form.campus }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Level</label>
+                  {{ form.level }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Admission Date</label>
+                  {{ form.admission_date }}
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Parent Name</label>
+                  {{ form.parent_name }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Parent Phone</label>
+                  {{ form.parent_phone }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Parent Email</label>
+                  {{ form.parent_email }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Address</label>
+                  {{ form.address }}
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-end">
+              <button type="submit" class="btn btn-primary">Update Student</button>
+              <a href="{% url 'manage_students' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

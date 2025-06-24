@@ -1,0 +1,392 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <!-- Hero Slider -->
+    <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-indicators">
+        <button
+          type="button"
+          data-bs-target="#mainCarousel"
+          data-bs-slide-to="0"
+          class="active"
+          aria-current="true"
+          aria-label="Slide 1"
+        ></button>
+        <button
+          type="button"
+          data-bs-target="#mainCarousel"
+          data-bs-slide-to="1"
+          aria-label="Slide 2"
+        ></button>
+        <button
+          type="button"
+          data-bs-target="#mainCarousel"
+          data-bs-slide-to="2"
+          aria-label="Slide 3"
+        ></button>
+      </div>
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img
+            src="{% static 'images/stud.jpg' %}"
+            class="d-block w-100"
+            alt="School Building"
+          />
+          <div class="carousel-caption d-none d-md-block">
+            <h2 data-aos="fade-up">Welcome to AHMES Secondary School</h2>
+            <p data-aos="fade-up" data-aos-delay="300">Center of Academic Excellence</p>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <img
+            src="{% static 'images/stud2.jpg' %}"
+            class="d-block w-100"
+            alt="Students in Class"
+          />
+          <div class="carousel-caption d-none d-md-block">
+            <h2 data-aos="fade-up">Quality Education</h2>
+            <p data-aos="fade-up" data-aos-delay="300">Preparing future leaders</p>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <img
+            src="{% static 'images/stud3.jpg' %}"
+            class="d-block w-100"
+            alt="Sports Day"
+          />
+          <div class="carousel-caption d-none d-md-block">
+            <h2 data-aos="fade-up">Holistic Development</h2>
+            <p data-aos="fade-up" data-aos-delay="300">Academic, Sports, and Cultural activities</p>
+          </div>
+        </div>
+      </div>
+      <button
+        class="carousel-control-prev"
+        type="button"
+        data-bs-target="#mainCarousel"
+        data-bs-slide="prev"
+      >
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button
+        class="carousel-control-next"
+        type="button"
+        data-bs-target="#mainCarousel"
+        data-bs-slide="next"
+      >
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+
+    <!-- About Us Section -->
+    <section class="section bg-light">
+      <div class="container">
+        <h2 class="text-center section-title" data-aos="fade-up">ABOUT US</h2>
+        <p class="text-center section-subtitle" data-aos="fade-up" data-aos-delay="200">
+          Providing quality education since 2007
+        </p>
+        <div class="row">
+          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+            <p>
+              Ali Hassan Mwinyi Elite Schools (AHMES) is an educational
+              institution that provides care and education for both boys and
+              girls in its campuses. We provide quality mental, physical and
+              spiritual education to the youth, bring the youth together through
+              teamwork in academics, sports and culture regardless of gender,
+              status, race, religion and political ideology.
+            </p>
+            <p>
+              AHMES manages a nursery and primary school in Kawe campus, located
+              in Dar es Salaam and the Secondary school located in Bagamoyo.
+            </p>
+          </div>
+          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+            <p>
+              AHMES secondary school officially opened its doors in 2007, and
+              has been a center of academic excellence for both boys and girls
+              at the secondary level. We offer O – level and A – level education
+              in both science, business and social sciences subjects.
+            </p>
+            <div class="alert alert-success" data-aos="fade-up" data-aos-delay="500">
+              <h5>MATOKEO YA KIDATO CHA SITA 2023</h5>
+              <p>TUMEVUNJA REKODI AMBAYO HAIJAWAHI KUTOKEA NCHINI TANZANIA</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- News and Updates -->
+    <section class="section">
+      <div class="container">
+        <h2 class="text-center section-title" data-aos="fade-up">CURRENT NEWS AND UPDATES</h2>
+        <p class="text-center section-subtitle" data-aos="fade-up" data-aos-delay="200">
+          Stay informed with the latest happenings at AHMES
+        </p>
+        <div class="row">
+          {% for news_item in news %}
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:2 }}00">
+            <div class="card">
+              <img
+                src="{{ news_item.image.url }}"
+                class="card-img-top"
+                alt="{{ news_item.title }}"
+              />
+              <div class="card-body">
+                <h5 class="card-title">{{ news_item.title }}</h5>
+                <p class="card-text">
+                  {{ news_item.content|truncatewords:20 }}
+                </p>
+                <a href="#" class="btn btn-primary">Read More</a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile App Section -->
+    <section class="app-section">
+      <div class="container text-center">
+        <h3 data-aos="fade-up">Download Our Mobile App</h3>
+        <p class="mb-5" data-aos="fade-up" data-aos-delay="200">Stay connected with AHMES anytime, anywhere</p>
+        <div class="row mt-4">
+          <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="300">
+            <a href="#" class="app-btn btn-light">
+              <i class="fab fa-apple"></i>
+              <div class="btn-text">
+                <span>Download on the</span>
+                <span>App Store</span>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="400">
+            <a href="#" class="app-btn btn-light">
+              <i class="fab fa-google-play"></i>
+              <div class="btn-text">
+                <span>Get it on</span>
+                <span>Google Play</span>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="500">
+            <a href="#" class="app-btn btn-light">
+              <i class="fas fa-question-circle"></i>
+              <div class="btn-text">
+                <span>Learn about</span>
+                <span>How to Use the App</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Campuses Section -->
+    <section class="section bg-light">
+      <div class="container">
+        <h2 class="text-center section-title" data-aos="fade-up">Our Campuses</h2>
+        <p class="text-center section-subtitle" data-aos="fade-up" data-aos-delay="200">
+          Quality education across multiple locations
+        </p>
+        <div class="row">
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="card">
+              <img
+                src="{% static 'images/gadu2.jpg' %}"
+                class="card-img-top"
+                alt="Pre and Primary School"
+              />
+              <div class="card-body">
+                <h5 class="card-title">Pre and Primary School - Kawe</h5>
+                <p class="card-text">
+                  Our Nursery and Primary school is located at Kawe,
+                  Kinondoni district in Dar es Salaam. Our outstanding
+                  results in District, Regional and National examinations
+                  all standard VII pupils have been scoring A grades for
+                  all subjects.
+                </p>
+                <p class="card-text">
+                  <small class="text-muted">Working Time: Mon - Sat</small>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
+            <div class="card">
+              <img
+                src="{% static 'images/holly3.jpg' %}"
+                class="card-img-top"
+                alt="O-Level Education"
+              />
+              <div class="card-body">
+                <h5 class="card-title">O - Level Education</h5>
+                <p class="card-text">
+                  Our O-Level Secondary school education provided at
+                  Bagamoyo Campus for all Boys and Girls. AHMES excelled
+                  as one of the best performing schools in O-Level as
+                  published by NECTA in January 2021 in Form Four results.
+                </p>
+                <p class="card-text">
+                  <small class="text-muted">Working Time: Mon - Sat</small>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
+            <div class="card">
+              <img
+                src="{% static 'images/advance.jpg' %}"
+                class="card-img-top"
+                alt="Advanced Level Education"
+              />
+              <div class="card-body">
+                <h5 class="card-title">Advanced Level Education</h5>
+                <p class="card-text">
+                  A-Level education provided at Bagamoyo Campus for all
+                  Boys and Girls and the School has been consistently
+                  ranked in Top ten School in NECTA's best performance
+                  schools academically since 2016 to date, Our Students
+                  score only division one and Two.
+                </p>
+                <a href="#" class="btn btn-primary">View Our Profile</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="section">
+      <div class="container">
+        <h2 class="text-center section-title" data-aos="fade-up">Why Choose AHMES?</h2>
+        <p class="text-center section-subtitle" data-aos="fade-up" data-aos-delay="200">
+          Discover what makes us the preferred choice for quality education
+        </p>
+        <div class="row">
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h4>Academic Progress Tracking</h4>
+              <p>
+                Parents can view academic progress report at any time through
+                smartphone click here to start
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fas fa-school"></i>
+              </div>
+              <h4>Conducive Environment</h4>
+              <p>
+                The school environment is calm and attractive learning points.
+                The classrooms population is about 30 to 40 students. All
+                students are provided with text books for each subject
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <h4>Academic Excellence</h4>
+              <p>
+                The home of Progressive Academic excellency and Good morals. Our
+                academic excellence has been improving yearly in all levels.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="600">
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fas fa-heart"></i>
+              </div>
+              <h4>Parental Care</h4>
+              <p>
+                We provide parental care to our students by the people
+                surrounding them through seminars and frequent meetings. Our
+                teachers have been empowered through seminars to acquire such
+                skills
+              </p>
+              <a href="#" class="btn btn-outline-primary mt-3">Learn More About Us</a>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="700">
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fas fa-flask"></i>
+              </div>
+              <h4>Modern Laboratories</h4>
+              <p>
+                State-of-the-art science laboratories equipped with the latest
+                technology to enhance practical learning and scientific research.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="800">
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fas fa-medal"></i>
+              </div>
+              <h4>Award-Winning Programs</h4>
+              <p>
+                Recognized nationally for our innovative curriculum and
+                exceptional student achievements in academics and extracurriculars.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comments Section -->
+<section class="section bg-light">
+  <div class="container">
+    <h2 class="text-center section-title" data-aos="fade-up">Share Your Thoughts</h2>
+    <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
+      (Usisite kututumia ujumbe wa aina yoyote, wito ushauri pamoja na
+      ukosoaji hapa.)
+    </p>
+    <div class="row justify-content-center">
+      <div class="col-md-8" data-aos="fade-up" data-aos-delay="300">
+        {% comment %} {% if messages %}
+          {% for message in messages %}
+          <div class="alert alert-success">
+            {{ message }}
+          </div>
+          {% endfor %}
+        {% endif %} {% endcomment %}
+        
+        <form id="commentForm" method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <textarea
+              class="form-control"
+              name="comment"
+              rows="5"
+              placeholder="Give out Comments"
+              required
+            ></textarea>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg">
+              Submit Comment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

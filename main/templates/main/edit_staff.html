@@ -1,0 +1,87 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    {% include 'main/sidebar.html' %}
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Edit Staff Member</h1>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">First Name</label>
+                  {{ form.first_name }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Last Name</label>
+                  {{ form.last_name }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Position</label>
+                  {{ form.position }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Qualification</label>
+                  {{ form.qualification }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Specialization</label>
+                  {{ form.specialization }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Campus</label>
+                  {{ form.campus }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Joined Date</label>
+                  {{ form.joined_date }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Profile Image</label>
+                  {{ form.image }}
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Phone</label>
+                  {{ form.phone }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  {{ form.email }}
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Bio</label>
+              {{ form.bio }}
+            </div>
+            
+            <div class="text-end">
+              <button type="submit" class="btn btn-primary">Update Staff Member</button>
+              <a href="{% url 'manage_staff' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

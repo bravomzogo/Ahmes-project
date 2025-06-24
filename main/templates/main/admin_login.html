@@ -1,0 +1,175 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  .login-container {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+  }
+  
+  .login-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .login-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .login-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .login-header::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 95px;
+    height: 90px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+  
+  .login-header img {
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+    transition: all 0.3s ease;
+  }
+  
+  .login-card:hover .login-header img {
+    transform: scale(1.05);
+  }
+  
+  .login-body {
+    padding: 1.3rem;
+    background-color: white;
+  }
+  
+  .form-control-lg {
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    border: 0.5px solid #e0e0e0;
+    transition: all 0.3s ease;
+  }
+  
+  .form-control-lg:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(26, 82, 118, 0.15);
+  }
+  
+  .btn-login {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border: none;
+    padding: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-login:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(26, 82, 118, 0.2);
+  }
+  
+  .forgot-link {
+    color: var(--text-light);
+    transition: all 0.3s ease;
+  }
+  
+  .forgot-link:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-xl-5 col-lg-6 col-md-8">
+        <div class="login-card" data-aos="zoom-in">
+          <div class="login-header">
+            {% comment %} <img src="{% static 'images/Ahmes.PNG' %}" alt="AHMES Logo" style="height: 80px;" class="mb-3"> {% endcomment %}
+            <h3 class="text-white mb-0">Admin Portal</h3>
+            <p class="text-white-50 mb-0">Enter your credentials to continue</p>
+          </div>
+          <div class="login-body">
+            {% if form.errors %}
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Invalid credentials!</strong> Please check your username and password.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endif %}
+            
+            <form method="post" class="needs-validation" novalidate>
+              {% csrf_token %}
+              <div class="mb-4">
+                <label for="username" class="form-label fw-bold">Username</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
+                  <input type="text" class="form-control form-control-lg" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <label for="password" class="form-label fw-bold">Password</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
+                  <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+              </div>
+              
+              <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-login btn-lg">
+                  <i class="fas fa-sign-in-alt me-2"></i> Login
+                </button>
+              </div>
+              
+              <div class="text-center">
+                <a href="#" class="forgot-link">
+                  <i class="fas fa-question-circle me-1"></i> Forgot Password?
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <div class="text-center mt-4">
+          <p class="text-muted">© {% now "Y" %} AHMES. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+  'use strict';
+  window.addEventListener('load', function() {
+    var forms = document.getElementsByClassName('needs-validation');
+    var validation = Array.prototype.filter.call(forms, function(form) {
+      form.addEventListener('submit', function(event) {
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }, false);
+})();
+</script>
+{% endblock %}

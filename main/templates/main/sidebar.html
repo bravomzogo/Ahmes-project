@@ -1,0 +1,41 @@
+<div class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+  <div class="position-sticky pt-3">
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link text-white {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+          <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'students' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_students' %}">
+          <i class="fas fa-users me-2"></i> Students
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'staff' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_staff' %}">
+          <i class="fas fa-user-tie me-2"></i> Staff
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'news' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_news' %}">
+          <i class="fas fa-newspaper me-2"></i> News
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'comments' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_comments' %}">
+          <i class="fas fa-comments me-2"></i> Comments
+        </a>
+      </li>
+    </ul>
+    
+    <div class="mt-4">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt me-2"></i> Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

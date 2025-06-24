@@ -1,0 +1,123 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h2 class="text-center section-title" data-aos="fade-up">Our Dedicated Staff</h2>
+    <p class="text-center section-subtitle" data-aos="fade-up" data-aos-delay="200">
+      Meet the team of professionals committed to your child's success
+    </p>
+    
+    <div class="row">
+      <div class="col-12 mb-5" data-aos="fade-up">
+        <ul class="nav nav-tabs justify-content-center" id="staffTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers" type="button" role="tab">Teaching Staff</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="administrators-tab" data-bs-toggle="tab" data-bs-target="#administrators" type="button" role="tab">Administration</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="support-tab" data-bs-toggle="tab" data-bs-target="#support" type="button" role="tab">Support Staff</button>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="col-12">
+        <div class="tab-content" id="staffTabContent">
+          <div class="tab-pane fade show active" id="teachers" role="tabpanel">
+            <div class="row">
+              {% for staff in staff_members %}
+                {% if staff.position == 'Teacher' %}
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:1 }}00">
+                  <div class="card h-100">
+                    <img src="{{ staff.image.url }}" class="card-img-top" alt="{{ staff.first_name }} {{ staff.last_name }}">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ staff.first_name }} {{ staff.last_name }}</h5>
+                      <p class="text-muted">{{ staff.qualification }}</p>
+                      <p><strong>Specialization:</strong> {{ staff.specialization }}</p>
+                      <p class="card-text">{{ staff.bio|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer bg-white">
+                      <small class="text-muted">Campus: {{ staff.campus.name }}</small>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          
+          <div class="tab-pane fade" id="administrators" role="tabpanel">
+            <div class="row">
+              {% for staff in staff_members %}
+                {% if staff.position == 'Administrator' %}
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:1 }}00">
+                  <div class="card h-100">
+                    <img src="{{ staff.image.url }}" class="card-img-top" alt="{{ staff.first_name }} {{ staff.last_name }}">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ staff.first_name }} {{ staff.last_name }}</h5>
+                      <p class="text-muted">{{ staff.qualification }}</p>
+                      <p><strong>Role:</strong> {{ staff.specialization }}</p>
+                      <p class="card-text">{{ staff.bio|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer bg-white">
+                      <small class="text-muted">Campus: {{ staff.campus.name }}</small>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          
+          <div class="tab-pane fade" id="support" role="tabpanel">
+            <div class="row">
+              {% for staff in staff_members %}
+                {% if staff.position == 'Support' %}
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:1 }}00">
+                  <div class="card h-100">
+                    <img src="{{ staff.image.url }}" class="card-img-top" alt="{{ staff.first_name }} {{ staff.last_name }}">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ staff.first_name }} {{ staff.last_name }}</h5>
+                      <p class="text-muted">{{ staff.qualification }}</p>
+                      <p><strong>Role:</strong> {{ staff.specialization }}</p>
+                      <p class="card-text">{{ staff.bio|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer bg-white">
+                      <small class="text-muted">Campus: {{ staff.campus.name }}</small>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-light">
+  <div class="container">
+    <h2 class="text-center section-title" data-aos="fade-up">Join Our Team</h2>
+    <div class="row justify-content-center">
+      <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200">
+        <div class="card">
+          <div class="card-body">
+            <p class="card-text text-center">
+              We're always looking for talented educators and staff to join our team. If you're passionate about education and meet our qualifications, we'd love to hear from you.
+            </p>
+            <div class="text-center mt-4">
+              <a href="#" class="btn btn-primary me-2">View Current Openings</a>
+              <a href="#" class="btn btn-outline-primary">Submit Application</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

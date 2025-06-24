@@ -1,0 +1,134 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h2 class="text-center section-title" data-aos="fade-up">Our Services</h2>
+    <p class="text-center section-subtitle" data-aos="fade-up" data-aos-delay="200">
+      Comprehensive educational services for holistic development
+    </p>
+    
+    <div class="row">
+      {% for campus in campuses %}
+      <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:2 }}00">
+        <div class="card h-100">
+          <img src="{{ campus.image.url }}" class="card-img-top" alt="{{ campus.name }}">
+          <div class="card-body">
+            <h4 class="card-title">{{ campus.name }}</h4>
+            <p class="card-text">{{ campus.description }}</p>
+            <div class="mt-4">
+              <h5>Facilities:</h5>
+              <ul>
+                <li>Modern classrooms with multimedia equipment</li>
+                <li>Well-equipped science laboratories</li>
+                <li>Computer labs with internet access</li>
+                <li>Library with extensive resources</li>
+                <li>Sports facilities including football pitch and basketball court</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card-footer bg-white">
+            <small class="text-muted">Location: {{ campus.location }}</small>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section bg-light">
+  <div class="container">
+    <h2 class="text-center section-title" data-aos="fade-up">Academic Programs</h2>
+    <div class="row">
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="feature-box">
+          <div class="feature-icon">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <h4>Ordinary Level (Form 1-4)</h4>
+          <p>Comprehensive O-Level education following the Tanzanian national curriculum with additional enrichment programs.</p>
+          <ul class="mt-3">
+            <li>Core subjects: Mathematics, English, Kiswahili, Civics, etc.</li>
+            <li>Science and arts streams available</li>
+            <li>ICT integrated across all subjects</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="feature-box">
+          <div class="feature-icon">
+            <i class="fas fa-microscope"></i>
+          </div>
+          <h4>Advanced Level - Science</h4>
+          <p>Rigorous A-Level science program preparing students for STEM careers and university education.</p>
+          <ul class="mt-3">
+            <li>PCB (Physics, Chemistry, Biology)</li>
+            <li>PCM (Physics, Chemistry, Mathematics)</li>
+            <li>CBG (Chemistry, Biology, Geography)</li>
+            <li>Advanced practical laboratory work</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
+        <div class="feature-box">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h4>Advanced Level - Arts & Business</h4>
+          <p>Comprehensive arts and business program developing critical thinking and analytical skills.</p>
+          <ul class="mt-3">
+            <li>HGL (History, Geography, Language)</li>
+            <li>EGM (Economics, Geography, Mathematics)</li>
+            <li>HGE (History, Geography, Economics)</li>
+            <li>Business skills development</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="text-center section-title" data-aos="fade-up">Additional Services</h2>
+    <div class="row">
+      <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h4 class="card-title">Boarding Facilities</h4>
+            <p class="card-text">
+              Safe and comfortable boarding facilities with:
+            </p>
+            <ul>
+              <li>24/7 security and supervision</li>
+              <li>Nutritious meals prepared by professional chefs</li>
+              <li>Medical care with a school nurse</li>
+              <li>Study halls with tutor support</li>
+              <li>Recreational areas for relaxation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h4 class="card-title">Extracurricular Activities</h4>
+            <p class="card-text">
+              We offer a wide range of extracurricular programs:
+            </p>
+            <ul>
+              <li>Sports: Football, basketball, athletics, etc.</li>
+              <li>Clubs: Debate, science, journalism, etc.</li>
+              <li>Cultural activities: Music, dance, drama</li>
+              <li>Community service programs</li>
+              <li>Leadership training</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
