@@ -5,9 +5,8 @@
 *.zip
 *.tar
 *.iso
-*.png
-*.jpg
-*.jpeg
+
+
 media/
 static/uploads/
 db.sqlite3
