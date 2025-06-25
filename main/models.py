@@ -170,3 +170,31 @@ class Comment(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
+
+
+class Gallery(models.Model):
+    MEDIA_TYPE_CHOICES = [
+        ('image', 'Image'),
+        ('video', 'Video'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
+    image = models.ImageField(upload_to='gallery/images/', blank=True, null=True)
+    video = models.FileField(upload_to='gallery/videos/', blank=True, null=True)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='gallery_items'
+    )
+    published_date = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-published_date']
+        verbose_name = 'Gallery Item'
+        verbose_name_plural = 'Gallery Items'

@@ -33,9 +33,19 @@ urlpatterns = [
     path('ad/news/add/', views.add_news, name='add_news'),
     path('ad/news/edit/<int:pk>/', views.edit_news, name='edit_news'),
     path('ad/news/delete/<int:pk>/', views.delete_news, name='delete_news'),
+    path('news/<int:pk>/', views.news_detail, name='news_detail'),
+
 
     # Comment management
     path('ad/comments/', views.manage_comments, name='manage_comments'),
     path('ad/comments/approve/<int:pk>/', views.approve_comment, name='approve_comment'),
     path('ad/comments/delete/<int:pk>/', views.delete_comment, name='delete_comment'),
+
+    # Gallery management
+    path('ad/manage-gallery/', views.manage_gallery, name='manage_gallery'),
+    path('ad/gallery/add/', views.add_gallery, name='add_gallery'),
+    path('ad/gallery/edit/<int:pk>/', views.edit_gallery, name='edit_gallery'),
+    path('ad/gallery/delete/<int:pk>/', views.delete_gallery, name='delete_gallery'),
+    path('gallery/', views.gallery, name='gallery'),
+
 ]

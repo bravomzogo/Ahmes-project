@@ -1,0 +1,53 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Delete Gallery Item | AHMES{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    {% include 'main/sidebar.html' %}
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h4 text-danger"><i class="fas fa-trash me-2"></i>Delete Gallery Item</h1>
+      </div>
+
+      <div class="card shadow rounded-4">
+        <div class="card-body p-4">
+          <p class="fs-5">Are you sure you want to delete the gallery item 
+            <strong class="text-dark">"{{ gallery.title }}"</strong>? This action <span class="text-danger fw-bold">cannot be undone.</span>
+          </p>
+
+          {% if gallery.media_type == 'image' and gallery.image %}
+            <div class="mb-3">
+              <label class="fw-bold">Image Preview:</label><br>
+              <img src="{{ gallery.image.url }}" alt="{{ gallery.title }}" class="img-fluid rounded shadow-sm" style="max-width: 300px;" />
+            </div>
+          {% elif gallery.media_type == 'video' and gallery.video %}
+            <div class="mb-3">
+              <label class="fw-bold">Video Preview:</label><br>
+              <video width="300" controls class="rounded shadow-sm">
+                <source src="{{ gallery.video.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          {% endif %}
+
+          <form method="post" class="mt-4">
+            {% csrf_token %}
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-danger btn-lg rounded-pill px-4">
+                <i class="fas fa-trash-alt me-2"></i>Yes, Delete
+              </button>
+              <a href="{% url 'manage_gallery' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                <i class="fas fa-arrow-left me-2"></i>Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

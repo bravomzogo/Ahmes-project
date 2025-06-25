@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import Campus, Level, Student, StaffMember, News, Comment
-from .forms import (UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
+from .models import Campus, Gallery, Level, Student, StaffMember, News, Comment
+from .forms import (GalleryForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm)
 
 def is_admin(user):
@@ -12,9 +12,32 @@ def is_admin(user):
 def is_staff_member(user):
     return user.is_authenticated and user.is_staff_member
 
+# Make sure you have this form created
+
 def home(request):
+    # Get latest 3 published news items
     news = News.objects.filter(is_published=True).order_by('-published_date')[:3]
-    return render(request, 'main/index.html', {'news': news})
+    
+    # Handle contact form submission
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            if request.user.is_authenticated:
+                comment.author_name = request.user.username
+                comment.author_email = request.user.email
+            comment.save()
+            messages.success(request, 'Thank you for your comment!')
+            # Redirect to prevent form resubmission
+            return redirect('home')
+    else:
+        form = CommentForm()
+    
+    context = {
+        'news': news,
+        'form': form,
+    }
+    return render(request, 'main/index.html', context)
 
 def about(request):
     return render(request, 'main/about.html')
@@ -61,11 +84,13 @@ def admin_dashboard(request):
     staff_count = StaffMember.objects.count()
     news_count = News.objects.count()
     pending_comments = Comment.objects.filter(is_approved=False).count()
+    gallery_count = Gallery.objects.count()
     return render(request, 'main/admin_dashboard.html', {
         'students_count': students_count,
         'staff_count': staff_count,
         'news_count': news_count,
         'pending_comments': pending_comments,
+        'gallery_count': gallery_count,
     })
 
 @login_required
@@ -237,3 +262,61 @@ def custom_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('logout')
+
+
+def news_detail(request, pk):
+    news = get_object_or_404(News, pk=pk, is_published=True)
+    return render(request, 'main/news_detail.html', {'news': news})
+
+
+
+@login_required
+@user_passes_test(is_admin)
+def manage_gallery(request):
+    gallery_items = Gallery.objects.all().order_by('-published_date')
+    return render(request, 'main/manage_gallery.html', {'gallery_items': gallery_items})
+
+@login_required
+@user_passes_test(is_admin)
+def add_gallery(request):
+    if request.method == 'POST':
+        form = GalleryForm(request.POST, request.FILES)
+        if form.is_valid():
+            gallery = form.save(commit=False)
+            gallery.author = request.user
+            gallery.save()
+            messages.success(request, 'Gallery item added successfully!')
+            return redirect('manage_gallery')
+    else:
+        form = GalleryForm()
+    return render(request, 'main/add_gallery.html', {'form': form})
+
+@login_required
+@user_passes_test(is_admin)
+def edit_gallery(request, pk):
+    gallery = get_object_or_404(Gallery, pk=pk)
+    if request.method == 'POST':
+        form = GalleryForm(request.POST, request.FILES, instance=gallery)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Gallery item updated successfully!')
+            return redirect('manage_gallery')
+    else:
+        form = GalleryForm(instance=gallery)
+    return render(request, 'main/edit_gallery.html', {'form': form, 'gallery': gallery})
+
+@login_required
+@user_passes_test(is_admin)
+def delete_gallery(request, pk):
+    gallery = get_object_or_404(Gallery, pk=pk)
+    if request.method == 'POST':
+        gallery.delete()
+        messages.success(request, 'Gallery item deleted successfully!')
+        return redirect('manage_gallery')
+    return render(request, 'main/delete_gallery.html', {'gallery': gallery})
+
+
+
+def gallery(request):
+    gallery_items = Gallery.objects.filter(is_published=True).order_by('-published_date')
+    return render(request, 'main/gallery.html', {'gallery_items': gallery_items})

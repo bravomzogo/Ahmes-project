@@ -1,39 +1,19 @@
-{% extends 'main/base.html' %}
-{% load static %}
-
-{% block title %}Admin Dashboard | AHMES{% endblock %}
-
-{% block content %}
+{% extends 'main/base.html' %} {% load static %} {% block title %}Admin
+Dashboard | AHMES{% endblock %} {% block content %}
 <div class="wrapper">
   <!-- Sidebar -->
   {% include 'main/sidebar.html' %}
 
   <!-- Main Content -->
   <div class="main-content">
-    <!-- Top Navigation -->
-    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-      <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-        <i class="fa fa-bars"></i>
-      </button>
-      
-      <h4 class="mb-0 text-gray-800">Dashboard Overview</h4>
-      
-      <!-- Topbar Navbar -->
-      <ul class="navbar-nav ml-auto">
-        <!-- Nav Item - User Information -->
-       
-          <!-- Dropdown - User Information -->
-          {% comment %}  {% endcomment %}
-        </li>
-      </ul>
-    </nav>
-    <!-- End of Topbar -->
-
     <!-- Begin Page Content -->
     <div class="container-fluid">
       <!-- Page Heading -->
       <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <a
+          href="#"
+          class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
+        >
           <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
         </a>
       </div>
@@ -46,15 +26,23 @@
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                    Total Students</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ students_count }}</div>
+                  <div
+                    class="text-xs font-weight-bold text-primary text-uppercase mb-1"
+                  >
+                    Total Students
+                  </div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ students_count }}
+                  </div>
                 </div>
                 <div class="col-auto">
                   <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
                 </div>
               </div>
-              <a href="{% url 'manage_students' %}" class="small-box-footer mt-2">
+              <a
+                href="{% url 'manage_students' %}"
+                class="small-box-footer mt-2"
+              >
                 More info <i class="fas fa-arrow-circle-right"></i>
               </a>
             </div>
@@ -67,9 +55,14 @@
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                    Staff Members</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ staff_count }}</div>
+                  <div
+                    class="text-xs font-weight-bold text-success text-uppercase mb-1"
+                  >
+                    Staff Members
+                  </div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ staff_count }}
+                  </div>
                 </div>
                 <div class="col-auto">
                   <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
@@ -88,9 +81,14 @@
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                    News Items</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ news_count }}</div>
+                  <div
+                    class="text-xs font-weight-bold text-info text-uppercase mb-1"
+                  >
+                    News Items
+                  </div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ news_count }}
+                  </div>
                 </div>
                 <div class="col-auto">
                   <i class="fas fa-newspaper fa-2x text-gray-300"></i>
@@ -103,21 +101,58 @@
           </div>
         </div>
 
+        <!-- Gallery Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-secondary shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div
+                    class="text-xs font-weight-bold text-secondary text-uppercase mb-1"
+                  >
+                    Gallery Items
+                  </div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ gallery_count }}
+                  </div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-images fa-2x text-gray-300"></i>
+                </div>
+              </div>
+              <a
+                href="{% url 'manage_gallery' %}"
+                class="small-box-footer mt-2"
+              >
+                More info <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
         <!-- Pending Comments Card -->
         <div class="col-xl-3 col-md-6 mb-4">
           <div class="card border-left-warning shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                    Pending Comments</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_comments }}</div>
+                  <div
+                    class="text-xs font-weight-bold text-warning text-uppercase mb-1"
+                  >
+                    Pending Comments
+                  </div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ pending_comments }}
+                  </div>
                 </div>
                 <div class="col-auto">
                   <i class="fas fa-comments fa-2x text-gray-300"></i>
                 </div>
               </div>
-              <a href="{% url 'manage_comments' %}" class="small-box-footer mt-2">
+              <a
+                href="{% url 'manage_comments' %}"
+                class="small-box-footer mt-2"
+              >
                 Review now <i class="fas fa-arrow-circle-right"></i>
               </a>
             </div>
@@ -127,50 +162,6 @@
 
       <!-- Content Row -->
       <div class="row">
-        <!-- Recent Students -->
-        <div class="col-lg-8 mb-4">
-          <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-              <h6 class="m-0 font-weight-bold text-primary">Recent Students</h6>
-              <div class="dropdown no-arrow">
-                <a class="dropdown-toggl" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-                  <a class="dropdown-item" href="{% url 'manage_students' %}">View All</a>
-                  <a class="dropdown-item" href="{% url 'add_student' %}">Add New</a>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
-                  <thead class="thead-light">
-                    <tr>
-                      <th>Admission No.</th>
-                      <th>Name</th>
-                      <th>Campus</th>
-                      <th>Level</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for student in recent_students %}
-                    <tr>
-                      <td>{{ student.admission_number }}</td>
-                      <td>{{ student.first_name }} {{ student.last_name }}</td>
-                      <td>{{ student.campus.name }}</td>
-                      <td>{{ student.level.name }}</td>
-                      <td>{{ student.created_at|date:"d M Y" }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Quick Actions & Recent News -->
         <div class="col-lg-4 mb-4">
           <!-- Quick Actions -->
@@ -180,47 +171,27 @@
             </div>
             <div class="card-body">
               <div class="d-grid gap-3">
-                <a href="{% url 'add_student' %}" class="btn btn-primary btn-block">
+                <a
+                  href="{% url 'add_student' %}"
+                  class="btn btn-primary btn-block"
+                >
                   <i class="fas fa-user-plus mr-2"></i> Add New Student
                 </a>
-                <a href="{% url 'add_staff' %}" class="btn btn-success btn-block">
+                <a
+                  href="{% url 'add_staff' %}"
+                  class="btn btn-success btn-block"
+                >
                   <i class="fas fa-user-tie mr-2"></i> Add Staff Member
                 </a>
                 <a href="{% url 'add_news' %}" class="btn btn-info btn-block">
                   <i class="fas fa-plus-circle mr-2"></i> Create News Update
                 </a>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recent News -->
-          <div class="card shadow">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-              <h6 class="m-0 font-weight-bold text-primary">Recent News</h6>
-              <div class="dropdown no-arrow">
-                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                <a
+                  href="{% url 'add_gallery' %}"
+                  class="btn btn-secondary btn-block"
+                >
+                  <i class="fas fa-image mr-2"></i> Add Gallery Item
                 </a>
-                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-                  <a class="dropdown-item" href="{% url 'manage_news' %}">View All</a>
-                  <a class="dropdown-item" href="{% url 'add_news' %}">Add New</a>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="list-group">
-                {% for news in recent_news %}
-                <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">{{ news.title|truncatechars:30 }}</h6>
-                    <small class="text-{% if news.is_published %}success{% else %}warning{% endif %}">
-                      {% if news.is_published %}Published{% else %}Draft{% endif %}
-                    </small>
-                  </div>
-                  <p class="mb-1">{{ news.content|truncatechars:60 }}</p>
-                  <small class="text-muted">{{ news.published_date|date:"d M Y" }}</small>
-                </a>
-                {% endfor %}
               </div>
             </div>
           </div>
@@ -231,9 +202,7 @@
   </div>
   <!-- End of Main Content -->
 </div>
-{% endblock %}
-
-{% block extra_css %}
+{% endblock %} {% block extra_css %}
 <style>
   :root {
     --sidebar-width: 250px;
@@ -322,6 +291,10 @@
     border-left: 0.25rem solid #36b9cc !important;
   }
 
+  .border-left-secondary {
+    border-left: 0.25rem solid #6c757d !important;
+  }
+
   .border-left-warning {
     border-left: 0.25rem solid #f6c23e !important;
   }
@@ -346,21 +319,21 @@
     }
   }
 </style>
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // Toggle sidebar on mobile
-    document.getElementById('sidebarToggleTop').addEventListener('click', function() {
-      document.querySelector('.sidebar').classList.toggle('active');
-    });
+    document
+      .getElementById("sidebarToggleTop")
+      .addEventListener("click", function () {
+        document.querySelector(".sidebar").classList.toggle("active");
+      });
 
     // Highlight active sidebar item
     const currentUrl = window.location.pathname;
-    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+    document.querySelectorAll(".sidebar .nav-link").forEach((link) => {
       if (link.href.includes(currentUrl)) {
-        link.classList.add('active');
+        link.classList.add("active");
       }
     });
   });

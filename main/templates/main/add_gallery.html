@@ -1,0 +1,90 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Add Gallery Item | AHMES{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    
+    <!-- Sidebar -->
+    {% include 'main/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+        <h1 class="h2 text-primary"><i class="fas fa-image me-2"></i>Add Gallery Item</h1>
+      </div>
+
+      <div class="card shadow rounded-4">
+        <div class="card-body p-4">
+          <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="form-floating mb-4">
+              {{ form.title|add_class:"form-control" }}
+              <label for="{{ form.title.id_for_label }}">Title</label>
+              {% if form.title.errors %}
+                <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold">Description</label>
+              {{ form.description|add_class:"form-control" }}
+              {% if form.description.errors %}
+                <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold">Media Type</label>
+              {{ form.media_type|add_class:"form-select" }}
+              {% if form.media_type.errors %}
+                <div class="text-danger small mt-1">{{ form.media_type.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Image (optional)</label>
+                {{ form.image|add_class:"form-control" }}
+                {% if form.image.errors %}
+                  <div class="text-danger small mt-1">{{ form.image.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Video (optional)</label>
+                {{ form.video|add_class:"form-control" }}
+                {% if form.video.errors %}
+                  <div class="text-danger small mt-1">{{ form.video.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="form-check form-switch mb-4">
+              {{ form.is_published|add_class:"form-check-input" }}
+              <label class="form-check-label ms-2" for="{{ form.is_published.id_for_label }}">Publish Immediately</label>
+              {% if form.is_published.errors %}
+                <div class="text-danger small mt-1">{{ form.is_published.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="text-end mt-4">
+              <button type="submit" class="btn btn-success btn-lg rounded-pill px-4 me-2">
+                <i class="fas fa-upload me-2"></i>Save Gallery Item
+              </button>
+              <a href="{% url 'manage_gallery' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                <i class="fas fa-times me-2"></i>Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+{% endblock %}

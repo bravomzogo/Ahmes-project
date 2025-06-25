@@ -1,0 +1,105 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Edit Gallery Item | AHMES{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    {% include 'main/sidebar.html' %}
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h4 text-primary"><i class="fas fa-edit me-2"></i>Edit Gallery Item</h1>
+      </div>
+
+      <div class="card shadow rounded-4">
+        <div class="card-body p-4">
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Title</label>
+              {{ form.title|add_class:"form-control" }}
+              {% if form.title.errors %}
+                <div class="text-danger small">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Description</label>
+              {{ form.description|add_class:"form-control" }}
+              {% if form.description.errors %}
+                <div class="text-danger small">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Media Type</label>
+              {{ form.media_type|add_class:"form-select" }}
+              {% if form.media_type.errors %}
+                <div class="text-danger small">{{ form.media_type.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Image (if applicable)</label>
+              {{ form.image|add_class:"form-control" }}
+              {% if gallery.image %}
+                <p class="mt-2">Current Image:</p>
+                <img src="{{ gallery.image.url }}" alt="{{ gallery.title }}" class="img-fluid rounded shadow-sm" style="max-width: 300px;">
+              {% endif %}
+              {% if form.image.errors %}
+                <div class="text-danger small">{{ form.image.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Video (if applicable)</label>
+              {{ form.video|add_class:"form-control" }}
+              {% if gallery.video %}
+                <p class="mt-2">Current Video:</p>
+                <video width="300" controls class="rounded shadow-sm">
+                  <source src="{{ gallery.video.url }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              {% endif %}
+              {% if form.video.errors %}
+                <div class="text-danger small">{{ form.video.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-check mb-4">
+              {{ form.is_published|add_class:"form-check-input" }}
+              <label class="form-check-label fw-bold" for="{{ form.is_published.id_for_label }}">Publish Immediately</label>
+              {% if form.is_published.errors %}
+                <div class="text-danger small">{{ form.is_published.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-end gap-3">
+              <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4">
+                <i class="fas fa-save me-2"></i>Update
+              </button>
+              <a href="{% url 'manage_gallery' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                <i class="fas fa-times me-2"></i>Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

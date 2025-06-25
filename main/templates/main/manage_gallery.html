@@ -1,0 +1,97 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Manage Gallery | AHMES{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row min-vh-100">
+    <!-- Sidebar -->
+    {% include 'main/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      <!-- Page Heading -->
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3 mb-4 border-bottom">
+        <h1 class="h3"><i class="fas fa-images me-2"></i>Manage Gallery</h1>
+        <a href="{% url 'add_gallery' %}" class="btn btn-primary rounded-pill px-4">
+          <i class="fas fa-plus-circle me-2"></i> Add New Gallery Item
+        </a>
+      </div>
+
+      <!-- Messages -->
+      {% comment %} {% if messages %}
+      <div class="mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endcomment %}
+
+      <!-- Gallery Items Table -->
+      <div class="card shadow rounded-4">
+        <div class="card-header py-3 bg-light border-bottom">
+          <h6 class="mb-0 fw-bold text-primary">Gallery Items List</h6>
+        </div>
+        <div class="card-body p-4">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Title</th>
+                  <th>Media Type</th>
+                  <th>Preview</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in gallery_items %}
+                <tr>
+                  <td>{{ item.title|truncatechars:30 }}</td>
+                  <td>{{ item.get_media_type_display }}</td>
+                  <td>
+                    {% if item.media_type == 'image' and item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}" class="img-thumbnail" style="max-width: 100px;">
+                    {% elif item.media_type == 'video' and item.video %}
+                    <video width="100" controls>
+                      <source src="{{ item.video.url }}" type="video/mp4">
+                      Your browser does not support the video tag.
+                    </video>
+                    {% else %}
+                    <span class="text-muted fst-italic">No preview</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge bg-{% if item.is_published %}success{% else %}warning{% endif %}">
+                      {{ item.is_published|yesno:"Published,Draft" }}
+                    </span>
+                  </td>
+                  <td>{{ item.published_date|date:"d M Y" }}</td>
+                  <td>
+                    <a href="{% url 'edit_gallery' item.pk %}" class="btn btn-sm btn-outline-primary me-2">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'delete_gallery' item.pk %}" class="btn btn-sm btn-outline-danger">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted">No gallery items found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

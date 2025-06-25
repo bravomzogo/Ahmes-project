@@ -1,3 +1,4 @@
+{% load static %}
 <div class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
   <div class="position-sticky pt-3">
     <ul class="nav flex-column">
@@ -22,8 +23,19 @@
         </a>
       </li>
       <li class="nav-item">
+        <a class="nav-link text-white {% if 'gallery' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_gallery' %}">
+          <i class="fas fa-images me-2"></i> Gallery
+          {% if gallery_count > 0 %}
+          <span class="badge bg-secondary ms-2">{{ gallery_count }}</span>
+          {% endif %}
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link text-white {% if 'comments' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_comments' %}">
           <i class="fas fa-comments me-2"></i> Comments
+          {% if pending_comments > 0 %}
+          <span class="badge bg-warning ms-2">{{ pending_comments }}</span>
+          {% endif %}
         </a>
       </li>
     </ul>
