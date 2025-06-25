@@ -1,0 +1,13 @@
+# .gitignore
+*.mp4
+*.mov
+*.avi
+*.zip
+*.tar
+*.iso
+*.png
+*.jpg
+*.jpeg
+media/
+static/uploads/
+db.sqlite3
