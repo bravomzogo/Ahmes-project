@@ -8,8 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'unsafe-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'True'
-
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 # Allow all hosts for Render
 ALLOWED_HOSTS = ['*']
 
@@ -110,8 +109,8 @@ EMAIL_HOST_PASSWORD = 'lhzv ktto mrsw ebxg'  # The 16-char app password
 DEFAULT_FROM_EMAIL = 'UdomShop <bravomzogo@gmail.com>'
 
 # For development - use console backend to test without sending real emails
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# if DEBUG:
+#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Force HTTPS in production
@@ -123,7 +122,8 @@ if not DEBUG:
     # HTTPS Settings
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-     # Cookie Settings
+    
+    # Cookie Settings
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
