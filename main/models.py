@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
+from django.utils import timezone
+from datetime import timedelta
+import secrets
 
 class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
@@ -198,3 +202,57 @@ class Gallery(models.Model):
         ordering = ['-published_date']
         verbose_name = 'Gallery Item'
         verbose_name_plural = 'Gallery Items'
+
+
+
+
+class EmailVerification(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='email_verification')
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    activation_code_expires = models.DateTimeField(default=timezone.now() + timedelta(hours=24))
+
+    def __str__(self):
+        return f"Verification for {self.user.email}"
+
+    def generate_new_code(self):
+        self.code = str(secrets.randbelow(900000) + 100000)  # 6-digit code
+        self.created_at = timezone.now()
+        self.save()
+        return self.code
+    
+    @classmethod
+    def create_for_user(cls, user):
+        code = str(secrets.randbelow(900000) + 100000)
+        return cls.objects.create(
+            user=user,
+            code=code
+        )
+
+class Conversation(models.Model):
+    participants = models.ManyToManyField(User, related_name='conversations')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"Conversation between {', '.join([user.username for user in self.participants.all()])}"
+
+    def get_other_user(self, current_user):
+        """Helper method to get the other participant in the conversation"""
+        return self.participants.exclude(id=current_user.id).first()
+
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"Message from {self.sender.username}"

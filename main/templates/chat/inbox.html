@@ -1,0 +1,166 @@
+{% extends 'main/base.html' %}
+{% block title %}Inbox | AHMES Secondary School{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Your Messages</h2>
+    <p class="section-subtitle">View and manage your conversations.</p>
+    
+    <div class="row">
+      <div class="col-12">
+        <div class="card" data-aos="fade-up">
+          <div class="card-body">
+            <div id="conversationsList">
+              {% if conversations_with_other %}
+                <ul class="list-group list-group-flush" id="conversationsContainer">
+                  {% for item in conversations_with_other %}
+                    <li class="list-group-item conversation-item" data-conversation-id="{{ item.conversation.id }}">
+                      <a href="{% url 'chat' item.conversation.id %}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h5 class="mb-1">
+                              {{ item.other_user.username }}
+                              {% if item.unread_count > 0 %}
+                                <span class="badge bg-primary rounded-pill unread-count">{{ item.unread_count }}</span>
+                              {% endif %}
+                            </h5>
+                            {% if item.last_message %}
+                              <p class="mb-0 text-muted last-message">
+                                {% if item.last_message.sender == request.user %}You: {% endif %}
+                                {{ item.last_message.content|truncatechars:50 }}
+                              </p>
+                            {% endif %}
+                          </div>
+                          <div class="text-end">
+                            {% if item.last_message %}
+                              <small class="text-muted d-block message-time">
+                                {{ item.last_message.timestamp|date:"M d, Y" }}
+                              </small>
+                              {% if item.last_message.sender == request.user %}
+                                <small class="read-status">
+                                  {% if item.last_message.is_read %}
+                                    <i class="fas fa-check-double text-primary" title="Read"></i>
+                                  {% else %}
+                                    <i class="fas fa-check text-muted" title="Sent"></i>
+                                  {% endif %}
+                                </small>
+                              {% endif %}
+                            {% endif %}
+                          </div>
+                        </div>
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-center text-muted">No conversations yet. Start a new conversation!</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  let isWindowFocused = true;
+  
+  window.addEventListener('focus', () => { isWindowFocused = true; });
+  window.addEventListener('blur', () => { isWindowFocused = false; });
+
+  function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  async function updateConversations() {
+    try {
+      const response = await fetch('{% url "get_conversations" %}');
+      const data = await response.json();
+      
+      if (data.conversations?.length) {
+        let html = '';
+        
+        data.conversations.forEach(item => {
+          const lastMsg = item.last_message;
+          const isMyMessage = lastMsg?.sender_id === {{ request.user.id }};
+          
+          html += `
+            <li class="list-group-item conversation-item" data-conversation-id="${item.id}">
+              <a href="/chat/${item.id}/" class="text-decoration-none">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 class="mb-1">
+                      ${item.other_user.username}
+                      ${item.unread_count > 0 ? 
+                        `<span class="badge bg-primary rounded-pill unread-count">${item.unread_count}</span>` : ''}
+                    </h5>
+                    ${lastMsg ? `
+                      <p class="mb-0 text-muted last-message">
+                        ${isMyMessage ? 'You: ' : ''}
+                        ${lastMsg.content.length > 50 ? 
+                          lastMsg.content.substring(0, 50) + '...' : lastMsg.content}
+                      </p>
+                    ` : ''}
+                  </div>
+                  <div class="text-end">
+                    ${lastMsg ? `
+                      <small class="text-muted d-block message-time">
+                        ${formatDate(lastMsg.timestamp)}
+                      </small>
+                      ${isMyMessage ? `
+                        <small class="read-status">
+                          ${lastMsg.is_read ? 
+                            '<i class="fas fa-check-double text-primary" title="Read"></i>' : 
+                            '<i class="fas fa-check text-muted" title="Sent"></i>'}
+                        </small>
+                      ` : ''}
+                    ` : ''}
+                  </div>
+                </div>
+              </a>
+            </li>`;
+        });
+        
+        document.getElementById('conversationsContainer').innerHTML = html;
+      } else {
+        document.getElementById('conversationsList').innerHTML = `
+          <p class="text-center text-muted">No conversations yet. Start a new conversation!</p>`;
+      }
+    } catch (error) {
+      console.error('Error updating conversations:', error);
+    }
+  }
+
+  // Update less frequently when window is not focused
+  setInterval(() => {
+    updateConversations();
+  }, isWindowFocused ? 3000 : 10000);
+
+  updateConversations();
+});
+</script>
+
+<style>
+.unread-count {
+  font-size: 0.75rem;
+  vertical-align: middle;
+}
+.conversation-item:hover {
+  background-color: #f8f9fa;
+}
+</style>
+{% endblock %}

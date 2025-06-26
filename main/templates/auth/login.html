@@ -1,0 +1,47 @@
+{% extends 'main/base.html' %}
+{% block title %}Login | AHMES Secondary School{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Login to Your Account</h2>
+    <p class="section-subtitle">Access your AHMES account to connect with our community.</p>
+    
+    {% if messages %}
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card" data-aos="fade-up">
+          <div class="card-body">
+            <form method="post" action="{% url 'login' %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+            <div class="text-center mt-3">
+              <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+              <p>Forgot password? Contact <a href="mailto:info@ahmes.sc.tz">info@ahmes.sc.tz</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

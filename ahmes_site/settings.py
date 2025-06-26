@@ -100,16 +100,44 @@ LOGIN_URL = 'admin_login'
 LOGIN_REDIRECT_URL = 'admin_dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
-# Email settings (update in production)
+# settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.yourmailserver.com'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your_email@example.com'
-EMAIL_HOST_PASSWORD = 'your_password'
-DEFAULT_FROM_EMAIL = 'AHMES School <noreply@ahmes.sc.tz>'
+EMAIL_HOST_USER = 'bravomzogo@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'lhzv ktto mrsw ebxg'  # The 16-char app password
+DEFAULT_FROM_EMAIL = 'UdomShop <bravomzogo@gmail.com>'
 
-# Render deployment optimization
+# For development - use console backend to test without sending real emails
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# Force HTTPS in production
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
+
+# Security settings for production
 if not DEBUG:
-    import logging
-    logging.basicConfig(level=logging.INFO)
+    # HTTPS Settings
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+     # Cookie Settings
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    
+    # HSTS Settings
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Additional Security Headers
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
+    REFERRER_POLICY = 'same-origin'
+    
+    # Session Settings
+    SESSION_SAVE_EVERY_REQUEST = True

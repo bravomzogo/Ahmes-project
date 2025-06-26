@@ -1,0 +1,42 @@
+{% extends 'main/base.html' %}
+{% block title %}Verify Email | AHMES Secondary School{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Verify Your Email</h2>
+    <p class="section-subtitle">Enter the 6-digit code sent to your email to activate your account.</p>
+    
+    {% if messages %}
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card" data-aos="fade-up">
+          <div class="card-body">
+            <form method="post" action="{% url 'verify_email' %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="code" class="form-label">Verification Code</label>
+                <input type="text" class="form-control" id="code" name="code" maxlength="6" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Verify</button>
+            </form>
+            <div class="text-center mt-3">
+              <p>Didn't receive the code? Contact <a href="mailto:info@ahmes.sc.tz">info@ahmes.sc.tz</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

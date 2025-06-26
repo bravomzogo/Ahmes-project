@@ -1,6 +1,14 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, Student, StaffMember, News, Comment , Gallery
+from .models import User, Student, StaffMember, News, Comment , Gallery , Message
+
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.utils import timezone
+from datetime import timedelta
+import secrets
+from .models import EmailVerification
 
 class UserRegistrationForm(UserCreationForm):
     class Meta:
@@ -86,3 +94,74 @@ class GalleryForm(forms.ModelForm):
         if media_type == 'video' and image:
             raise forms.ValidationError("Image should not be provided for video media type.")
         return cleaned_data
+    
+
+
+
+
+class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email').lower()
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("This email is already registered.")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email'].lower()
+        user.is_active = False
+
+        if commit:
+            user.save()
+            verification_code = str(secrets.randbelow(900000) + 100000)
+            EmailVerification.objects.create(
+                user=user,
+                code=verification_code,
+                activation_code_expires=timezone.now() + timedelta(hours=24)
+            )
+            self.send_verification_email(user)
+        return user
+
+    def send_verification_email(self, user):
+        try:
+            subject = 'Activate Your Account'
+            verification = EmailVerification.objects.get(user=user)
+            code = verification.code
+            
+            context = {
+                'user': user,
+                'verification_code': code,
+                'expiration_hours': 24,
+                'support_email': settings.DEFAULT_FROM_EMAIL,
+            }
+            
+            text_message = render_to_string('emails/verification_email.txt', context)
+            html_message = render_to_string('emails/verification_email.html', context)
+            
+            send_mail(
+                subject=subject,
+                message=text_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+        except Exception as e:
+            raise forms.ValidationError(f"Failed to send verification email: {str(e)}")
+
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Type your message...'
+            })
+        }

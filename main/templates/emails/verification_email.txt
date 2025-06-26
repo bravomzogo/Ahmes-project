@@ -1,0 +1,12 @@
+Hi {{ user.username }},
+
+Please use the following code to verify your email:
+
+Verification Code: {{ verification_code }}
+
+This code will expire in {{ expiration_hours }} hours.
+
+If you didn't request this, please ignore this email.
+
+Thanks,
+The Team

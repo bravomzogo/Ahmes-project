@@ -38,6 +38,11 @@
           {% endif %}
         </a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}" href="{% url 'inbox' %}">
+          <i class="fas fa-envelope me-2"></i> Messages
+        </a>
+      </li>
     </ul>
     
     <div class="mt-4">

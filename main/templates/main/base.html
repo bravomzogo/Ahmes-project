@@ -50,7 +50,6 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
     />
-    
 
     <style>
       :root {
@@ -954,22 +953,13 @@
           margin-right: 10px;
         }
       }
+     
     </style>
     {% block extra_css %}{% endblock %}
   </head>
   <body>
     <!-- Announcement Bar --><br />
-    {% comment %}
-    <div class="announcement-bar">
-      <div class="container text-center">
-        <div class="announcement-content">
-          INTERVIEW FOR FORM FIVE 2025 : Waliochagua wiki ya pili itakuwa ni
-          tarehe 08-02-2025 Na wiki ya tatu itakuwa ni tarehe 15-02-2025 Na hizi
-          ndizo tarehe pekee za usaili
-        </div>
-      </div>
-    </div>
-    {% endcomment %}
+  
 
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
@@ -1066,6 +1056,44 @@
                 <span class="nav-underline"></span>
               </a>
             </li>
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a
+                class="nav-link {% if 'chat' in request.path %}active{% endif %}"
+                href="{% url 'inbox' %}"
+              >
+                <span class="nav-icon"><i class="fas fa-comments"></i></span>
+                <span class="nav-text">Chat</span>
+                <span class="nav-underline"></span>
+              </a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+  {% if request.user.is_authenticated %}
+    <a
+      class="nav-link"
+      href="{% url 'logout' %}"
+      onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+    >
+      <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+      <span class="nav-text">Logout</span>
+      <span class="nav-underline"></span>
+    </a>
+    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+      {% csrf_token %}
+    </form>
+  {% else %}
+    <a
+      class="nav-link {% if 'login' in request.path %}active{% endif %}"
+      href="{% url 'login' %}"
+    >
+      <span class="nav-icon"><i class="fas fa-sign-in-alt"></i></span>
+      <span class="nav-text">Login</span>
+      <span class="nav-underline"></span>
+    </a>
+  {% endif %}
+</li>
+
             <li class="nav-item">
               <a class="nav-link cta-button" href="{% url 'admin_login' %}">
                 <span class="nav-icon"><i class="fas fa-lock"></i></span>
@@ -1184,7 +1212,12 @@
           </div>
         </div>
         <div class="copyright">
-          <p>Copyright © 2025 AHMES - Designed by Udom Student</p>
+         <p style="font-family: Arial, sans-serif; font-size: 16px; color: #555; text-align: center;">
+  Copyright © 2025 AHMES - Developed by Udom Student 
+  <span style="font-family: 'Courier New', monospace; font-size: 20px; color: #3498db; letter-spacing: 1px; font-weight: bold; text-transform: uppercase; background: linear-gradient(90deg, #3498db, #2ecc71); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+    Shaibu Mzogo
+  </span>
+</p>
         </div>
       </div>
     </footer>

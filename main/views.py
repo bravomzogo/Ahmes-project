@@ -2,9 +2,165 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import Campus, Gallery, Level, Student, StaffMember, News, Comment
+from .models import Campus, Gallery, Level, Student, StaffMember, News, Comment, User
 from .forms import (GalleryForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm)
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
+from django.db import transaction
+from django.http import JsonResponse
+from django.db.models import Max, Count, Q
+from .models import Conversation, Message, EmailVerification
+from .forms import RegisterForm, MessageForm
+from django.contrib.auth.views import LoginView
+from django.views.decorators.http import require_POST
+import secrets
+import json
+
+class CustomLoginView(LoginView):
+    template_name = 'auth/login.html'
+    
+    def form_valid(self, form):
+        user = form.get_user()
+        
+        if not user.is_active:
+            messages.error(self.request, "Account not active. Please verify your email first.")
+            return redirect('login')
+        
+        login(self.request, user)
+        messages.success(self.request, "Login successful!")
+        return redirect('inbox')
+    
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid username or password.")
+        return super().form_invalid(form)
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect('inbox')
+
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, 'Registration successful! Please check your email for verification.')
+            return redirect('verify_email')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = RegisterForm()
+    
+    return render(request, 'auth/register.html', {'form': form})
+
+def verify_email(request):
+    if request.method == 'POST':
+        code = request.POST.get('code')
+        try:
+            verification = EmailVerification.objects.get(code=code)
+            verification.user.is_active = True
+            verification.user.save()
+            
+            # Automatically create a conversation with admin
+            admin = User.objects.filter(is_staff=True).first()
+            if admin:
+                conversation = Conversation.objects.create()
+                conversation.participants.add(verification.user, admin)
+            
+            messages.success(request, "Email verified! You can now login.")
+            return redirect('login')
+        except EmailVerification.DoesNotExist:
+            messages.error(request, "Invalid code. Please try again.")
+    
+    return render(request, 'auth/verify_email.html')
+
+@login_required
+def inbox(request):
+    # Get all conversations for the current user
+    conversations = Conversation.objects.filter(
+        participants=request.user
+    ).prefetch_related(
+        'participants', 
+        'messages',
+        'messages__sender'
+    ).annotate(
+        last_message_time=Max('messages__timestamp')
+    ).order_by('-last_message_time')
+
+    conversations_with_other = []
+    for conversation in conversations:
+        # Get the other participant (not the current user)
+        other_user = conversation.participants.exclude(id=request.user.id).first()
+        
+        # Get the last message
+        last_message = conversation.messages.order_by('-timestamp').first()
+        
+        # Count unread messages (not sent by current user)
+        unread_count = conversation.messages.filter(
+            is_read=False
+        ).exclude(
+            sender=request.user
+        ).count()
+        
+        conversations_with_other.append({
+            'conversation': conversation,
+            'other_user': other_user,
+            'last_message': last_message,
+            'unread_count': unread_count
+        })
+    
+    return render(request, 'chat/inbox.html', {
+        'conversations_with_other': conversations_with_other
+    })
+
+@login_required
+def chat(request, conversation_id):
+    conversation = get_object_or_404(
+        Conversation.objects.prefetch_related('participants', 'messages__sender'), 
+        id=conversation_id,
+        participants=request.user
+    )
+    
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.conversation = conversation
+            message.sender = request.user
+            message.save()
+            
+            conversation.updated_at = message.timestamp
+            conversation.save(update_fields=['updated_at'])
+            
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message_id': message.id,
+                    'content': message.content,
+                    'timestamp': message.timestamp.strftime("%b %d, %Y %H:%M"),
+                    'sender': message.sender.username,
+                    'is_read': message.is_read
+                })
+            return redirect('chat', conversation_id=conversation.id)
+    
+    else:
+        form = MessageForm()
+
+    # Mark messages as read when opening the chat
+    conversation.messages.exclude(sender=request.user).update(is_read=True)
+
+    return render(request, 'chat/chat.html', {
+        'conversation': conversation,
+        'form': form,
+        'other_user': conversation.participants.exclude(id=request.user.id).first(),
+    })
+
+
+
+def logout_view(request):
+    if request.user.is_authenticated:
+        logout(request)
+        messages.success(request, "You've been logged out successfully.")
+    return redirect('home')
 
 def is_admin(user):
     return user.is_authenticated and user.is_admin
@@ -320,3 +476,83 @@ def delete_gallery(request, pk):
 def gallery(request):
     gallery_items = Gallery.objects.filter(is_published=True).order_by('-published_date')
     return render(request, 'main/gallery.html', {'gallery_items': gallery_items})
+
+
+
+@login_required
+def get_conversations(request):
+    conversations = Conversation.objects.filter(
+        participants=request.user
+    ).prefetch_related(
+        'participants', 'messages'
+    ).annotate(
+        last_message_time=Max('messages__timestamp'),
+        unread_count=Count('messages', filter=Q(messages__is_read=False) & ~Q(messages__sender=request.user))
+    ).order_by('-last_message_time')
+
+    conversations_data = []
+    for conversation in conversations:
+        other_user = conversation.participants.exclude(id=request.user.id).first()
+        last_message = conversation.messages.order_by('-timestamp').first()
+        
+        conversations_data.append({
+            'id': conversation.id,
+            'other_user': {
+                'username': other_user.username if other_user else '',
+                'id': other_user.id if other_user else None,
+            },
+            'last_message': {
+                'id': last_message.id if last_message else None,
+                'content': last_message.content if last_message else '',
+                'timestamp': last_message.timestamp.isoformat() if last_message else None,
+                'sender_id': last_message.sender.id if last_message else None,
+                'is_read': last_message.is_read if last_message else False,
+            },
+            'unread_count': conversation.unread_count,
+        })
+
+    return JsonResponse({
+        'conversations': conversations_data,
+    })
+
+@login_required
+def get_new_messages(request, conversation_id):
+    last_id = request.GET.get('last_id', 0)
+    try:
+        messages = Message.objects.filter(
+            conversation_id=conversation_id,
+            conversation__participants=request.user,
+            id__gt=last_id
+        ).order_by('timestamp')
+        
+        messages_data = [{
+            'id': m.id,
+            'content': m.content,
+            'timestamp': m.timestamp.isoformat(),
+            'sender': m.sender.username,
+            'is_read': m.is_read,
+            'is_me': m.sender == request.user
+        } for m in messages]
+        
+        return JsonResponse({'messages': messages_data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@require_POST
+@login_required
+def mark_messages_read(request):
+    try:
+        data = json.loads(request.body)
+        message_ids = data.get('message_ids', [])
+        
+        # Only mark messages that belong to conversations the user is in
+        Message.objects.filter(
+            id__in=message_ids,
+            conversation__participants=request.user
+        ).exclude(
+            sender=request.user
+        ).update(is_read=True)
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)

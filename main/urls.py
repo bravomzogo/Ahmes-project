@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import CustomLoginView, register, verify_email, inbox, chat, logout_view, get_conversations,mark_messages_read, get_new_messages
 
 urlpatterns = [
     # Public pages
@@ -47,5 +48,16 @@ urlpatterns = [
     path('ad/gallery/edit/<int:pk>/', views.edit_gallery, name='edit_gallery'),
     path('ad/gallery/delete/<int:pk>/', views.delete_gallery, name='delete_gallery'),
     path('gallery/', views.gallery, name='gallery'),
+
+    #Chats
+    path('login/tochat/', CustomLoginView.as_view(), name='login'),
+    path('register/', register, name='register'),
+    path('verify-email/', verify_email, name='verify_email'),
+    path('inbox/', inbox, name='inbox'),
+    path('chat/<int:conversation_id>/', chat, name='chat'),
+    path('logout/', logout_view, name='out'),
+    path('messages/<int:message_id>/mark_read/', mark_messages_read, name='mark_messages_read'),
+    path('conversations/<int:conversation_id>/messages/', get_new_messages, name='get_new_messages'),
+    path('api/conversations/', get_conversations, name='get_conversations'),
 
 ]
