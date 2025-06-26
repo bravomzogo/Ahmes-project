@@ -16,8 +16,7 @@ from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_POST
 import secrets
 import json
-from django.core.mail import send_mail
-from django.conf import settings
+from django.utils import timezone
 
 class CustomLoginView(LoginView):
     template_name = 'auth/login.html'
@@ -46,18 +45,6 @@ def register(request):
         if form.is_valid():
             user = form.save()
             messages.success(request, 'Registration successful! Please check your email for verification.')
-            # Generate verification code (6 digits)
-            verification_code = secrets.randbelow(900000) + 100000
-            EmailVerification.objects.create(user=user, code=verification_code)
-
-                # Send real email via Gmail SMTP
-            send_mail(
-                    'Activate Your UdomShop Account',
-                    f'Your verification code: {verification_code}\n\nEnter this code to verify your email.',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user.email],  # Send to the email they registered with
-                    fail_silently=False,
-                )
             return redirect('verify_email')
         else:
             messages.error(request, "Please correct the errors below.")
@@ -134,6 +121,16 @@ def chat(request, conversation_id):
         participants=request.user
     )
     
+    # Mark all unread messages as read when opening the chat
+    unread_messages = conversation.messages.filter(
+        is_read=False
+    ).exclude(
+        sender=request.user
+    )
+    
+    if unread_messages.exists():
+        unread_messages.update(is_read=True, read_at=timezone.now())
+    
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
@@ -142,7 +139,7 @@ def chat(request, conversation_id):
             message.sender = request.user
             message.save()
             
-            conversation.updated_at = message.timestamp
+            conversation.updated_at = timezone.now()
             conversation.save(update_fields=['updated_at'])
             
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -151,24 +148,17 @@ def chat(request, conversation_id):
                     'message_id': message.id,
                     'content': message.content,
                     'timestamp': message.timestamp.strftime("%b %d, %Y %H:%M"),
-                    'sender': message.sender.username,
-                    'is_read': message.is_read
+                    'sender_id': message.sender.id,
+                    'is_read': message.is_read,
+                    'is_me': True
                 })
             return redirect('chat', conversation_id=conversation.id)
     
-    else:
-        form = MessageForm()
-
-    # Mark messages as read when opening the chat
-    conversation.messages.exclude(sender=request.user).update(is_read=True)
-
     return render(request, 'chat/chat.html', {
         'conversation': conversation,
-        'form': form,
+        'form': MessageForm(),
         'other_user': conversation.participants.exclude(id=request.user.id).first(),
     })
-
-
 
 def logout_view(request):
     if request.user.is_authenticated:
@@ -509,7 +499,6 @@ def get_conversations(request):
         other_user = conversation.participants.exclude(id=request.user.id).first()
         last_message = conversation.messages.order_by('-timestamp').first()
         
-        # Ensure we only include conversations with messages
         if last_message:
             conversations_data.append({
                 'id': conversation.id,
@@ -523,6 +512,7 @@ def get_conversations(request):
                     'timestamp': last_message.timestamp.isoformat(),
                     'sender_id': last_message.sender.id,
                     'is_read': last_message.is_read,
+                    'is_me': last_message.sender == request.user,
                 },
                 'unread_count': conversation.unread_count,
             })
@@ -530,6 +520,7 @@ def get_conversations(request):
     return JsonResponse({
         'conversations': conversations_data,
     })
+
 
 @login_required
 def get_new_messages(request, conversation_id):
@@ -545,7 +536,7 @@ def get_new_messages(request, conversation_id):
             'id': m.id,
             'content': m.content,
             'timestamp': m.timestamp.isoformat(),
-            'sender_id': m.sender.id,  # Changed from 'sender' to 'sender_id'
+            'sender_id': m.sender.id,
             'is_read': m.is_read,
             'is_me': m.sender == request.user
         } for m in messages]
@@ -561,14 +552,27 @@ def mark_messages_read(request):
         data = json.loads(request.body)
         message_ids = data.get('message_ids', [])
         
-        # Only mark messages that belong to conversations the user is in
-        Message.objects.filter(
+        # Update messages that belong to the user's conversations and are not sent by them
+        updated = Message.objects.filter(
             id__in=message_ids,
-            conversation__participants=request.user
+            conversation__participants=request.user,
+            is_read=False
         ).exclude(
             sender=request.user
-        ).update(is_read=True)
+        ).update(
+            is_read=True,
+            read_at=timezone.now()
+        )
         
-        return JsonResponse({'success': True})
+        return JsonResponse({
+            'success': True,
+            'updated_count': updated
+        })
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+    
+
+
