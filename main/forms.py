@@ -132,41 +132,34 @@ class RegisterForm(UserCreationForm):
         return user
 
     def send_verification_email(self, user):
-        """Send verification email to the user's registered email address"""
         try:
-            subject = 'Activate Your UdomShop Account'
             verification = EmailVerification.objects.get(user=user)
-            code = verification.code
-            
-            # Email context
             context = {
                 'user': user,
-                'verification_code': code,
+                'verification_code': verification.code,
                 'expiration_hours': 24,
-                'support_email': settings.DEFAULT_FROM_EMAIL,
-                'support_email_display': settings.DEFAULT_FROM_EMAIL.split(' <')[0] if ' <' in settings.DEFAULT_FROM_EMAIL else settings.DEFAULT_FROM_EMAIL
+                'support_email': settings.DEFAULT_FROM_EMAIL
             }
             
-            # Render email templates
-            text_message = render_to_string('emails/verification_email.txt', context)
-            html_message = render_to_string('emails/verification_email.html', context)
-            
-            # Send email to the user's registered address
+            # Render-specific email sending
             send_mail(
-                subject=subject,
-                message=text_message,
+                subject='Verify Your Ahmes School Account',
+                message=render_to_string('emails/verification_email.txt', context),
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
-                html_message=html_message,
+                html_message=render_to_string('emails/verification_email.html', context),
                 fail_silently=False,
             )
             
             logger.info(f"Verification email sent to {user.email}")
-            
+        
         except Exception as e:
-            logger.error(f"Failed to send verification email to {user.email}: {str(e)}")
-            raise
-
+            logger.error(f"Email sending failed: {str(e)}")
+            # Only raise in production to prevent user creation if email fails
+            if not settings.DEBUG:
+                raise forms.ValidationError(
+                    "We couldn't send the verification email. Please try again later."
+                )
 
 class MessageForm(forms.ModelForm):
     class Meta:

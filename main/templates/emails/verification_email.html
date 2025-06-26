@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Email Verification</title>
+    <title>Ahmes School - Email Verification</title>
 </head>
 <body>
-    <h2>Hi {{ user.username }},</h2>
-    <p>Please use the following code to verify your email:</p>
+    <h2>Hello {{ user.username }},</h2>
+    <p>Welcome to Ahmes School! Please verify your email address:</p>
     
-    <h3>Verification Code: {{ verification_code }}</h3>
+    <div style="background: #f0f0f0; padding: 20px; margin: 15px 0;">
+        <h3 style="margin: 0;">Your Verification Code:</h3>
+        <p style="font-size: 24px; font-weight: bold;">{{ verification_code }}</p>
+    </div>
     
-    <p>This code will expire in {{ expiration_hours }} hours.</p>
+    <p>This code expires in {{ expiration_hours }} hours.</p>
     
     <p>If you didn't request this, please ignore this email.</p>
     
-    <p>Thanks,<br>
-    The Team</p>
+    <p>Best regards,<br>
+    The Ahmes School Team</p>
 </body>
 </html>

@@ -5,7 +5,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'unsafe-secret-key')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'cobra1981@LLL2000sss@LLL')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -99,30 +99,30 @@ LOGIN_URL = 'admin_login'
 LOGIN_REDIRECT_URL = 'admin_dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
-# settings.py
+# Email Configuration (Render-Specific)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'bravomzogo@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'lhzv ktto mrsw ebxg'  # The 16-char app password
-DEFAULT_FROM_EMAIL = 'UdomShop <bravomzogo@gmail.com>'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'bravomzogo@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # Must be set in Render
+DEFAULT_FROM_EMAIL = 'Ahmes School <bravomzogo@gmail.com>'
 
-# For development - use console backend to test without sending real emails
-# if DEBUG:
-#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-
-# Force HTTPS in production
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
-
-# Security settings for production
-if not DEBUG:
-    # HTTPS Settings
+# Force production settings on Render
+if os.environ.get('RENDER', None):
+    DEBUG = False
+    # Security headers
     SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    
+else:
+    # Local development settings
+    if DEBUG:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     # Cookie Settings
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

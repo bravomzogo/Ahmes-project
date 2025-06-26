@@ -1,12 +1,12 @@
-Hi {{ user.username }},
+Hello {{ user.username }},
 
-Please use the following code to verify your email:
+Welcome to Ahmes School! Please verify your email using this code:
 
 Verification Code: {{ verification_code }}
 
-This code will expire in {{ expiration_hours }} hours.
+This code expires in {{ expiration_hours }} hours.
 
 If you didn't request this, please ignore this email.
 
-Thanks,
-The Team
+Best regards,
+The Ahmes School Team
