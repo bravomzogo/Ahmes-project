@@ -8,7 +8,10 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from datetime import timedelta
 import secrets
+import logging
 from .models import EmailVerification
+
+logger = logging.getLogger(__name__)
 
 class UserRegistrationForm(UserCreationForm):
     class Meta:
@@ -129,21 +132,26 @@ class RegisterForm(UserCreationForm):
         return user
 
     def send_verification_email(self, user):
+        """Send verification email to the user's registered email address"""
         try:
-            subject = 'Activate Your Account'
+            subject = 'Activate Your UdomShop Account'
             verification = EmailVerification.objects.get(user=user)
             code = verification.code
             
+            # Email context
             context = {
                 'user': user,
                 'verification_code': code,
                 'expiration_hours': 24,
                 'support_email': settings.DEFAULT_FROM_EMAIL,
+                'support_email_display': settings.DEFAULT_FROM_EMAIL.split(' <')[0] if ' <' in settings.DEFAULT_FROM_EMAIL else settings.DEFAULT_FROM_EMAIL
             }
             
+            # Render email templates
             text_message = render_to_string('emails/verification_email.txt', context)
             html_message = render_to_string('emails/verification_email.html', context)
             
+            # Send email to the user's registered address
             send_mail(
                 subject=subject,
                 message=text_message,
@@ -152,8 +160,13 @@ class RegisterForm(UserCreationForm):
                 html_message=html_message,
                 fail_silently=False,
             )
+            
+            logger.info(f"Verification email sent to {user.email}")
+            
         except Exception as e:
-            raise forms.ValidationError(f"Failed to send verification email: {str(e)}")
+            logger.error(f"Failed to send verification email to {user.email}: {str(e)}")
+            raise
+
 
 class MessageForm(forms.ModelForm):
     class Meta:

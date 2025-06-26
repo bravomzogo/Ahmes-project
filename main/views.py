@@ -16,6 +16,8 @@ from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_POST
 import secrets
 import json
+from django.core.mail import send_mail
+from django.conf import settings
 
 class CustomLoginView(LoginView):
     template_name = 'auth/login.html'
@@ -44,6 +46,18 @@ def register(request):
         if form.is_valid():
             user = form.save()
             messages.success(request, 'Registration successful! Please check your email for verification.')
+            # Generate verification code (6 digits)
+            verification_code = secrets.randbelow(900000) + 100000
+            EmailVerification.objects.create(user=user, code=verification_code)
+
+                # Send real email via Gmail SMTP
+            send_mail(
+                    'Activate Your UdomShop Account',
+                    f'Your verification code: {verification_code}\n\nEnter this code to verify your email.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],  # Send to the email they registered with
+                    fail_silently=False,
+                )
             return redirect('verify_email')
         else:
             messages.error(request, "Please correct the errors below.")
