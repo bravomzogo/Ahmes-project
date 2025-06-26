@@ -35,7 +35,7 @@
                           <div class="text-end">
                             {% if item.last_message %}
                               <small class="text-muted d-block message-time">
-                                {{ item.last_message.timestamp|date:"M d, Y" }}
+                                {{ item.last_message.timestamp|date:"M d, Y H:i" }}
                               </small>
                               {% if item.last_message.sender == request.user %}
                                 <small class="read-status">
@@ -71,9 +71,21 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   let isWindowFocused = true;
+  let updateInterval;
   
-  window.addEventListener('focus', () => { isWindowFocused = true; });
-  window.addEventListener('blur', () => { isWindowFocused = false; });
+  window.addEventListener('focus', () => { 
+    isWindowFocused = true;
+    resetUpdateInterval();
+  });
+  window.addEventListener('blur', () => { 
+    isWindowFocused = false;
+    resetUpdateInterval();
+  });
+
+  function resetUpdateInterval() {
+    clearInterval(updateInterval);
+    updateInterval = setInterval(updateConversations, isWindowFocused ? 3000 : 10000);
+  }
 
   function formatDate(timestamp) {
     const date = new Date(timestamp);
@@ -100,65 +112,83 @@ document.addEventListener("DOMContentLoaded", function() {
   async function updateConversations() {
     try {
       const response = await fetch('{% url "get_conversations" %}');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       const data = await response.json();
       
-      if (data.conversations?.length) {
-        let html = '';
-        
-        data.conversations.forEach(item => {
-          const lastMsg = item.last_message;
-          const isMyMessage = lastMsg?.sender_id === {{ request.user.id }};
-          
-          html += `
-            <li class="list-group-item conversation-item" data-conversation-id="${item.id}">
-              <a href="/chat/${item.id}/" class="text-decoration-none">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h5 class="mb-1">
-                      ${item.other_user.username}
-                      ${item.unread_count > 0 ? 
-                        `<span class="badge bg-primary rounded-pill unread-count">${item.unread_count}</span>` : ''}
-                    </h5>
-                    ${lastMsg ? `
-                      <p class="mb-0 text-muted last-message">
-                        ${isMyMessage ? 'You: ' : ''}
-                        ${lastMsg.content.length > 50 ? 
-                          lastMsg.content.substring(0, 50) + '...' : lastMsg.content}
-                      </p>
-                    ` : ''}
-                  </div>
-                  <div class="text-end">
-                    ${lastMsg ? `
-                      <small class="text-muted d-block message-time">
-                        ${formatDate(lastMsg.timestamp)}
-                      </small>
-                      ${isMyMessage ? `
-                        <small class="read-status">
-                          ${lastMsg.is_read ? 
-                            '<i class="fas fa-check-double text-primary" title="Read"></i>' : 
-                            '<i class="fas fa-check text-muted" title="Sent"></i>'}
-                        </small>
-                      ` : ''}
-                    ` : ''}
-                  </div>
-                </div>
-              </a>
-            </li>`;
-        });
-        
-        document.getElementById('conversationsContainer').innerHTML = html;
-      } else {
+      // Only update if we actually have conversations
+      if (data.conversations && data.conversations.length > 0) {
+        renderConversations(data);
+      } else if (!document.querySelector('#conversationsContainer')) {
+        // Only show "no conversations" if container doesn't exist (initial load)
         document.getElementById('conversationsList').innerHTML = `
           <p class="text-center text-muted">No conversations yet. Start a new conversation!</p>`;
       }
     } catch (error) {
       console.error('Error updating conversations:', error);
+      // Don't update UI if there's an error
     }
   }
 
-  // Update less frequently when window is not focused
-  setInterval(updateConversations, isWindowFocused ? 3000 : 10000);
-  updateConversations();
+  function renderConversations(data) {
+    const container = document.getElementById('conversationsContainer');
+    const listContainer = document.getElementById('conversationsList');
+    
+    // Create container if it doesn't exist
+    if (!container) {
+      listContainer.innerHTML = '<ul class="list-group list-group-flush" id="conversationsContainer"></ul>';
+    }
+    
+    const conversationsContainer = document.getElementById('conversationsContainer');
+    let html = '';
+    
+    data.conversations.forEach(item => {
+      const lastMsg = item.last_message;
+      const isMyMessage = lastMsg?.sender_id === {{ request.user.id }};
+      
+      html += `
+        <li class="list-group-item conversation-item" data-conversation-id="${item.conversation.id}">
+          <a href="/chat/${item.conversation.id}/" class="text-decoration-none">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-1">
+                  ${item.other_user.username}
+                  ${item.unread_count > 0 ? 
+                    `<span class="badge bg-primary rounded-pill unread-count">${item.unread_count}</span>` : ''}
+                </h5>
+                ${lastMsg ? `
+                  <p class="mb-0 text-muted last-message">
+                    ${isMyMessage ? 'You: ' : ''}
+                    ${lastMsg.content.length > 50 ? 
+                      lastMsg.content.substring(0, 50) + '...' : lastMsg.content}
+                  </p>
+                ` : ''}
+              </div>
+              <div class="text-end">
+                ${lastMsg ? `
+                  <small class="text-muted d-block message-time">
+                    ${formatDate(lastMsg.timestamp)}
+                  </small>
+                  ${isMyMessage ? `
+                    <small class="read-status">
+                      ${lastMsg.is_read ? 
+                        '<i class="fas fa-check-double text-primary" title="Read"></i>' : 
+                        '<i class="fas fa-check text-muted" title="Sent"></i>'}
+                    </small>
+                  ` : ''}
+                ` : ''}
+              </div>
+            </div>
+          </a>
+        </li>`;
+    });
+    
+    conversationsContainer.innerHTML = html;
+  }
+
+  // Initialize
+  resetUpdateInterval();
 });
 </script>
 
@@ -169,6 +199,16 @@ document.addEventListener("DOMContentLoaded", function() {
 }
 .conversation-item:hover {
   background-color: #f8f9fa;
+  cursor: pointer;
+}
+.message-time {
+  white-space: nowrap;
+}
+.last-message {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
 }
 </style>
 {% endblock %}

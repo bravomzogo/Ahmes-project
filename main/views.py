@@ -36,6 +36,8 @@ class CustomLoginView(LoginView):
         messages.error(self.request, "Invalid username or password.")
         return super().form_invalid(form)
 
+from django.db import transaction
+
 def register(request):
     if request.user.is_authenticated:
         return redirect('inbox')
@@ -43,9 +45,14 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            messages.success(request, 'Registration successful! Please check your email for verification.')
-            return redirect('verify_email')
+            try:
+                with transaction.atomic():
+                    user = form.save()
+                    messages.success(request, 'Registration successful! Please check your email for verification.')
+                    return redirect('verify_email')
+            except Exception as e:
+                messages.error(request, "An error occurred during registration. Please try again.")
+                # Log the error if needed
         else:
             messages.error(request, "Please correct the errors below.")
     else:
