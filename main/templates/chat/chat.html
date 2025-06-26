@@ -16,7 +16,7 @@
                 <div class="d-inline-block p-3 rounded" style="background: {% if message.sender == request.user %}#e6f3ff{% else %}#f8f9fa{% endif %}; max-width: 70%;">
                   <p class="mb-1">{{ message.content }}</p>
                   <small class="text-muted">
-                    {{ message.timestamp|date:"M d, Y H:i" }}
+                    {{ message.timestamp|time:"H:i" }}  <!-- Changed to time only format -->
                     {% if message.sender == request.user %}
                       <span class="read-status" data-message-id="{{ message.id }}">
                         {% if message.is_read %}
@@ -67,16 +67,16 @@ document.addEventListener("DOMContentLoaded", function() {
     messageContainer.scrollTop = messageContainer.scrollHeight;
   }
 
+  function formatTime(date) {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
   function createMessageElement(data) {
     const isMe = data.sender_id === currentUserId;
     const date = new Date(data.timestamp);
-    const formattedTime = date.toLocaleString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const formattedTime = formatTime(date);
     
     const messageDiv = document.createElement('div');
     messageDiv.className = `mb-3 ${isMe ? 'text-end' : 'text-start'}`;

@@ -154,7 +154,7 @@ def chat(request, conversation_id):
                     'success': True,
                     'message_id': message.id,
                     'content': message.content,
-                    'timestamp': message.timestamp.strftime("%b %d, %Y %H:%M"),
+                    'timestamp': message.timestamp.isoformat(),  # Use ISO format
                     'sender_id': message.sender.id,
                     'is_read': message.is_read,
                     'is_me': True
