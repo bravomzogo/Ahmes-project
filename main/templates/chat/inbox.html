@@ -86,6 +86,17 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
+  function updateReadStatus(conversationId, messageId) {
+    const conversationItem = document.querySelector(`.conversation-item[data-conversation-id="${conversationId}"]`);
+    if (conversationItem) {
+      const checkIcon = conversationItem.querySelector('.read-status i');
+      if (checkIcon) {
+        checkIcon.className = 'fas fa-check-double text-primary';
+        checkIcon.title = 'Read';
+      }
+    }
+  }
+
   async function updateConversations() {
     try {
       const response = await fetch('{% url "get_conversations" %}');
@@ -146,10 +157,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Update less frequently when window is not focused
-  setInterval(() => {
-    updateConversations();
-  }, isWindowFocused ? 3000 : 10000);
-
+  setInterval(updateConversations, isWindowFocused ? 3000 : 10000);
   updateConversations();
 });
 </script>

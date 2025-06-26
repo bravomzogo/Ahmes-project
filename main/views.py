@@ -495,21 +495,23 @@ def get_conversations(request):
         other_user = conversation.participants.exclude(id=request.user.id).first()
         last_message = conversation.messages.order_by('-timestamp').first()
         
-        conversations_data.append({
-            'id': conversation.id,
-            'other_user': {
-                'username': other_user.username if other_user else '',
-                'id': other_user.id if other_user else None,
-            },
-            'last_message': {
-                'id': last_message.id if last_message else None,
-                'content': last_message.content if last_message else '',
-                'timestamp': last_message.timestamp.isoformat() if last_message else None,
-                'sender_id': last_message.sender.id if last_message else None,
-                'is_read': last_message.is_read if last_message else False,
-            },
-            'unread_count': conversation.unread_count,
-        })
+        # Ensure we only include conversations with messages
+        if last_message:
+            conversations_data.append({
+                'id': conversation.id,
+                'other_user': {
+                    'username': other_user.username if other_user else '',
+                    'id': other_user.id if other_user else None,
+                },
+                'last_message': {
+                    'id': last_message.id,
+                    'content': last_message.content,
+                    'timestamp': last_message.timestamp.isoformat(),
+                    'sender_id': last_message.sender.id,
+                    'is_read': last_message.is_read,
+                },
+                'unread_count': conversation.unread_count,
+            })
 
     return JsonResponse({
         'conversations': conversations_data,
@@ -529,7 +531,7 @@ def get_new_messages(request, conversation_id):
             'id': m.id,
             'content': m.content,
             'timestamp': m.timestamp.isoformat(),
-            'sender': m.sender.username,
+            'sender_id': m.sender.id,  # Changed from 'sender' to 'sender_id'
             'is_read': m.is_read,
             'is_me': m.sender == request.user
         } for m in messages]

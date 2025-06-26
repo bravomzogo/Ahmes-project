@@ -56,7 +56,7 @@ urlpatterns = [
     path('inbox/', inbox, name='inbox'),
     path('chat/<int:conversation_id>/', chat, name='chat'),
     path('logout/', logout_view, name='out'),
-    path('messages/<int:message_id>/mark_read/', mark_messages_read, name='mark_messages_read'),
+    path('messages/mark_read/', views.mark_messages_read, name='mark_messages_read'),
     path('conversations/<int:conversation_id>/messages/', get_new_messages, name='get_new_messages'),
     path('api/conversations/', get_conversations, name='get_conversations'),
 
