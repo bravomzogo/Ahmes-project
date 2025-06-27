@@ -213,9 +213,24 @@ def services(request):
     campuses = Campus.objects.all()
     return render(request, 'main/services.html', {'campuses': campuses})
 
+from django.shortcuts import render
+from .models import StaffMember
+
 def staff(request):
-    staff_members = StaffMember.objects.all()
-    return render(request, 'main/staff.html', {'staff_members': staff_members})
+    # Fetch and categorize staff
+    staff_members = StaffMember.objects.select_related('user', 'campus')
+    teachers = staff_members.filter(position='Teacher')
+    admins = staff_members.filter(position='Administrator')
+    supports = staff_members.filter(position='Support')
+
+    return render(request, 'main/staff.html', {
+        'teachers': teachers,
+        'admins': admins,
+        'supports': supports,
+        'teacher_count': teachers.count(),
+        'admin_count': admins.count(),
+        'support_count': supports.count(),
+    })
 
 def contact(request):
     if request.method == 'POST':
@@ -580,6 +595,11 @@ def mark_messages_read(request):
             'success': False,
             'error': str(e)
         }, status=400)
+    
+
+
+def under_development(request):
+    return render(request, 'main/under_development.html')
     
 
 

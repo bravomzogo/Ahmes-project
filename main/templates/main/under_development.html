@@ -1,0 +1,117 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section under-development-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <div class="development-card">
+          <div class="development-icon">
+            <img src="{% static 'images/p.jpg' %}" alt="Under Construction" class="img-fluid" style='border-radius:200%'>
+          </div>
+          <h1 class="development-title">Page Under Development</h1>
+          <p class="development-text">
+            We're working hard to bring you this feature soon! Our team is currently building 
+            something amazing for you. Please check back later.
+          </p>
+          
+          <div class="progress mt-4">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                 role="progressbar" style="width: 75%"></div>
+          </div>
+          <p class="text-muted mt-2">Development Progress: 75%</p>
+          
+          <div class="upcoming-features mt-5">
+            <h3 class="feature-heading">Coming Soon:</h3>
+            <ul class="feature-list">
+              <li><i class="fas fa-check-circle text-success me-2"></i> Enhanced Staff Management</li>
+              <li><i class="fas fa-check-circle text-success me-2"></i> Student Performance Analytics</li>
+              <li><i class="fas fa-spinner text-warning me-2"></i> Parent Communication Portal</li>
+              <li><i class="fas fa-spinner text-warning me-2"></i> Mobile Application</li>
+            </ul>
+          </div>
+          
+          <div class="contact-support mt-4">
+            <p>Have suggestions or questions?</p>
+            <a href="{% url 'contact' %}" class="btn btn-outline-primary">
+              <i class="fas fa-envelope me-2"></i>Contact Us
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .under-development-section {
+    padding: 100px 0;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+  
+  .development-card {
+    background: white;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .development-icon {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 30px;
+  }
+  
+  .development-icon img {
+    width: 300%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .development-title {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  
+  .development-text {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+  }
+  
+  .feature-heading {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+  }
+  
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .feature-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .progress {
+    height: 10px;
+    border-radius: 5px;
+  }
+  
+  .progress-bar {
+    background-color: #3498db;
+  }
+</style>
+{% endblock %}

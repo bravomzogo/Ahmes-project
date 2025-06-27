@@ -1,18 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
 import secrets
-import cloudinary
 from cloudinary.models import CloudinaryField
 
 class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
     is_staff_member = models.BooleanField(default=False)
     
-    # Updated ManyToManyField relationships with proper related_name
     groups = models.ManyToManyField(
         Group,
         verbose_name=_('groups'),
@@ -44,7 +41,8 @@ class Campus(models.Model):
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=200)
     description = models.TextField()
-    image = CloudinaryField('campuses', folder="school/campuses")
+    image = CloudinaryField('campuses', folder="school/campuses", 
+                          transformation={'quality': 'auto:good'})
     
     def __str__(self):
         return self.name
@@ -128,7 +126,8 @@ class StaffMember(models.Model):
     email = models.EmailField()
     joined_date = models.DateField()
     bio = models.TextField(blank=True)
-    image = CloudinaryField('staff', folder="school/staff")
+    image = CloudinaryField('staff', folder="school/staff",
+                          transformation={'quality': 'auto:good'})
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -143,7 +142,8 @@ class StaffMember(models.Model):
 class News(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
-    image = CloudinaryField('news', folder="school/news")
+    image = CloudinaryField('news', folder="school/news",
+                          transformation={'quality': 'auto:good'})
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -185,8 +185,13 @@ class Gallery(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
-    image = CloudinaryField('gallery/images', folder="school/gallery/images", blank=True, null=True)
-    video = CloudinaryField('gallery/videos', folder="school/gallery/videos", resource_type="video", blank=True, null=True)
+    image = CloudinaryField('gallery/images', folder="school/gallery/images", 
+                          transformation={'quality': 'auto:good'}, 
+                          blank=True, null=True)
+    video = CloudinaryField('gallery/videos', folder="school/gallery/videos", 
+                           resource_type="video", 
+                           transformation={'quality': 'auto:good'},
+                           blank=True, null=True)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

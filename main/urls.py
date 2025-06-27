@@ -60,4 +60,7 @@ urlpatterns = [
     path('conversations/<int:conversation_id>/messages/', get_new_messages, name='get_new_messages'),
     path('api/conversations/', get_conversations, name='get_conversations'),
 
+    # Under development page
+    path('under-development/', views.under_development, name='under_development'),
+
 ]
