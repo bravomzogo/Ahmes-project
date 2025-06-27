@@ -15,23 +15,24 @@
           <ul class="nav nav-tabs flex-nowrap" id="staffTab" role="tablist" style="overflow-x: auto; white-space: nowrap;">
             <li class="nav-item flex-shrink-0" role="presentation">
               <button class="nav-link active d-flex align-items-center py-2 px-3" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers" type="button" role="tab">
-                <i class="fas fa-chalkboard-teacher me-2"></i>
-                <span class="text-nowrap">Teachers</span>
-                <span class="badge bg-primary ms-2">{{ teacher_count }}</span>
+                <i class="fas fa-chalkboard-teacher me-2" style='color: black;'></i>
+                <span class="text-nowrap" style='color: black;'>Teachers</span>
+                {% comment %} <span class="badge bg-primary ms-2">{{ teacher_count }}</span> {% endcomment %}
               </button>
             </li>
             <li class="nav-item flex-shrink-0" role="presentation">
               <button class="nav-link d-flex align-items-center py-2 px-3" id="administrators-tab" data-bs-toggle="tab" data-bs-target="#administrators" type="button" role="tab">
-                <i class="fas fa-user-tie me-2"></i>
-                <span class="text-nowrap">Administrators</span>
-                <span class="badge bg-primary ms-2">{{ admin_count }}</span>
+                <i class="fas fa-user-tie me-2" style='color: black;'></i>
+                {% comment %} <span class="badge bg-primary ms-2" style='color: black;'>{{ admin_count }}</span> {% endcomment %}
+                <span class="text-nowrap" style='color: black;'>Administrators</span>
+               
               </button>
             </li>
             <li class="nav-item flex-shrink-0" role="presentation">
               <button class="nav-link d-flex align-items-center py-2 px-3" id="support-tab" data-bs-toggle="tab" data-bs-target="#support" type="button" role="tab">
-                <i class="fas fa-hands-helping me-2"></i>
-                <span class="text-nowrap">Support Staff</span>
-                <span class="badge bg-primary ms-2">{{ support_count }}</span>
+                <i class="fas fa-hands-helping me-2" style='color: black;'></i>
+                <span class="text-nowrap" style='color: black;'>Support Staff</span>
+                {% comment %} <span class="badge bg-primary ms-2">{{ support_count }}</span> {% endcomment %}
               </button>
             </li>
           </ul>

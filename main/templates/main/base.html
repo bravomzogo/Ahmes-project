@@ -1097,7 +1097,7 @@
             <li class="nav-item">
               <a class="nav-link cta-button" href="{% url 'admin_login' %}">
                 <span class="nav-icon"><i class="fas fa-lock"></i></span>
-                <span class="nav-text">Admin Portal</span>
+                <span class="nav-text">Admin</span>
               </a>
             </li>
           </ul>
@@ -1131,7 +1131,6 @@
               <a href="#"><i class="fab fa-twitter"></i></a>
               <a href="#"><i class="fab fa-instagram"></i></a>
               <a href="#"><i class="fab fa-youtube"></i></a>
-              <a href="#"><i class="fab fa-linkedin-in"></i></a>
             </div>
           </div>
           <div
@@ -1142,12 +1141,12 @@
             <div class="footer-links">
               <h5>Quick Links</h5>
               <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Academics</a></li>
-                <li><a href="#">Admissions</a></li>
-                <li><a href="#">News & Events</a></li>
-                <li><a href="#">Contact Us</a></li>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'about' %}">About Us</a></li>
+                <li><a href="{% url 'staff' %}">Our Staff</a></li>
+                <li><a href="{% url 'under_development' %}">Admissions</a></li>
+                <li><a href="{% url 'gallery' %}">Gallery</a></li>
+                <li><a href="{% url 'contact' %}">Contact Us</a></li>
               </ul>
             </div>
           </div>

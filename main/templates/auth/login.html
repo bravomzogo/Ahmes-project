@@ -6,7 +6,7 @@
     <h2 class="section-title">Login to Your Account</h2>
     <p class="section-subtitle">Access your AHMES account to connect with our community.</p>
     
-    {% if messages %}
+    {% comment %} {% if messages %}
       <div class="row justify-content-center">
         <div class="col-md-6">
           {% for message in messages %}
@@ -16,7 +16,7 @@
           {% endfor %}
         </div>
       </div>
-    {% endif %}
+    {% endif %} {% endcomment %}
 
     <div class="row justify-content-center">
       <div class="col-md-6">
