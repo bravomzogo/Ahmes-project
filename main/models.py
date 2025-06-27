@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
 import secrets
+import cloudinary
+from cloudinary.models import CloudinaryField
 
 class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
@@ -32,9 +34,8 @@ class User(AbstractUser):
     )
 
     class Meta:
-        # Ensure this model is used as the custom user model
         swappable = 'AUTH_USER_MODEL'
-        db_table = 'auth_user'  # Optional: keeps the same table name as default User
+        db_table = 'auth_user'
 
     def __str__(self):
         return self.username
@@ -43,7 +44,7 @@ class Campus(models.Model):
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=200)
     description = models.TextField()
-    image = models.ImageField(upload_to='campuses/')
+    image = CloudinaryField('campuses', folder="school/campuses")
     
     def __str__(self):
         return self.name
@@ -65,7 +66,7 @@ class Student(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='student_profile',
-        null=True,  # Make optional if needed
+        null=True,
         blank=True
     )
     first_name = models.CharField(max_length=100)
@@ -110,7 +111,7 @@ class StaffMember(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='staff_profile',
-        null=True,  # Make optional if needed
+        null=True,
         blank=True
     )
     first_name = models.CharField(max_length=100)
@@ -127,7 +128,7 @@ class StaffMember(models.Model):
     email = models.EmailField()
     joined_date = models.DateField()
     bio = models.TextField(blank=True)
-    image = models.ImageField(upload_to='staff/')
+    image = CloudinaryField('staff', folder="school/staff")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -142,7 +143,7 @@ class StaffMember(models.Model):
 class News(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
-    image = models.ImageField(upload_to='news/')
+    image = CloudinaryField('news', folder="school/news")
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -175,7 +176,6 @@ class Comment(models.Model):
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
 
-
 class Gallery(models.Model):
     MEDIA_TYPE_CHOICES = [
         ('image', 'Image'),
@@ -185,8 +185,8 @@ class Gallery(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
-    image = models.ImageField(upload_to='gallery/images/', blank=True, null=True)
-    video = models.FileField(upload_to='gallery/videos/', blank=True, null=True)
+    image = CloudinaryField('gallery/images', folder="school/gallery/images", blank=True, null=True)
+    video = CloudinaryField('gallery/videos', folder="school/gallery/videos", resource_type="video", blank=True, null=True)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -202,9 +202,6 @@ class Gallery(models.Model):
         ordering = ['-published_date']
         verbose_name = 'Gallery Item'
         verbose_name_plural = 'Gallery Items'
-
-
-
 
 class EmailVerification(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='email_verification')
@@ -241,7 +238,6 @@ class Conversation(models.Model):
         return f"Conversation between {', '.join([user.username for user in self.participants.all()])}"
 
     def get_other_user(self, current_user):
-        """Helper method to get the other participant in the conversation"""
         return self.participants.exclude(id=current_user.id).first()
 
 class Message(models.Model):

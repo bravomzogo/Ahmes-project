@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, Student, StaffMember, News, Comment , Gallery , Message
-
+from .models import User, Student, StaffMember, News, Comment, Gallery, Message
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -10,6 +9,7 @@ from datetime import timedelta
 import secrets
 import logging
 from .models import EmailVerification
+from cloudinary.forms import CloudinaryFileField  # Import CloudinaryFileField
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,15 @@ class StaffMemberForm(forms.ModelForm):
         }
 
 class NewsForm(forms.ModelForm):
+    image = CloudinaryFileField(
+        options={
+            'folder': 'school/news',
+            'resource_type': 'image',
+            'overwrite': True,
+        },
+        required=False
+    )
+    
     class Meta:
         model = News
         fields = ['title', 'content', 'image', 'is_published']
@@ -71,9 +80,25 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['content', 'author_name', 'author_email']
 
-
-
 class GalleryForm(forms.ModelForm):
+    image = CloudinaryFileField(
+        options={
+            'folder': 'school/gallery/images',
+            'resource_type': 'image',
+            'overwrite': True,
+        },
+        required=False
+    )
+    
+    video = CloudinaryFileField(
+        options={
+            'folder': 'school/gallery/videos',
+            'resource_type': 'video',
+            'overwrite': True,
+        },
+        required=False
+    )
+    
     class Meta:
         model = Gallery
         fields = ['title', 'description', 'media_type', 'image', 'video', 'is_published']
@@ -97,10 +122,6 @@ class GalleryForm(forms.ModelForm):
         if media_type == 'video' and image:
             raise forms.ValidationError("Image should not be provided for video media type.")
         return cleaned_data
-    
-
-
-
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)

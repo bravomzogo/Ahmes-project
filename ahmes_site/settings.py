@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'main',
     'humanize',
     'widget_tweaks',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -87,8 +89,18 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Cloudinary configuration for media files
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dgybduur7'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '167429449282255'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'Cq79f2-WsPSRq6G3n_zhikwCs_I'),
+    'SECURE': True,
+    'EXCLUDE_DELETE_ORPHANED_MEDIA_PATHS': (),
+}
+
+# Media files configuration - using Cloudinary
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+MEDIA_URL = '/media/'  # This can remain as is or you can use Cloudinary URL
 
 # Default primary key
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

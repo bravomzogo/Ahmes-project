@@ -7,13 +7,5 @@
 *.iso
 
 
-media/
-static/uploads/
-db.sqlite3
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.log
-*.env
+
 
