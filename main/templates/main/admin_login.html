@@ -9,7 +9,6 @@
     display: flex;
     align-items: center;
   }
-  
   .login-card {
     border: none;
     border-radius: 15px;
@@ -17,12 +16,10 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
   }
-  
   .login-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
   }
-  
   .login-header {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     padding: 1.5rem;
@@ -30,7 +27,6 @@
     position: relative;
     overflow: hidden;
   }
-  
   .login-header::before {
     content: '';
     position: absolute;
@@ -41,33 +37,27 @@
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
   }
-  
   .login-header img {
     filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
     transition: all 0.3s ease;
   }
-  
   .login-card:hover .login-header img {
     transform: scale(1.05);
   }
-  
   .login-body {
     padding: 1.3rem;
     background-color: white;
   }
-  
   .form-control-lg {
     padding: 1rem 1.25rem;
     border-radius: 10px;
     border: 0.5px solid #e0e0e0;
     transition: all 0.3s ease;
   }
-  
   .form-control-lg:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.25rem rgba(26, 82, 118, 0.15);
   }
-  
   .btn-login {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     border: none;
@@ -76,17 +66,14 @@
     letter-spacing: 0.5px;
     transition: all 0.3s ease;
   }
-  
   .btn-login:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(26, 82, 118, 0.2);
   }
-  
   .forgot-link {
     color: var(--text-light);
     transition: all 0.3s ease;
   }
-  
   .forgot-link:hover {
     color: var(--primary-color);
     text-decoration: none;
@@ -106,13 +93,30 @@
             <p class="text-white-50 mb-0">Enter your credentials to continue</p>
           </div>
           <div class="login-body">
+            {# Display error messages if any #}
+            {% if messages %}
+              <div class="mb-3">
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="color: red; background-color: #f8d7da; padding: 10px; border-radius: 5px;">
+                    {% if message.tags == 'error' %}
+                      <strong>Error:</strong>
+                    {% elif message.tags == 'warning' %}
+                      <strong>Warning:</strong>
+                    {% elif message.tags == 'success' %}
+                      <strong>Success:</strong>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
             {% if form.errors %}
               <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <strong>Invalid credentials!</strong> Please check your username and password.
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
             {% endif %}
-            
             <form method="post" class="needs-validation" novalidate>
               {% csrf_token %}
               <div class="mb-4">
@@ -122,7 +126,6 @@
                   <input type="text" class="form-control form-control-lg" id="username" name="username" placeholder="Enter your username" required>
                 </div>
               </div>
-              
               <div class="mb-4">
                 <label for="password" class="form-label fw-bold">Password</label>
                 <div class="input-group">
@@ -130,13 +133,11 @@
                   <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Enter your password" required>
                 </div>
               </div>
-              
               <div class="d-grid mb-3">
                 <button type="submit" class="btn btn-login btn-lg">
                   <i class="fas fa-sign-in-alt me-2"></i> Login
                 </button>
               </div>
-              
               <div class="text-center">
                 {% comment %} <a href="#" class="forgot-link">
                   <i class="fas fa-question-circle me-1"></i> Forgot Password?
@@ -145,7 +146,6 @@
             </form>
           </div>
         </div>
-        
         <div class="text-center mt-4">
           <p class="text-muted">© {% now "Y" %} AHMES. All rights reserved.</p>
         </div>

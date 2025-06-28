@@ -11,6 +11,27 @@
       <div class="col-md-6">
         <div class="card" data-aos="fade-up">
           <div class="card-body">
+            {# Display error messages if any #}
+            {% if messages %}
+              <div class="mb-3" style='color: red; background-color: #f8d7da; padding: 10px; border-radius: 5px;'>
+                {% comment %} Display a single error message if only one exists {% endcomment %}
+                {% if messages|length == 1 %}
+                  {% comment %} <strong>Error:</strong> {% endcomment %}
+                {% endif %}
+                {# If multiple messages, indicate that multiple errors occurred #}
+                {% if messages|length > 1 %}
+                  <strong>Multiple errors occurred:</strong>
+                {% else %}
+                  {% comment %} <strong>Error:</strong> {% endcomment %}
+                {% endif %}
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
             <form method="post" action="{% url 'login' %}">
               {% csrf_token %}
               <div class="mb-3">
