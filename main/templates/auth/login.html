@@ -1,22 +1,11 @@
 {% extends 'main/base.html' %}
 {% block title %}Login | AHMES Secondary School{% endblock %}
+
 {% block content %}
 <section class="section">
   <div class="container">
     <h2 class="section-title">Login to Your Account</h2>
     <p class="section-subtitle">Access your AHMES account to connect with our community.</p>
-    
-    {% comment %} {% if messages %}
-      <div class="row justify-content-center">
-        <div class="col-md-6">
-          {% for message in messages %}
-            <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      </div>
-    {% endif %} {% endcomment %}
 
     <div class="row justify-content-center">
       <div class="col-md-6">
@@ -28,9 +17,10 @@
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" name="username" required>
               </div>
-              <div class="mb-3">
+              <div class="mb-3 position-relative">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" name="password" required>
+                <i class="fa fa-eye toggle-password" toggle="#password"></i>
               </div>
               <button type="submit" class="btn btn-primary w-100">Login</button>
             </form>
@@ -44,4 +34,36 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- FontAwesome (for eye icon) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+<style>
+  .toggle-password {
+    position: absolute;
+    top: 50px;
+    right: 15px;
+    cursor: pointer;
+    color: #888;
+    z-index: 10;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggles = document.querySelectorAll(".toggle-password");
+
+    toggles.forEach(icon => {
+      icon.addEventListener("click", function () {
+        const input = document.querySelector(this.getAttribute("toggle"));
+        const type = input.getAttribute("type") === "password" ? "text" : "password";
+        input.setAttribute("type", type);
+        this.classList.toggle("fa-eye");
+        this.classList.toggle("fa-eye-slash");
+      });
+    });
+  });
+</script>
 {% endblock %}

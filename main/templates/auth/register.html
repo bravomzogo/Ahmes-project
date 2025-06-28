@@ -1,22 +1,11 @@
 {% extends 'main/base.html' %}
 {% block title %}Register | AHMES Secondary School{% endblock %}
+
 {% block content %}
 <section class="section">
   <div class="container">
     <h2 class="section-title">Create Your Account</h2>
     <p class="section-subtitle">Join the AHMES community by registering below.</p>
-    
-    {% if messages %}
-      <div class="row justify-content-center">
-        <div class="col-md-6">
-          {% for message in messages %}
-            <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      </div>
-    {% endif %}
 
     <div class="row justify-content-center">
       <div class="col-md-6">
@@ -38,16 +27,18 @@
                   <div class="text-danger">{{ form.email.errors }}</div>
                 {% endif %}
               </div>
-              <div class="mb-3">
+              <div class="mb-3 position-relative">
                 <label for="password1" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password1" name="password1" required>
+                <i class="fa fa-eye toggle-password" toggle="#password1"></i>
                 {% if form.password1.errors %}
                   <div class="text-danger">{{ form.password1.errors }}</div>
                 {% endif %}
               </div>
-              <div class="mb-3">
+              <div class="mb-3 position-relative">
                 <label for="password2" class="form-label">Confirm Password</label>
                 <input type="password" class="form-control" id="password2" name="password2" required>
+                <i class="fa fa-eye toggle-password" toggle="#password2"></i>
                 {% if form.password2.errors %}
                   <div class="text-danger">{{ form.password2.errors }}</div>
                 {% endif %}
@@ -64,4 +55,36 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- FontAwesome (for eye icon) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+<style>
+  .toggle-password {
+    position: absolute;
+    top: 50px;
+    right: 15px;
+    cursor: pointer;
+    color: #888;
+    z-index: 10;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggles = document.querySelectorAll(".toggle-password");
+
+    toggles.forEach(icon => {
+      icon.addEventListener("click", function () {
+        const input = document.querySelector(this.getAttribute("toggle"));
+        const type = input.getAttribute("type") === "password" ? "text" : "password";
+        input.setAttribute("type", type);
+        this.classList.toggle("fa-eye");
+        this.classList.toggle("fa-eye-slash");
+      });
+    });
+  });
+</script>
 {% endblock %}
