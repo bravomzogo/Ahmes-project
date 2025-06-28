@@ -1,5 +1,6 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,75 +9,84 @@
     
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Edit Staff Member</h1>
+        <h1 class="h2"><i class="fas fa-user-edit me-2"></i>Edit Staff Member</h1>
       </div>
 
-      <div class="card">
-        <div class="card-body">
-          <form method="post" enctype="multipart/form-data">
+      <div class="card shadow rounded-4">
+        <div class="card-body p-4">
+          <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             {% csrf_token %}
-            <div class="row">
+
+            <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-id-card me-2"></i>Staff Information</h5>
+            <div class="row g-4">
               <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">First Name</label>
-                  {{ form.first_name }}
+                <div class="form-floating">
+                  {{ form.first_name|add_class:"form-control" }}
+                  <label>First Name</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Last Name</label>
-                  {{ form.last_name }}
+                <div class="form-floating mt-3">
+                  {{ form.last_name|add_class:"form-control" }}
+                  <label>Last Name</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Position</label>
-                  {{ form.position }}
+                <div class="form-floating mt-3">
+                  {{ form.position|add_class:"form-control" }}
+                  <label>Position</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Qualification</label>
-                  {{ form.qualification }}
+                <div class="form-floating mt-3">
+                  {{ form.qualification|add_class:"form-control" }}
+                  <label>Qualification</label>
                 </div>
               </div>
+
               <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Specialization</label>
-                  {{ form.specialization }}
+                <div class="form-floating">
+                  {{ form.specialization|add_class:"form-control" }}
+                  <label>Specialization</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Campus</label>
-                  {{ form.campus }}
+                <div class="form-floating mt-3">
+                  {{ form.campus|add_class:"form-select" }}
+                  <label>Campus</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Joined Date</label>
-                  {{ form.joined_date }}
+                <div class="form-floating mt-3">
+                  {{ form.joined_date|add_class:"form-control" }}
+                  <label>Joined Date</label>
                 </div>
-                <div class="mb-3">
+                <div class="mt-3">
                   <label class="form-label">Profile Image</label>
-                  {{ form.image }}
+                  {{ form.image|add_class:"form-control" }}
                 </div>
               </div>
             </div>
-            
-            <div class="row">
+
+            <hr class="my-4">
+
+            <div class="row g-4">
               <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Phone</label>
-                  {{ form.phone }}
+                <div class="form-floating">
+                  {{ form.phone|add_class:"form-control" }}
+                  <label>Phone</label>
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Email</label>
-                  {{ form.email }}
+                <div class="form-floating">
+                  {{ form.email|add_class:"form-control" }}
+                  <label>Email</label>
                 </div>
               </div>
             </div>
-            
-            <div class="mb-3">
+
+            <div class="mt-4">
               <label class="form-label">Bio</label>
-              {{ form.bio }}
+              {{ form.bio|add_class:"form-control" }}
             </div>
-            
-            <div class="text-end">
-              <button type="submit" class="btn btn-primary">Update Staff Member</button>
-              <a href="{% url 'manage_staff' %}" class="btn btn-secondary">Cancel</a>
+
+            <div class="text-end mt-4">
+              <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4">
+                <i class="fas fa-save me-2"></i>Update Staff Member
+              </button>
+              <a href="{% url 'manage_staff' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4 ms-2">
+                <i class="fas fa-times me-2"></i>Cancel
+              </a>
             </div>
           </form>
         </div>
