@@ -1,6 +1,6 @@
 {% extends 'main/base.html' %}
 {% block title %}Chat with {{ other_user.username }} | AHMES Secondary School{% endblock %}
-
+{% load static %}
 {% block content %}
 <section class="section">
   <div class="container">
@@ -50,6 +50,14 @@
 {% block extra_js %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+<!-- Audio elements for sound effects (hidden) -->
+<audio id="sendSound" preload="auto">
+  <source src="{% static 'audio/send.mp3' %} " type="audio/mpeg">
+</audio>
+<audio id="receiveSound" preload="auto">
+  <source src="{% static 'audio/receive.mp3' %}" type="audio/mpeg">
+</audio>
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const messageForm = document.getElementById("messageForm");
@@ -59,6 +67,14 @@ document.addEventListener("DOMContentLoaded", function() {
   let isWindowFocused = true;
   const currentUserId = {{ request.user.id }};
   const otherUserId = {{ other_user.id }};
+  
+  // Sound elements
+  const sendSound = document.getElementById('sendSound');
+  const receiveSound = document.getElementById('receiveSound');
+  
+  // Volume settings (adjust as needed)
+  sendSound.volume = 0.3;
+  receiveSound.volume = 0.3;
   
   window.addEventListener('focus', () => { isWindowFocused = true; });
   window.addEventListener('blur', () => { isWindowFocused = false; });
@@ -155,6 +171,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (data.messages?.length) {
         let shouldScroll = false;
         let messagesToMarkRead = [];
+        let newMessagesReceived = false;
         
         for (const msg of data.messages) {
           const existingElement = document.getElementById(`message-${msg.id}`);
@@ -172,6 +189,11 @@ document.addEventListener("DOMContentLoaded", function() {
             lastMessageId = Math.max(lastMessageId, msg.id);
             shouldScroll = true;
             
+            // Play sound for new received messages (not sent by current user)
+            if (!msg.is_me) {
+              newMessagesReceived = true;
+            }
+            
             // Collect messages to mark as read
             if (!msg.is_me && !msg.is_read && isWindowFocused) {
               messagesToMarkRead.push(msg.id);
@@ -180,6 +202,12 @@ document.addEventListener("DOMContentLoaded", function() {
             // Update read status for our messages
             updateReadStatus(msg.id);
           }
+        }
+        
+        // Play receive sound if new messages were received
+        if (newMessagesReceived && isWindowFocused) {
+          receiveSound.currentTime = 0; // Rewind to start
+          receiveSound.play().catch(e => console.log("Audio play failed:", e));
         }
         
         // Mark messages as read in bulk
@@ -239,6 +267,10 @@ document.addEventListener("DOMContentLoaded", function() {
         messageContainer.appendChild(element);
         messageInput.value = '';
         scrollToBottom();
+        
+        // Play send sound
+        sendSound.currentTime = 0; // Rewind to start
+        sendSound.play().catch(e => console.log("Audio play failed:", e));
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -260,6 +292,11 @@ document.addEventListener("DOMContentLoaded", function() {
 <style>
 .read-status i {
   margin-left: 5px;
+}
+
+/* Hide audio elements */
+audio {
+  display: none;
 }
 </style>
 {% endblock %}
