@@ -64,5 +64,7 @@ urlpatterns = [
 
     # Under development page
     path('under-development/', views.under_development, name='under_development'),
+    path('conversations/typing/', views.handle_typing, name='handle_typing'),
+    path('conversations/<int:conversation_id>/typing-status/', views.get_typing_status, name='typing_status'),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

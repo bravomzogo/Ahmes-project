@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 import secrets
 import json
 from django.utils import timezone
+from django.core.cache import cache
 
 class CustomLoginView(LoginView):
     template_name = 'auth/login.html'
@@ -596,6 +597,35 @@ def mark_messages_read(request):
 
 def under_development(request):
     return render(request, 'main/under_development.html')
+
+
+
+
+@require_POST
+@login_required
+def handle_typing(request):
+    conversation_id = request.POST.get('conversation_id')
+    is_typing = request.POST.get('is_typing') == 'true'
+    
+    # Store typing status in cache with a short expiration
+    cache_key = f'typing_{conversation_id}_{request.user.id}'
+    cache.set(cache_key, is_typing, timeout=3)  # 3 seconds expiration
+    
+    return JsonResponse({'success': True})
+
+@login_required
+def get_typing_status(request, conversation_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    other_user = conversation.participants.exclude(id=request.user.id).first()
+    
+    # Check if other user is typing
+    cache_key = f'typing_{conversation_id}_{other_user.id}'
+    is_typing = cache.get(cache_key, False)
+    
+    return JsonResponse({
+        'is_typing': is_typing,
+        'user_id': other_user.id
+    })
     
 
 

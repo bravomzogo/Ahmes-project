@@ -46,6 +46,34 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
   }
+  /* Typing indicator styles */
+  .typing-indicator {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    background-color: white;
+    padding: 2px 10px;
+    border-radius: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-size: 0.8rem;
+  }
+  .typing-dots span {
+    animation: typingAnimation 1.4s infinite ease-in-out;
+    opacity: 0.6;
+    display: inline-block;
+  }
+  .typing-dots span:nth-child(1) { animation-delay: 0s; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingAnimation {
+    0% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(-3px); opacity: 1; }
+    100% { transform: translateY(0); opacity: 0.6; }
+  }
+  .chat-header {
+    position: relative;
+    padding-bottom: 15px;
+  }
 </style>
 
 <section class="section">
@@ -63,27 +91,37 @@
     <div class="row">
       <div class="col-12">
         <div class="card border-0 shadow-sm" data-aos="fade-up">
-          <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="mb-0">{{ other_user.get_full_name|default:other_user.username }}</h6>
-              <small class="text-muted">
-                {% if other_user.is_online %}
-                  <span class="text-success">
-                    <span class="online-dot bg-success"></span>Online
-                  </span>
-                {% else %}
-                  <span class="text-muted">Last seen {{ other_user.last_login|timesince }} ago</span>
-                {% endif %}
-              </small>
+          <div class="card-header bg-white border-bottom chat-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">{{ other_user.get_full_name|default:other_user.username }}</h6>
+                <small class="text-muted">
+                  {% if other_user.is_online %}
+                    <span class="text-success">
+                      <span class="online-dot bg-success"></span>Online
+                    </span>
+                  {% else %}
+                    <span class="text-muted">Last seen {{ other_user.last_login|timesince }} ago</span>
+                  {% endif %}
+                </small>
+              </div>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>View Profile</a></li>
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-ban me-2"></i>Block User</a></li>
+                </ul>
+              </div>
             </div>
-            <div class="dropdown">
-              <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
-                <i class="fas fa-ellipsis-v"></i>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>View Profile</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-ban me-2"></i>Block User</a></li>
-              </ul>
+            <div id="typingIndicator" class="typing-indicator d-none">
+              <span class="text-muted small">
+                <span class="typing-dots">
+                  <span>.</span><span>.</span><span>.</span>
+                </span>
+                {{ other_user.username }} is typing
+              </span>
             </div>
           </div>
           
@@ -209,6 +247,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const filePreviewContent = document.getElementById("filePreviewContent");
   const imagePreview = document.getElementById("imagePreview");
   const clearFileButton = document.getElementById("clearFileButton");
+  const typingIndicator = document.getElementById("typingIndicator");
   
   // Variables
   let lastMessageId = {{ conversation.messages.last.id|default:0 }};
@@ -217,6 +256,9 @@ document.addEventListener("DOMContentLoaded", function() {
   const otherUserId = {{ other_user.id }};
   const sendSound = document.getElementById('sendSound');
   const receiveSound = document.getElementById('receiveSound');
+  let typingTimeout;
+  const TYPING_TIMEOUT = 2000; // 2 seconds of inactivity stops the typing indicator
+  let isTyping = false;
   
   // Audio settings
   sendSound.volume = 0.3;
@@ -225,6 +267,45 @@ document.addEventListener("DOMContentLoaded", function() {
   // Window focus events
   window.addEventListener('focus', () => { isWindowFocused = true; });
   window.addEventListener('blur', () => { isWindowFocused = false; });
+
+  // Typing indicator functions
+  function sendTypingStatus(isTyping) {
+    fetch('/conversations/typing/', {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        conversation_id: {{ conversation.id }},
+        is_typing: isTyping
+      })
+    }).catch(error => console.error('Error sending typing status:', error));
+  }
+
+  function handleTypingIndicator(data) {
+    if (data.sender_id === otherUserId) {
+      if (data.is_typing) {
+        typingIndicator.classList.remove('d-none');
+      } else {
+        typingIndicator.classList.add('d-none');
+      }
+    }
+  }
+
+  // Message input event for typing indicator
+  messageInput.addEventListener('input', function() {
+    if (!isTyping) {
+      isTyping = true;
+      sendTypingStatus(true);
+    }
+    
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      isTyping = false;
+      sendTypingStatus(false);
+    }, TYPING_TIMEOUT);
+  });
 
   // File preview functions
   function showFilePreview(input) {
@@ -422,6 +503,22 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  // Check typing status
+  async function checkTypingStatus() {
+    try {
+      const response = await fetch(`/conversations/{{ conversation.id }}/typing-status/`);
+      const data = await response.json();
+      if (data.is_typing !== undefined) {
+        handleTypingIndicator({
+          sender_id: data.user_id,
+          is_typing: data.is_typing
+        });
+      }
+    } catch (error) {
+      console.error('Error checking typing status:', error);
+    }
+  }
+
   // Message fetching functions
   async function checkNewMessagesAndReadStatus() {
     try {
@@ -535,10 +632,12 @@ document.addEventListener("DOMContentLoaded", function() {
   setInterval(() => {
     checkNewMessagesAndReadStatus();
     checkAllMessagesReadStatus();
+    checkTypingStatus();
   }, isWindowFocused ? 2000 : 5000);
 
   checkNewMessagesAndReadStatus();
   checkAllMessagesReadStatus();
+  checkTypingStatus();
   scrollToBottom();
 });
 </script>
