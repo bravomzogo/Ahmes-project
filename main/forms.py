@@ -182,6 +182,10 @@ class RegisterForm(UserCreationForm):
                     "We couldn't send the verification email. Please try again later."
                 )
 
+from django import forms
+from .models import Message
+from django.core.validators import FileExtensionValidator
+
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
@@ -190,10 +194,32 @@ class MessageForm(forms.ModelForm):
             'content': forms.Textarea(attrs={
                 'rows': 3,
                 'placeholder': 'Type your message...',
-                'class': 'form-control'
+                'class': 'form-control',
+                'id': 'messageInput'
             }),
             'file': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': '.jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4'
+                'class': 'd-none',
+                'id': 'fileInput',
+                'accept': '.jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4,.mov,.avi'
             })
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['file'].required = False
+        self.fields['file'].validators = [
+            FileExtensionValidator(allowed_extensions=[
+                'jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx',
+                'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'mp3', 'mp4', 'mov', 'avi'
+            ])
+        ]
+    
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Cloudinary will handle the file upload automatically
+            # Add any additional file validation here
+            max_size = 10 * 1024 * 1024  # 10MB
+            if file.size > max_size:
+                raise forms.ValidationError(f"File too large. Maximum size is {max_size/1024/1024}MB.")
+        return file
