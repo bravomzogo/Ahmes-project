@@ -39,8 +39,12 @@
     border-radius: 50%;
     margin-right: 5px;
   }
-    .read-status i title="Read" {
-    color: #0d6efd !important; /* Blue color for read status */
+  .read-status i {
+    color: #0d6efd !important;
+  }
+  .download-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
   }
 </style>
 
@@ -89,21 +93,42 @@
                 <div class="mb-3 {% if message.sender == request.user %}text-end{% else %}text-start{% endif %}" id="message-{{ message.id }}" data-sender-id="{{ message.sender.id }}">
                   <div class="d-inline-block p-3 {% if message.sender == request.user %}user-message{% else %}other-message{% endif %}" style="max-width: 80%;">
                     {% if message.file %}
-                      <p class="mb-1">
-                        <a href="{{ message.file.url }}" download class="{% if message.sender == request.user %}text-white{% else %}text-primary{% endif %} d-flex align-items-center">
-                          <i class="fas fa-paperclip me-2"></i>
-                          <span class="text-truncate" style="max-width: 200px;">{{ message.file.name|basename }}</span>
-                        </a>
-                      </p>
-                      {% if message.file.name|lower|slice:'-4:' == '.jpg' or message.file.name|lower|slice:'-5:' == '.jpeg' or message.file.name|lower|slice:'-4:' == '.png' %}
+                      {% if message.is_image %}
                         <div class="mt-2">
                           <img src="{{ message.file.url }}" class="img-thumbnail" style="max-height: 200px; max-width: 100%;">
+                          <div class="mt-2">
+                            <a href="{{ message.file.url }}" download="{{ message.file_name }}" class="btn btn-sm btn-outline-primary download-btn">
+                              <i class="fas fa-download me-1"></i>Download
+                            </a>
+                          </div>
+                        </div>
+                      {% elif message.is_video %}
+                        <div class="mt-2">
+                          <video controls style="max-height: 200px; max-width: 100%;">
+                            <source src="{{ message.file.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                          </video>
+                          <div class="mt-2">
+                            <a href="{{ message.file.url }}" download="{{ message.file_name }}" class="btn btn-sm btn-outline-primary download-btn">
+                              <i class="fas fa-download me-1"></i>Download
+                            </a>
+                          </div>
+                        </div>
+                      {% else %}
+                        <div class="d-flex align-items-center justify-content-between">
+                          <div class="d-flex align-items-center">
+                            <i class="fas fa-file me-2"></i>
+                            <span class="text-truncate" style="max-width: 200px;">{{ message.file_name }}</span>
+                          </div>
+                          <a href="{{ message.file.url }}" download="{{ message.file_name }}" class="btn btn-sm btn-outline-primary download-btn">
+                            <i class="fas fa-download me-1"></i>Download
+                          </a>
                         </div>
                       {% endif %}
                     {% else %}
                       <p class="mb-1">{{ message.content }}</p>
                     {% endif %}
-                    <div class="message-time {% if message.sender == request.user %}text-blue-50{% else %}text-muted{% endif %}">
+                    <div class="message-time {% if message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}">
                       {{ message.timestamp|time:"H:i" }}
                       {% if message.sender == request.user %}
                         <span class="read-status" data-message-id="{{ message.id }}">
@@ -135,7 +160,7 @@
                     <i class="fas fa-paperclip me-2 text-muted"></i>
                     <span id="fileName" class="text-truncate" style="max-width: 200px;"></span>
                   </div>
-                  <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="clearFile()">
+                  <button type="button" class="btn btn-sm btn-link text-danger p-0" id="clearFileButton">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -147,7 +172,7 @@
                 <button type="button" class="btn btn-light border" onclick="document.getElementById('fileInput').click()">
                   <i class="fas fa-paperclip"></i>
                 </button>
-                <input type="file" name="file" id="fileInput" class="d-none" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4">
+                <input type="file" name="file" id="fileInput" class="d-none" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4,.mov,.avi">
                 <input type="text" name="content" class="form-control border-start-0" placeholder="Type your message..." id="messageInput" autocomplete="off">
                 <button type="submit" class="btn btn-primary">
                   <i class="fas fa-paper-plane"></i>
@@ -183,6 +208,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const fileName = document.getElementById("fileName");
   const filePreviewContent = document.getElementById("filePreviewContent");
   const imagePreview = document.getElementById("imagePreview");
+  const clearFileButton = document.getElementById("clearFileButton");
   
   // Variables
   let lastMessageId = {{ conversation.messages.last.id|default:0 }};
@@ -233,6 +259,9 @@ document.addEventListener("DOMContentLoaded", function() {
     filePreviewContent.classList.add('d-none');
   }
 
+  // Clear file button event listener
+  clearFileButton.addEventListener('click', clearFile);
+
   // Message display functions
   function scrollToBottom() {
     messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -260,40 +289,81 @@ document.addEventListener("DOMContentLoaded", function() {
     contentBlock.className = 'mb-1';
 
     if (data.file_url && data.file_name) {
-      const fileLink = document.createElement('a');
-      fileLink.href = data.file_url;
-      fileLink.download = '';
-      fileLink.className = isMe ? 'text-white' : 'text-primary';
-      fileLink.style.textDecoration = 'none';
-      
-      const paperclip = document.createElement('i');
-      paperclip.className = 'fas fa-paperclip me-2';
-      fileLink.appendChild(paperclip);
-      
-      const fileNameSpan = document.createElement('span');
-      fileNameSpan.className = 'text-truncate';
-      fileNameSpan.style.maxWidth = '200px';
-      fileNameSpan.style.display = 'inline-block';
-      fileNameSpan.textContent = data.file_name;
-      fileLink.appendChild(fileNameSpan);
-      
-      contentBlock.appendChild(fileLink);
-
-      // Add image preview if file is an image
-      if (data.file_name.toLowerCase().endsWith('.jpg') || 
-          data.file_name.toLowerCase().endsWith('.jpeg') || 
-          data.file_name.toLowerCase().endsWith('.png')) {
-        const imgDiv = document.createElement('div');
-        imgDiv.className = 'mt-2';
+      // Check if file is an image
+      if (data.file_name.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'mt-2';
         
         const img = document.createElement('img');
         img.src = data.file_url;
         img.className = 'img-thumbnail';
         img.style.maxHeight = '200px';
         img.style.maxWidth = '100%';
+        imgContainer.appendChild(img);
         
-        imgDiv.appendChild(img);
-        contentBlock.appendChild(imgDiv);
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = data.file_url;
+        downloadBtn.setAttribute('download', data.file_name);
+        downloadBtn.className = 'btn btn-sm btn-outline-primary download-btn mt-2';
+        downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i>Download';
+        imgContainer.appendChild(downloadBtn);
+        
+        contentBlock.appendChild(imgContainer);
+      } 
+      // Check if file is a video
+      else if (data.file_name.toLowerCase().match(/\.(mp4|mov|avi)$/)) {
+        const videoContainer = document.createElement('div');
+        videoContainer.className = 'mt-2';
+        
+        const video = document.createElement('video');
+        video.controls = true;
+        video.style.maxHeight = '200px';
+        video.style.maxWidth = '100%';
+        
+        const source = document.createElement('source');
+        source.src = data.file_url;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+        
+        video.appendChild(document.createTextNode('Your browser does not support the video tag.'));
+        videoContainer.appendChild(video);
+        
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = data.file_url;
+        downloadBtn.setAttribute('download', data.file_name);
+        downloadBtn.className = 'btn btn-sm btn-outline-primary download-btn mt-2';
+        downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i>Download';
+        videoContainer.appendChild(downloadBtn);
+        
+        contentBlock.appendChild(videoContainer);
+      } 
+      // Other file types
+      else {
+        const fileContainer = document.createElement('div');
+        fileContainer.className = 'd-flex align-items-center justify-content-between';
+        
+        const fileInfo = document.createElement('div');
+        fileInfo.className = 'd-flex align-items-center';
+        
+        const fileIcon = document.createElement('i');
+        fileIcon.className = 'fas fa-file me-2';
+        fileInfo.appendChild(fileIcon);
+        
+        const fileNameSpan = document.createElement('span');
+        fileNameSpan.className = 'text-truncate';
+        fileNameSpan.style.maxWidth = '200px';
+        fileNameSpan.textContent = data.file_name;
+        fileInfo.appendChild(fileNameSpan);
+        
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = data.file_url;
+        downloadBtn.setAttribute('download', data.file_name);
+        downloadBtn.className = 'btn btn-sm btn-outline-primary download-btn';
+        downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i>Download';
+        
+        fileContainer.appendChild(fileInfo);
+        fileContainer.appendChild(downloadBtn);
+        contentBlock.appendChild(fileContainer);
       }
     } else {
       contentBlock.textContent = data.content;

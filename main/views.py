@@ -151,8 +151,8 @@ def chat(request, conversation_id):
                     'timestamp': message.timestamp.isoformat(),
                     'sender_id': message.sender.id,
                     'is_read': message.is_read,
-                    'file_url': message.file.url if message.file else None,
-                    'file_name': message.file.name.split('/')[-1] if message.file else '',
+                    'file_url': message.file_url,
+                    'file_name': message.file_name,
                     'is_me': True
                 })
             return redirect('chat', conversation_id=conversation.id)
