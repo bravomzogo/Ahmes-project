@@ -39,6 +39,9 @@
     border-radius: 50%;
     margin-right: 5px;
   }
+    .read-status i title="Read" {
+    color: #0d6efd !important; /* Blue color for read status */
+  }
 </style>
 
 <section class="section">
@@ -105,7 +108,7 @@
                       {% if message.sender == request.user %}
                         <span class="read-status" data-message-id="{{ message.id }}">
                           {% if message.is_read %}
-                            <i class="fas fa-check-double ms-2" title="Read" style='color: blue; !important'></i>
+                            <i class="fas fa-check-double ms-2" title="Read"></i>
                           {% else %}
                             <i class="fas fa-check ms-2" title="Sent"></i>
                           {% endif %}

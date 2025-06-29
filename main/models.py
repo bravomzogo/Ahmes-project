@@ -258,13 +258,14 @@ class Conversation(models.Model):
         return self.participants.exclude(id=current_user.id).first()
 
 class Message(models.Model):
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    conversation = models.ForeignKey('Conversation', on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(blank=True)
-    file = models.FileField(
-        upload_to='chat_files/',
+    file = CloudinaryField(
+        folder='chat_files/',
         null=True,
         blank=True,
+        resource_type='auto',  # This will handle both images and videos
         validators=[FileExtensionValidator(allowed_extensions=[
             'jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 
             'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'mp3', 'mp4'
@@ -279,3 +280,21 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.username}"
+
+    @property
+    def file_url(self):
+        if self.file:
+            return self.file.url
+        return None
+
+    @property
+    def is_image(self):
+        if self.file:
+            return self.file.url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif'))
+        return False
+
+    @property
+    def is_video(self):
+        if self.file:
+            return self.file.url.lower().endswith(('.mp4', '.mov', '.avi'))
+        return False
