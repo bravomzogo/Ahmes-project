@@ -194,32 +194,10 @@ class MessageForm(forms.ModelForm):
             'content': forms.Textarea(attrs={
                 'rows': 3,
                 'placeholder': 'Type your message...',
-                'class': 'form-control',
-                'id': 'messageInput'
+                'class': 'form-control'
             }),
             'file': forms.FileInput(attrs={
-                'class': 'd-none',
-                'id': 'fileInput',
-                'accept': '.jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4,.mov,.avi'
+                'class': 'form-control',
+                'accept': '.jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4'
             })
         }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['file'].required = False
-        self.fields['file'].validators = [
-            FileExtensionValidator(allowed_extensions=[
-                'jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx',
-                'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'mp3', 'mp4', 'mov', 'avi'
-            ])
-        ]
-    
-    def clean_file(self):
-        file = self.cleaned_data.get('file')
-        if file:
-            # Cloudinary will handle the file upload automatically
-            # Add any additional file validation here
-            max_size = 10 * 1024 * 1024  # 10MB
-            if file.size > max_size:
-                raise forms.ValidationError(f"File too large. Maximum size is {max_size/1024/1024}MB.")
-        return file
