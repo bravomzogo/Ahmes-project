@@ -74,6 +74,27 @@
     position: relative;
     padding-bottom: 15px;
   }
+  /* Improved file preview styles */
+  .file-preview {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .document-preview {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+  }
+  .document-icon {
+    font-size: 2rem;
+    color: #6c757d;
+  }
+  .file-view-container {
+    max-width: 100%;
+    max-height: 300px;
+    overflow: hidden;
+  }
 </style>
 
 <section class="section">
@@ -132,35 +153,43 @@
                   <div class="d-inline-block p-3 {% if message.sender == request.user %}user-message{% else %}other-message{% endif %}" style="max-width: 80%;">
                     {% if message.file %}
                       {% if message.is_image %}
-                        <div class="mt-2">
-                          <img src="{{ message.file.url }}" class="img-thumbnail" style="max-height: 200px; max-width: 100%;">
-                          <div class="mt-2">
-                            <a href="{{ message.file.url }}" download="{{ message.file_name }}" class="btn btn-sm btn-outline-primary download-btn">
-                              <i class="fas fa-download me-1"></i>Download
-                            </a>
-                          </div>
+                        <div class="file-view-container">
+                          <img src="{{ message.file.url }}" class="img-thumbnail file-preview" style="max-height: 200px;">
                         </div>
-                      {% elif message.is_video %}
                         <div class="mt-2">
-                          <video controls style="max-height: 200px; max-width: 100%;">
-                            <source src="{{ message.file.url }}" type="video/mp4">
-                            Your browser does not support the video tag.
-                          </video>
-                          <div class="mt-2">
-                            <a href="{{ message.file.url }}" download="{{ message.file_name }}" class="btn btn-sm btn-outline-primary download-btn">
-                              <i class="fas fa-download me-1"></i>Download
-                            </a>
-                          </div>
-                        </div>
-                      {% else %}
-                        <div class="d-flex align-items-center justify-content-between">
-                          <div class="d-flex align-items-center">
-                            <i class="fas fa-file me-2"></i>
-                            <span class="text-truncate" style="max-width: 200px;">{{ message.file_name }}</span>
-                          </div>
                           <a href="{{ message.file.url }}" download="{{ message.file_name }}" class="btn btn-sm btn-outline-primary download-btn">
                             <i class="fas fa-download me-1"></i>Download
                           </a>
+                        </div>
+                      {% elif message.is_video %}
+                        <div class="file-view-container">
+                          <video controls class="file-preview" style="max-height: 200px;">
+                            <source src="{{ message.file.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                        <div class="mt-2">
+                          <a href="{{ message.file.url }}" download="{{ message.file_name }}" class="btn btn-sm btn-outline-primary download-btn">
+                            <i class="fas fa-download me-1"></i>Download
+                          </a>
+                        </div>
+                      {% else %}
+                        <div class="document-preview">
+                          <div class="d-flex align-items-center">
+                            <i class="fas fa-file-pdf document-icon me-3"></i>
+                            <div>
+                              <div class="fw-bold">{{ message.file_name }}</div>
+                              <small class="text-muted">{{ message.file.size|filesizeformat }}</small>
+                            </div>
+                          </div>
+                          <div class="mt-2 text-end">
+                            <a href="{{ message.file.url }}" class="btn btn-sm btn-outline-primary me-2" target="_blank">
+                              <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <a href="{{ message.file.url }}" download="{{ message.file_name }}" class="btn btn-sm btn-outline-primary download-btn">
+                              <i class="fas fa-download me-1"></i>Download
+                            </a>
+                          </div>
                         </div>
                       {% endif %}
                     {% else %}
@@ -203,7 +232,7 @@
                   </button>
                 </div>
                 <div id="filePreviewContent" class="mt-2 d-none">
-                  <img id="imagePreview" src="#" class="img-thumbnail" style="max-height: 150px; display: none;">
+                  <img id="imagePreview" src="#" class="img-thumbnail file-preview" style="max-height: 150px; display: none;">
                 </div>
               </div>
               <div class="input-group mt-2">
@@ -352,6 +381,29 @@ document.addEventListener("DOMContentLoaded", function() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  function getFileIcon(fileName) {
+    const extension = fileName.split('.').pop().toLowerCase();
+    const fileIcons = {
+      pdf: 'file-pdf',
+      doc: 'file-word',
+      docx: 'file-word',
+      xls: 'file-excel',
+      xlsx: 'file-excel',
+      ppt: 'file-powerpoint',
+      pptx: 'file-powerpoint',
+      txt: 'file-alt',
+      mp3: 'file-audio',
+      mp4: 'file-video',
+      mov: 'file-video',
+      avi: 'file-video',
+      jpg: 'file-image',
+      jpeg: 'file-image',
+      png: 'file-image',
+      gif: 'file-image'
+    };
+    return fileIcons[extension] || 'file';
+  }
+
   function createMessageElement(data) {
     const isMe = data.sender_id === currentUserId;
     const date = new Date(data.timestamp);
@@ -366,40 +418,45 @@ document.addEventListener("DOMContentLoaded", function() {
     messageContent.className = `d-inline-block p-3 ${isMe ? 'user-message' : 'other-message'}`;
     messageContent.style.maxWidth = '80%';
     
-    const contentBlock = document.createElement('p');
+    const contentBlock = document.createElement('div');
     contentBlock.className = 'mb-1';
 
     if (data.file_url && data.file_name) {
       // Check if file is an image
       if (data.file_name.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
         const imgContainer = document.createElement('div');
-        imgContainer.className = 'mt-2';
+        imgContainer.className = 'file-view-container';
         
         const img = document.createElement('img');
         img.src = data.file_url;
-        img.className = 'img-thumbnail';
+        img.className = 'img-thumbnail file-preview';
         img.style.maxHeight = '200px';
-        img.style.maxWidth = '100%';
+        img.style.width = 'auto';
         imgContainer.appendChild(img);
+        
+        const downloadBtnContainer = document.createElement('div');
+        downloadBtnContainer.className = 'mt-2';
         
         const downloadBtn = document.createElement('a');
         downloadBtn.href = data.file_url;
         downloadBtn.setAttribute('download', data.file_name);
-        downloadBtn.className = 'btn btn-sm btn-outline-primary download-btn mt-2';
+        downloadBtn.className = 'btn btn-sm btn-outline-primary download-btn';
         downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i>Download';
-        imgContainer.appendChild(downloadBtn);
+        downloadBtnContainer.appendChild(downloadBtn);
         
         contentBlock.appendChild(imgContainer);
+        contentBlock.appendChild(downloadBtnContainer);
       } 
       // Check if file is a video
       else if (data.file_name.toLowerCase().match(/\.(mp4|mov|avi)$/)) {
         const videoContainer = document.createElement('div');
-        videoContainer.className = 'mt-2';
+        videoContainer.className = 'file-view-container';
         
         const video = document.createElement('video');
         video.controls = true;
+        video.className = 'file-preview';
         video.style.maxHeight = '200px';
-        video.style.maxWidth = '100%';
+        video.style.width = 'auto';
         
         const source = document.createElement('source');
         source.src = data.file_url;
@@ -409,32 +466,53 @@ document.addEventListener("DOMContentLoaded", function() {
         video.appendChild(document.createTextNode('Your browser does not support the video tag.'));
         videoContainer.appendChild(video);
         
+        const downloadBtnContainer = document.createElement('div');
+        downloadBtnContainer.className = 'mt-2';
+        
         const downloadBtn = document.createElement('a');
         downloadBtn.href = data.file_url;
         downloadBtn.setAttribute('download', data.file_name);
-        downloadBtn.className = 'btn btn-sm btn-outline-primary download-btn mt-2';
+        downloadBtn.className = 'btn btn-sm btn-outline-primary download-btn';
         downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i>Download';
-        videoContainer.appendChild(downloadBtn);
+        downloadBtnContainer.appendChild(downloadBtn);
         
         contentBlock.appendChild(videoContainer);
+        contentBlock.appendChild(downloadBtnContainer);
       } 
-      // Other file types
+      // Other file types (documents)
       else {
         const fileContainer = document.createElement('div');
-        fileContainer.className = 'd-flex align-items-center justify-content-between';
+        fileContainer.className = 'document-preview';
+        
+        const fileIcon = document.createElement('i');
+        fileIcon.className = `fas fa-${getFileIcon(data.file_name)} document-icon me-3`;
         
         const fileInfo = document.createElement('div');
         fileInfo.className = 'd-flex align-items-center';
-        
-        const fileIcon = document.createElement('i');
-        fileIcon.className = 'fas fa-file me-2';
         fileInfo.appendChild(fileIcon);
         
-        const fileNameSpan = document.createElement('span');
-        fileNameSpan.className = 'text-truncate';
-        fileNameSpan.style.maxWidth = '200px';
-        fileNameSpan.textContent = data.file_name;
-        fileInfo.appendChild(fileNameSpan);
+        const fileDetails = document.createElement('div');
+        const fileNameText = document.createElement('div');
+        fileNameText.className = 'fw-bold';
+        fileNameText.textContent = data.file_name;
+        
+        const fileSize = document.createElement('small');
+        fileSize.className = 'text-muted';
+        fileSize.textContent = data.file_size ? data.file_size : '';
+        
+        fileDetails.appendChild(fileNameText);
+        fileDetails.appendChild(fileSize);
+        fileInfo.appendChild(fileDetails);
+        fileContainer.appendChild(fileInfo);
+        
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'mt-2 text-end';
+        
+        const viewBtn = document.createElement('a');
+        viewBtn.href = data.file_url;
+        viewBtn.className = 'btn btn-sm btn-outline-primary me-2';
+        viewBtn.target = '_blank';
+        viewBtn.innerHTML = '<i class="fas fa-eye me-1"></i>View';
         
         const downloadBtn = document.createElement('a');
         downloadBtn.href = data.file_url;
@@ -442,12 +520,16 @@ document.addEventListener("DOMContentLoaded", function() {
         downloadBtn.className = 'btn btn-sm btn-outline-primary download-btn';
         downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i>Download';
         
-        fileContainer.appendChild(fileInfo);
-        fileContainer.appendChild(downloadBtn);
+        buttonContainer.appendChild(viewBtn);
+        buttonContainer.appendChild(downloadBtn);
+        fileContainer.appendChild(buttonContainer);
+        
         contentBlock.appendChild(fileContainer);
       }
     } else {
-      contentBlock.textContent = data.content;
+      const textContent = document.createElement('p');
+      textContent.textContent = data.content;
+      contentBlock.appendChild(textContent);
     }
 
     const messageTime = document.createElement('div');
@@ -536,21 +618,22 @@ document.addEventListener("DOMContentLoaded", function() {
               id: msg.id,
               content: msg.content,
               timestamp: msg.timestamp,
-              sender_id: msg.is_me ? currentUserId : otherUserId,
+              sender_id: msg.sender_id,
               is_read: msg.is_read,
-              file_url: msg.file_url || null,
-              file_name: msg.file_name || null
+              file_url: msg.file_url,
+              file_name: msg.file_name,
+              file_size: msg.file_size
             });
             messageContainer.appendChild(element);
             lastMessageId = Math.max(lastMessageId, msg.id);
             shouldScroll = true;
-            if (!msg.is_me && !msg.is_read && isWindowFocused) {
+            if (msg.sender_id !== currentUserId && !msg.is_read && isWindowFocused) {
               messagesToMarkRead.push(msg.id);
             }
-            if (!msg.is_me) {
+            if (msg.sender_id !== currentUserId) {
               newMessagesReceived = true;
             }
-          } else if (msg.is_me && msg.is_read) {
+          } else if (msg.sender_id === currentUserId && msg.is_read) {
             updateReadStatus(msg.id);
           }
         }
@@ -577,7 +660,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const data = await response.json();
       if (data.messages?.length) {
         for (const msg of data.messages) {
-          if (msg.is_me && msg.is_read) {
+          if (msg.sender_id === currentUserId && msg.is_read) {
             updateReadStatus(msg.id);
           }
         }
@@ -596,7 +679,10 @@ document.addEventListener("DOMContentLoaded", function() {
       const response = await fetch(this.action, {
         method: "POST",
         body: formData,
-        headers: { "X-Requested-With": "XMLHttpRequest" },
+        headers: { 
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
       });
       const data = await response.json();
 
@@ -608,7 +694,8 @@ document.addEventListener("DOMContentLoaded", function() {
           sender_id: currentUserId,
           is_read: false,
           file_url: data.file_url || null,
-          file_name: data.file_name || null
+          file_name: data.file_name || null,
+          file_size: data.file_size || null
         });
         messageContainer.appendChild(element);
         messageInput.value = '';
