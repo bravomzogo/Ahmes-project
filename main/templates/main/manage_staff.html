@@ -33,7 +33,7 @@
               <tbody>
                 {% for staff in staff_members %}
                 <tr>
-                  <td>{{ staff.first_name }} {{ staff.last_name }}</td>
+                  <td>{{ staff.first_name }} {{ staff.middle_name }} {{staff.last_name}}</td>
                   <td>{{ staff.position }}</td>
                   <td>{{ staff.campus.name }}</td>
                   <td>{{ staff.qualification }}</td>

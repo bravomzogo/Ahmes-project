@@ -1,5 +1,6 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,78 +9,92 @@
     
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Edit Student</h1>
+        <h1 class="h2"><i class="fas fa-user-graduate me-2"></i>Edit Student</h1>
       </div>
 
-      <div class="card">
-        <div class="card-body">
-          <form method="post" enctype="multipart/form-data">
+      <div class="card shadow rounded-4">
+        <div class="card-body p-4">
+          <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             {% csrf_token %}
-            <div class="row">
+
+            <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-id-card me-2"></i>Student Information</h5>
+            <div class="row g-4">
               <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">First Name</label>
-                  {{ form.first_name }}
+                <div class="form-floating">
+                  {{ form.first_name|add_class:"form-control" }}
+                  <label>First Name</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Last Name</label>
-                  {{ form.last_name }}
+                <div class="form-floating mt-3">
+                  {{ form.middle_name|add_class:"form-control" }}
+                  <label>Middle Name</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Gender</label>
-                  {{ form.gender }}
+                <div class="form-floating mt-3">
+                  {{ form.last_name|add_class:"form-control" }}
+                  <label>Last Name</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Date of Birth</label>
-                  {{ form.date_of_birth }}
+                <div class="form-floating mt-3">
+                  {{ form.gender|add_class:"form-select" }}
+                  <label>Gender</label>
+                </div>
+                <div class="form-floating mt-3">
+                  {{ form.date_of_birth|add_class:"form-control" }}
+                  <label>Date of Birth</label>
                 </div>
               </div>
+
               <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Admission Number</label>
-                  {{ form.admission_number }}
+                <div class="form-floating">
+                  {{ form.admission_number|add_class:"form-control" }}
+                  <label>Admission Number</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Campus</label>
-                  {{ form.campus }}
+                <div class="form-floating mt-3">
+                  {{ form.campus|add_class:"form-select" }}
+                  <label>Campus</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Level</label>
-                  {{ form.level }}
+                <div class="form-floating mt-3">
+                  {{ form.level|add_class:"form-select" }}
+                  <label>Level</label>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Admission Date</label>
-                  {{ form.admission_date }}
-                </div>
-              </div>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Parent Name</label>
-                  {{ form.parent_name }}
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Parent Phone</label>
-                  {{ form.parent_phone }}
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Parent Email</label>
-                  {{ form.parent_email }}
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Address</label>
-                  {{ form.address }}
+                <div class="form-floating mt-3">
+                  {{ form.admission_date|add_class:"form-control" }}
+                  <label>Admission Date</label>
                 </div>
               </div>
             </div>
-            
-            <div class="text-end">
-              <button type="submit" class="btn btn-primary">Update Student</button>
-              <a href="{% url 'manage_students' %}" class="btn btn-secondary">Cancel</a>
+
+            <hr class="my-4">
+
+            <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-user-friends me-2"></i>Parent/Guardian Information</h5>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  {{ form.parent_name|add_class:"form-control" }}
+                  <label>Parent Name</label>
+                </div>
+                <div class="form-floating mt-3">
+                  {{ form.parent_phone|add_class:"form-control" }}
+                  <label>Parent Phone</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  {{ form.parent_email|add_class:"form-control" }}
+                  <label>Parent Email</label>
+                </div>
+                <div class="form-floating mt-3">
+                  {{ form.address|add_class:"form-control" }}
+                  <label>Address</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end mt-4">
+              <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4">
+                <i class="fas fa-save me-2"></i>Update Student
+              </button>
+              <a href="{% url 'manage_students' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4 ms-2">
+                <i class="fas fa-times me-2"></i>Cancel
+              </a>
             </div>
           </form>
         </div>

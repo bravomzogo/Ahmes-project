@@ -68,6 +68,7 @@ class Student(models.Model):
         blank=True
     )
     first_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
@@ -113,6 +114,7 @@ class StaffMember(models.Model):
         blank=True
     )
     first_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100)
     position = models.CharField(max_length=50, choices=POSITION_CHOICES)
     qualification = models.CharField(max_length=200)

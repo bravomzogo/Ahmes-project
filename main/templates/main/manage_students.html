@@ -34,7 +34,7 @@
                 {% for student in students %}
                 <tr>
                   <td>{{ student.admission_number }}</td>
-                  <td>{{ student.first_name }} {{ student.last_name }}</td>
+                  <td>{{ student.first_name }} {{ student.middle_name }} {{student.last_name}}</td>
                   <td>{{ student.campus.name }}</td>
                   <td>{{ student.level.name }}</td>
                   <td>{{ student.created_at|date:"d M Y" }}</td>
