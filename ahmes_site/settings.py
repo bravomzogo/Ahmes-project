@@ -193,3 +193,9 @@ if DEBUG:
     print(f"API Key: {CLOUDINARY_STORAGE['API_KEY'][:4]}...")
     print(f"Media Storage: {DEFAULT_FILE_STORAGE}")
     print(f"Media URL: {MEDIA_URL}\n")
+
+
+
+# settings.py
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB

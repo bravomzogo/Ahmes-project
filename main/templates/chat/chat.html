@@ -1,42 +1,154 @@
 {% extends 'main/base.html' %}
 {% block title %}Chat with {{ other_user.username }} | AHMES Secondary School{% endblock %}
 {% load static %}
+{% load chat_filters %}
 {% block content %}
+<style>
+  .chat-container {
+    background-image: url("{% static 'images/Ahmes.PNG' %}");
+    background-size: cover;
+    background-attachment: fixed;
+    background-blend-mode: overlay;
+    background-color: rgba(245, 245, 245, 0.9);
+  }
+  .user-message {
+    background-color: #6f42c1;
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+  }
+  .other-message {
+    background-color: white;
+    border-radius: 18px 18px 18px 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  .file-preview-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border: 1px solid #e9ecef;
+  }
+  .message-time {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+  .online-dot {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+</style>
+
 <section class="section">
   <div class="container">
-    <h2 class="section-title">Chat with {{ other_user.username }}</h2>
-    <p class="section-subtitle">Send and receive messages in real-time.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="section-title mb-1">Chat with {{ other_user.username }}</h2>
+        <p class="section-subtitle text-muted mb-0">Send and receive messages in real-time</p>
+      </div>
+      <a href="{% url 'inbox' %}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Inbox
+      </a>
+    </div>
     
     <div class="row">
       <div class="col-12">
-        <div class="card" data-aos="fade-up">
-          <div class="card-body" id="messageContainer" style="max-height: 500px; overflow-y: auto;">
-            {% for message in conversation.messages.all %}
-              <div class="mb-3 {% if message.sender == request.user %}text-end{% else %}text-start{% endif %}" id="message-{{ message.id }}" data-sender-id="{{ message.sender.id }}">
-                <div class="d-inline-block p-3 rounded" style="background: {% if message.sender == request.user %}#e6f3ff{% else %}#f8f9fa{% endif %}; max-width: 70%;">
-                  <p class="mb-1">{{ message.content }}</p>
-                  <small class="text-muted">
-                    {{ message.timestamp|time:"H:i" }}  <!-- Changed to time only format -->
-                    {% if message.sender == request.user %}
-                      <span class="read-status" data-message-id="{{ message.id }}">
-                        {% if message.is_read %}
-                          <i class="fas fa-check-double text-primary" title="Read"></i>
-                        {% else %}
-                          <i class="fas fa-check text-muted" title="Sent"></i>
-                        {% endif %}
-                      </span>
+        <div class="card border-0 shadow-sm" data-aos="fade-up">
+          <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-0">{{ other_user.get_full_name|default:other_user.username }}</h6>
+              <small class="text-muted">
+                {% if other_user.is_online %}
+                  <span class="text-success">
+                    <span class="online-dot bg-success"></span>Online
+                  </span>
+                {% else %}
+                  <span class="text-muted">Last seen {{ other_user.last_login|timesince }} ago</span>
+                {% endif %}
+              </small>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>View Profile</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-ban me-2"></i>Block User</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="card-body p-0">
+            <div id="messageContainer" class="p-4 chat-container" style="max-height: 500px; overflow-y: auto;">
+              {% for message in conversation.messages.all %}
+                <div class="mb-3 {% if message.sender == request.user %}text-end{% else %}text-start{% endif %}" id="message-{{ message.id }}" data-sender-id="{{ message.sender.id }}">
+                  <div class="d-inline-block p-3 {% if message.sender == request.user %}user-message{% else %}other-message{% endif %}" style="max-width: 80%;">
+                    {% if message.file %}
+                      <p class="mb-1">
+                        <a href="{{ message.file.url }}" download class="{% if message.sender == request.user %}text-white{% else %}text-primary{% endif %} d-flex align-items-center">
+                          <i class="fas fa-paperclip me-2"></i>
+                          <span class="text-truncate" style="max-width: 200px;">{{ message.file.name|basename }}</span>
+                        </a>
+                      </p>
+                      {% if message.file.name|lower|slice:'-4:' == '.jpg' or message.file.name|lower|slice:'-5:' == '.jpeg' or message.file.name|lower|slice:'-4:' == '.png' %}
+                        <div class="mt-2">
+                          <img src="{{ message.file.url }}" class="img-thumbnail" style="max-height: 200px; max-width: 100%;">
+                        </div>
+                      {% endif %}
+                    {% else %}
+                      <p class="mb-1">{{ message.content }}</p>
                     {% endif %}
-                  </small>
+                    <div class="message-time {% if message.sender == request.user %}text-blue-50{% else %}text-muted{% endif %}">
+                      {{ message.timestamp|time:"H:i" }}
+                      {% if message.sender == request.user %}
+                        <span class="read-status" data-message-id="{{ message.id }}">
+                          {% if message.is_read %}
+                            <i class="fas fa-check-double ms-2" title="Read" style='color: blue; !important'></i>
+                          {% else %}
+                            <i class="fas fa-check ms-2" title="Sent"></i>
+                          {% endif %}
+                        </span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="text-center py-5">
+                  <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                  <p class="text-muted">No messages yet. Start the conversation!</p>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          
+          <div class="card-footer bg-white border-top">
+            <form method="post" action="{% url 'chat' conversation.id %}" id="messageForm" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div id="filePreview" class="file-preview-container d-none">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <i class="fas fa-paperclip me-2 text-muted"></i>
+                    <span id="fileName" class="text-truncate" style="max-width: 200px;"></span>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="clearFile()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div id="filePreviewContent" class="mt-2 d-none">
+                  <img id="imagePreview" src="#" class="img-thumbnail" style="max-height: 150px; display: none;">
                 </div>
               </div>
-            {% endfor %}
-          </div>
-          <div class="card-footer">
-            <form method="post" action="{% url 'chat' conversation.id %}" id="messageForm">
-              {% csrf_token %}
-              <div class="input-group">
-                <input type="text" name="content" class="form-control" placeholder="Type your message..." required id="messageInput">
-                <button type="submit" class="btn btn-primary">Send</button>
+              <div class="input-group mt-2">
+                <button type="button" class="btn btn-light border" onclick="document.getElementById('fileInput').click()">
+                  <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="file" name="file" id="fileInput" class="d-none" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4">
+                <input type="text" name="content" class="form-control border-start-0" placeholder="Type your message..." id="messageInput" autocomplete="off">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
               </div>
             </form>
           </div>
@@ -48,11 +160,10 @@
 {% endblock %}
 
 {% block extra_js %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- Audio elements for sound effects (hidden) -->
 <audio id="sendSound" preload="auto">
-  <source src="{% static 'audio/send.mp3' %} " type="audio/mpeg">
+  <source src="{% static 'audio/send.mp3' %}" type="audio/mpeg">
 </audio>
 <audio id="receiveSound" preload="auto">
   <source src="{% static 'audio/receive.mp3' %}" type="audio/mpeg">
@@ -60,33 +171,72 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+  // DOM Elements
   const messageForm = document.getElementById("messageForm");
   const messageInput = document.getElementById("messageInput");
+  const fileInput = document.getElementById("fileInput");
   const messageContainer = document.getElementById("messageContainer");
+  const filePreview = document.getElementById("filePreview");
+  const fileName = document.getElementById("fileName");
+  const filePreviewContent = document.getElementById("filePreviewContent");
+  const imagePreview = document.getElementById("imagePreview");
+  
+  // Variables
   let lastMessageId = {{ conversation.messages.last.id|default:0 }};
   let isWindowFocused = true;
   const currentUserId = {{ request.user.id }};
   const otherUserId = {{ other_user.id }};
-  
-  // Sound elements
   const sendSound = document.getElementById('sendSound');
   const receiveSound = document.getElementById('receiveSound');
   
-  // Volume settings (adjust as needed)
+  // Audio settings
   sendSound.volume = 0.3;
   receiveSound.volume = 0.3;
-  
+
+  // Window focus events
   window.addEventListener('focus', () => { isWindowFocused = true; });
   window.addEventListener('blur', () => { isWindowFocused = false; });
 
+  // File preview functions
+  function showFilePreview(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      fileName.textContent = file.name;
+      filePreview.classList.remove('d-none');
+      
+      // Check if file is an image
+      if (file.type.match('image.*')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = 'block';
+          filePreviewContent.classList.remove('d-none');
+        }
+        reader.readAsDataURL(file);
+      } else {
+        imagePreview.style.display = 'none';
+        filePreviewContent.classList.add('d-none');
+      }
+      
+      // Scroll to show the preview
+      filePreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function clearFile() {
+    fileInput.value = '';
+    filePreview.classList.add('d-none');
+    imagePreview.style.display = 'none';
+    filePreviewContent.classList.add('d-none');
+  }
+
+  // Message display functions
   function scrollToBottom() {
     messageContainer.scrollTop = messageContainer.scrollHeight;
   }
 
   function formatTime(date) {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   function createMessageElement(data) {
@@ -100,43 +250,82 @@ document.addEventListener("DOMContentLoaded", function() {
     messageDiv.dataset.senderId = data.sender_id;
     
     const messageContent = document.createElement('div');
-    messageContent.className = 'd-inline-block p-3 rounded';
-    messageContent.style.background = isMe ? '#e6f3ff' : '#f8f9fa';
-    messageContent.style.maxWidth = '70%';
+    messageContent.className = `d-inline-block p-3 ${isMe ? 'user-message' : 'other-message'}`;
+    messageContent.style.maxWidth = '80%';
     
-    const messageText = document.createElement('p');
-    messageText.className = 'mb-1';
-    messageText.textContent = data.content;
-    
-    const messageTime = document.createElement('small');
-    messageTime.className = 'text-muted';
+    const contentBlock = document.createElement('p');
+    contentBlock.className = 'mb-1';
+
+    if (data.file_url && data.file_name) {
+      const fileLink = document.createElement('a');
+      fileLink.href = data.file_url;
+      fileLink.download = '';
+      fileLink.className = isMe ? 'text-white' : 'text-primary';
+      fileLink.style.textDecoration = 'none';
+      
+      const paperclip = document.createElement('i');
+      paperclip.className = 'fas fa-paperclip me-2';
+      fileLink.appendChild(paperclip);
+      
+      const fileNameSpan = document.createElement('span');
+      fileNameSpan.className = 'text-truncate';
+      fileNameSpan.style.maxWidth = '200px';
+      fileNameSpan.style.display = 'inline-block';
+      fileNameSpan.textContent = data.file_name;
+      fileLink.appendChild(fileNameSpan);
+      
+      contentBlock.appendChild(fileLink);
+
+      // Add image preview if file is an image
+      if (data.file_name.toLowerCase().endsWith('.jpg') || 
+          data.file_name.toLowerCase().endsWith('.jpeg') || 
+          data.file_name.toLowerCase().endsWith('.png')) {
+        const imgDiv = document.createElement('div');
+        imgDiv.className = 'mt-2';
+        
+        const img = document.createElement('img');
+        img.src = data.file_url;
+        img.className = 'img-thumbnail';
+        img.style.maxHeight = '200px';
+        img.style.maxWidth = '100%';
+        
+        imgDiv.appendChild(img);
+        contentBlock.appendChild(imgDiv);
+      }
+    } else {
+      contentBlock.textContent = data.content;
+    }
+
+    const messageTime = document.createElement('div');
+    messageTime.className = `message-time ${isMe ? 'text-white-50' : 'text-muted'}`;
     messageTime.textContent = formattedTime;
-    
+
     if (isMe) {
       const readStatus = document.createElement('span');
       readStatus.className = 'read-status';
       readStatus.dataset.messageId = data.id;
-      
+
       const checkIcon = document.createElement('i');
-      checkIcon.className = data.is_read ? 'fas fa-check-double text-primary' : 'fas fa-check text-muted';
+      checkIcon.className = data.is_read ? 'fas fa-check-double ms-2' : 'fas fa-check ms-2';
       checkIcon.title = data.is_read ? 'Read' : 'Sent';
-      
+
       readStatus.appendChild(document.createTextNode(' '));
       readStatus.appendChild(checkIcon);
       messageTime.appendChild(readStatus);
     }
-    
-    messageContent.appendChild(messageText);
+
+    messageContent.appendChild(contentBlock);
     messageContent.appendChild(messageTime);
     messageDiv.appendChild(messageContent);
-    
+
     return messageDiv;
   }
 
+  // Message status functions
   async function markMessagesAsRead(messageIds) {
     if (!messageIds.length) return;
     try {
-      const response = await fetch('{% url "mark_messages_read" %}', {
+      await fetch('{% url "mark_messages_read" %}', {
         method: "POST",
         headers: {
           "X-CSRFToken": "{{ csrf_token }}",
@@ -144,9 +333,6 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         body: JSON.stringify({ message_ids: messageIds })
       });
-      if (!response.ok) {
-        throw new Error('Failed to mark messages as read');
-      }
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
@@ -156,13 +342,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const messageElement = document.getElementById(`message-${messageId}`);
     if (messageElement) {
       const checkIcon = messageElement.querySelector('.read-status i');
-      if (checkIcon && checkIcon.className !== 'fas fa-check-double text-primary') {
-        checkIcon.className = 'fas fa-check-double text-primary';
+      if (checkIcon && !checkIcon.classList.contains('fa-check-double')) {
+        checkIcon.className = 'fas fa-check-double ms-2';
         checkIcon.title = 'Read';
       }
     }
   }
 
+  // Message fetching functions
   async function checkNewMessagesAndReadStatus() {
     try {
       const response = await fetch(`/conversations/{{ conversation.id }}/messages/?last_id=${lastMessageId}`);
@@ -174,50 +361,40 @@ document.addEventListener("DOMContentLoaded", function() {
         let newMessagesReceived = false;
         
         for (const msg of data.messages) {
-          const existingElement = document.getElementById(`message-${msg.id}`);
-          
-          if (!existingElement) {
-            // New message - add to chat
+          if (!document.getElementById(`message-${msg.id}`)) {
             const element = createMessageElement({
               id: msg.id,
               content: msg.content,
               timestamp: msg.timestamp,
               sender_id: msg.is_me ? currentUserId : otherUserId,
-              is_read: msg.is_read
+              is_read: msg.is_read,
+              file_url: msg.file_url || null,
+              file_name: msg.file_name || null
             });
             messageContainer.appendChild(element);
             lastMessageId = Math.max(lastMessageId, msg.id);
             shouldScroll = true;
-            
-            // Play sound for new received messages (not sent by current user)
-            if (!msg.is_me) {
-              newMessagesReceived = true;
-            }
-            
-            // Collect messages to mark as read
             if (!msg.is_me && !msg.is_read && isWindowFocused) {
               messagesToMarkRead.push(msg.id);
             }
+            if (!msg.is_me) {
+              newMessagesReceived = true;
+            }
           } else if (msg.is_me && msg.is_read) {
-            // Update read status for our messages
             updateReadStatus(msg.id);
           }
         }
-        
-        // Play receive sound if new messages were received
+
         if (newMessagesReceived && isWindowFocused) {
-          receiveSound.currentTime = 0; // Rewind to start
+          receiveSound.currentTime = 0;
           receiveSound.play().catch(e => console.log("Audio play failed:", e));
         }
-        
-        // Mark messages as read in bulk
+
         if (messagesToMarkRead.length) {
           await markMessagesAsRead(messagesToMarkRead);
         }
-        
-        if (shouldScroll) {
-          scrollToBottom();
-        }
+
+        if (shouldScroll) scrollToBottom();
       }
     } catch (error) {
       console.error('Error checking messages:', error);
@@ -226,10 +403,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   async function checkAllMessagesReadStatus() {
     try {
-      // Fetch all messages to check read status
       const response = await fetch(`/conversations/{{ conversation.id }}/messages/?last_id=0`);
       const data = await response.json();
-      
       if (data.messages?.length) {
         for (const msg of data.messages) {
           if (msg.is_me && msg.is_read) {
@@ -242,34 +417,35 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  // Form submission
   messageForm?.addEventListener("submit", async function(e) {
     e.preventDefault();
     const formData = new FormData(this);
-    
+
     try {
       const response = await fetch(this.action, {
         method: "POST",
         body: formData,
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-        },
+        headers: { "X-Requested-With": "XMLHttpRequest" },
       });
       const data = await response.json();
-      
+
       if (data.success) {
         const element = createMessageElement({
           id: data.message_id,
           content: data.content,
           timestamp: data.timestamp,
           sender_id: currentUserId,
-          is_read: false
+          is_read: false,
+          file_url: data.file_url || null,
+          file_name: data.file_name || null
         });
         messageContainer.appendChild(element);
         messageInput.value = '';
+        fileInput.value = '';
+        clearFile();
         scrollToBottom();
-        
-        // Play send sound
-        sendSound.currentTime = 0; // Rewind to start
+        sendSound.currentTime = 0;
         sendSound.play().catch(e => console.log("Audio play failed:", e));
       }
     } catch (error) {
@@ -277,7 +453,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  // Check messages and read status every 2 seconds when focused, 5 seconds when not
+  // Event listeners
+  fileInput.addEventListener('change', function() {
+    showFilePreview(this);
+  });
+
+  // Initialize
   setInterval(() => {
     checkNewMessagesAndReadStatus();
     checkAllMessagesReadStatus();
@@ -288,15 +469,4 @@ document.addEventListener("DOMContentLoaded", function() {
   scrollToBottom();
 });
 </script>
-
-<style>
-.read-status i {
-  margin-left: 5px;
-}
-
-/* Hide audio elements */
-audio {
-  display: none;
-}
-</style>
 {% endblock %}

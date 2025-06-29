@@ -123,44 +123,40 @@ def inbox(request):
 @login_required
 def chat(request, conversation_id):
     conversation = get_object_or_404(
-        Conversation.objects.prefetch_related('participants', 'messages__sender'), 
+        Conversation.objects.prefetch_related('participants', 'messages__sender'),
         id=conversation_id,
         participants=request.user
     )
-    
-    # Mark all unread messages as read when opening the chat
-    unread_messages = conversation.messages.filter(
-        is_read=False
-    ).exclude(
-        sender=request.user
-    )
-    
+
+    unread_messages = conversation.messages.filter(is_read=False).exclude(sender=request.user)
     if unread_messages.exists():
         unread_messages.update(is_read=True, read_at=timezone.now())
-    
+
     if request.method == 'POST':
-        form = MessageForm(request.POST)
+        form = MessageForm(request.POST, request.FILES)
         if form.is_valid():
             message = form.save(commit=False)
             message.conversation = conversation
             message.sender = request.user
             message.save()
-            
+
             conversation.updated_at = timezone.now()
             conversation.save(update_fields=['updated_at'])
-            
+
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
                     'message_id': message.id,
                     'content': message.content,
-                    'timestamp': message.timestamp.isoformat(),  # Use ISO format
+                    'timestamp': message.timestamp.isoformat(),
                     'sender_id': message.sender.id,
                     'is_read': message.is_read,
+                    'file_url': message.file.url if message.file else None,
+                    'file_name': message.file.name.split('/')[-1] if message.file else '',
                     'is_me': True
                 })
             return redirect('chat', conversation_id=conversation.id)
-    
+
     return render(request, 'chat/chat.html', {
         'conversation': conversation,
         'form': MessageForm(),

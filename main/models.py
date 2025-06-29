@@ -5,10 +5,12 @@ from django.utils import timezone
 from datetime import timedelta
 import secrets
 from cloudinary.models import CloudinaryField
+from django.core.validators import FileExtensionValidator
 
 class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
     is_staff_member = models.BooleanField(default=False)
+    last_activity = models.DateTimeField(null=True, blank=True)
     
     groups = models.ManyToManyField(
         Group,
@@ -30,13 +32,21 @@ class User(AbstractUser):
         related_query_name="user",
     )
 
+
+
     class Meta:
         swappable = 'AUTH_USER_MODEL'
         db_table = 'auth_user'
 
     def __str__(self):
         return self.username
-
+    
+    @property
+    def is_online(self):
+        if self.last_activity:
+            return (timezone.now() - self.last_activity) < timedelta(minutes=5)
+        return False
+ 
 class Campus(models.Model):
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=200)
@@ -250,7 +260,16 @@ class Conversation(models.Model):
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.TextField(blank=True)
+    file = models.FileField(
+        upload_to='chat_files/',
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=[
+            'jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 
+            'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'mp3', 'mp4'
+        ])]
+    )
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)

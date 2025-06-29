@@ -21,7 +21,7 @@
                 {# If multiple messages, indicate that multiple errors occurred #}
                 {% if messages|length > 1 %}
                   <strong>Multiple errors occurred:</strong>
-                {% else %}
+             
                   {% comment %} <strong>Error:</strong> {% endcomment %}
                 {% endif %}
                 {% for message in messages %}

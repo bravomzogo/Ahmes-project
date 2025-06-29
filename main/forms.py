@@ -185,10 +185,15 @@ class RegisterForm(UserCreationForm):
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
-        fields = ['content']
+        fields = ['content', 'file']
         widgets = {
             'content': forms.Textarea(attrs={
                 'rows': 3,
-                'placeholder': 'Type your message...'
+                'placeholder': 'Type your message...',
+                'class': 'form-control'
+            }),
+            'file': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': '.jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4'
             })
         }
