@@ -1,5 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+admin.site.site_header = "Ahmes Administration"
+admin.site.site_title = "Ahmes Admin Portal"
+admin.site.index_title = "Welcome to Ahmes Admin"
 from .models import (
     User,
     Campus,
