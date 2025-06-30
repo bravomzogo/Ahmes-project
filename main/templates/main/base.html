@@ -1065,20 +1065,22 @@
     {% block extra_css %}{% endblock %}
   </head>
   <body>
+ {% block loader %}
     <!-- Professional Loader -->
-<div class="loader-container">
-    <div class="loader-wrapper">
-        <div class="school-logo"></div>
-        <div class="loader"></div>
+    <div class="loader-container">
+        <div class="loader-wrapper">
+            <div class="school-logo"></div>
+            <div class="loader"></div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="pageLoadProgress"></div>
+        </div>
+        
+        <div class="loader-text">AHMES SECONDARY SCHOOL</div>
+        <div class="loader-subtext">Forward Ever, Backward Never.</div>
     </div>
-    
-    <div class="progress-container">
-        <div class="progress-bar" id="pageLoadProgress"></div>
-    </div>
-    
-    <div class="loader-text">AHMES SECONDARY SCHOOL</div>
-    <div class="loader-subtext">Forward Ever, Backward Never.</div>
-</div>
+    {% endblock %}
     <!-- Announcement Bar --><br />
   
 
