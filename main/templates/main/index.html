@@ -29,6 +29,28 @@
         ></button>
       </div>
       <div class="carousel-inner">
+        <!-- News Ticker -->
+        <div class="news-ticker-container">
+          <div class="news-ticker-label">
+            <span>Latest News:</span>
+          </div>
+          <div class="news-ticker">
+            <ul>
+              {% for news_item in latest_news %}
+              <li>
+                <a href="{% url 'news_detail' news_item.pk %}">
+                  {{ news_item.title }}
+                </a>
+              </li>
+              {% empty %}
+              <li><a href="#">2024 Form Six Results Released - 98% Division I</a></li>
+              <li><a href="#">Admissions Open for 2024/2025 Academic Year</a></li>
+              <li><a href="#">Sports Day Scheduled for March 15th</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        
         <div class="carousel-item active">
           <img
             src="{% static 'images/stud.jpg' %}"
@@ -122,34 +144,34 @@
     </section>
 
     <!-- News and Updates -->
-  <section class="section">
-    <div class="container">
-      <h2 class="text-center section-title" data-aos="fade-up">CURRENT NEWS AND UPDATES</h2>
-      <p class="text-center section-subtitle" data-aos="fade-up" data-aos-delay="200">
-        Stay informed with the latest happenings at AHMES
-      </p>
-      <div class="row">
-        {% for news_item in news %}
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:2 }}00">
-          <div class="card">
-            <img
-              src="{{ news_item.image.url }}"
-              class="card-img-top"
-              alt="{{ news_item.title }}"
-            />
-            <div class="card-body">
-              <h5 class="card-title">{{ news_item.title }}</h5>
-              <p class="card-text">
-                {{ news_item.content|truncatewords:8 }}
-              </p>
-              <a href="{% url 'news_detail' news_item.pk %}" class="btn btn-primary">Read More</a>
+    <section class="section">
+      <div class="container">
+        <h2 class="text-center section-title" data-aos="fade-up">CURRENT NEWS AND UPDATES</h2>
+        <p class="text-center section-subtitle" data-aos="fade-up" data-aos-delay="200">
+          Stay informed with the latest happenings at AHMES
+        </p>
+        <div class="row">
+          {% for news_item in news %}
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:2 }}00">
+            <div class="card">
+              <img
+                src="{{ news_item.image.url }}"
+                class="card-img-top"
+                alt="{{ news_item.title }}"
+              />
+              <div class="card-body">
+                <h5 class="card-title">{{ news_item.title }}</h5>
+                <p class="card-text">
+                  {{ news_item.content|truncatewords:8 }}
+                </p>
+                <a href="{% url 'news_detail' news_item.pk %}" class="btn btn-primary">Read More</a>
+              </div>
             </div>
           </div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </div>
-    </div>
-  </section>
+    </section>
 
     <!-- Mobile App Section -->
     <section class="app-section">
@@ -352,24 +374,24 @@
     </section>
 
     <!-- Comments Section -->
-<section class="section bg-light">
-  <div class="container">
-    <h2 class="text-center section-title" data-aos="fade-up">Share Your Thoughts</h2>
-    <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
-      (Usisite kututumia ujumbe wa aina yoyote, wito ushauri pamoja na
-      ukosoaji hapa.)
-    </p>
-    <div class="row justify-content-center">
-      <div class="col-md-8" data-aos="fade-up" data-aos-delay="300">
-        {% comment %} {% if messages %}
-          {% for message in messages %}
-          <div class="alert alert-success">
-            {{ message }}
-          </div>
-          {% endfor %}
-        {% endif %} {% endcomment %}
-        
-        <form method="post" novalidate>
+    <section class="section bg-light">
+      <div class="container">
+        <h2 class="text-center section-title" data-aos="fade-up">Share Your Thoughts</h2>
+        <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
+          (Usisite kututumia ujumbe wa aina yoyote, wito ushauri pamoja na
+          ukosoaji hapa.)
+        </p>
+        <div class="row justify-content-center">
+          <div class="col-md-8" data-aos="fade-up" data-aos-delay="300">
+            {% if messages %}
+              {% for message in messages %}
+              <div class="alert alert-success">
+                {{ message }}
+              </div>
+              {% endfor %}
+            {% endif %}
+            
+            <form method="post" novalidate>
               {% csrf_token %}
               <div class="form-floating mb-3">
                 {{ form.author_name|add_class:"form-control" }}
@@ -389,8 +411,160 @@
                 </button>
               </div>
             </form>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
+
+    <style>
+      /* News Ticker Styles */
+      .news-ticker-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(26, 82, 118, 0.9);
+        color: white;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .news-ticker-label {
+        background: var(--secondary-color);
+        padding: 8px 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin-right: 20px;
+        white-space: nowrap;
+        position: relative;
+      }
+
+      .news-ticker-label::after {
+        content: "";
+        position: absolute;
+        right: -10px;
+        top: 0;
+        width: 0;
+        height: 0;
+        border-top: 20px solid transparent;
+        border-bottom: 20px solid transparent;
+        border-left: 10px solid var(--secondary-color);
+      }
+
+      .news-ticker {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .news-ticker ul {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        animation: ticker 20s linear infinite;
+        white-space: nowrap;
+      }
+
+      .news-ticker li {
+        margin-right: 40px;
+        position: relative;
+      }
+
+      .news-ticker li:after {
+        content: "•";
+        position: absolute;
+        right: -25px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .news-ticker li:last-child:after {
+        display: none;
+      }
+
+      .news-ticker a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        display: inline-block;
+        padding: 2px 0;
+      }
+
+      .news-ticker a:hover {
+        color: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      @keyframes ticker {
+        0% {
+          transform: translateX(100%);
+        }
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      /* Adjust carousel item to accommodate ticker */
+      .carousel-item {
+        height: calc(80vh - 50px); /* Reduced by ticker height */
+        min-height: calc(585px - 50px);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 991.98px) {
+        .news-ticker-container {
+          flex-direction: column;
+          padding: 8px 0;
+        }
+      
+        .news-ticker-label {
+          margin-right: 0;
+          margin-bottom: 5px;
+          padding: 5px 15px;
+        }
+      
+        .news-ticker-label::after {
+          display: none;
+        }
+      
+        .news-ticker ul {
+          animation: ticker-mobile 20s linear infinite;
+        }
+      
+        .carousel-item {
+          height: calc(60vh - 70px);
+          min-height: calc(400px - 70px);
+        }
+      }
+
+      @media (max-width: 767.98px) {
+        .news-ticker li {
+          margin-right: 25px;
+        }
+        
+        .news-ticker li:after {
+          right: -15px;
+        }
+        
+        .carousel-item {
+          height: calc(50vh - 80px);
+          min-height: calc(350px - 80px);
+        }
+      }
+
+      @keyframes ticker-mobile {
+        0% {
+          transform: translateX(100%);
+        }
+        100% {
+          transform: translateX(-150%);
+        }
+      }
+    </style>
 {% endblock %}

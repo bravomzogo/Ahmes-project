@@ -179,7 +179,10 @@ def is_staff_member(user):
 # Make sure you have this form created
 
 def home(request):
-    # Get latest 3 published news items
+    # Get latest 5 published news items for the ticker
+    latest_news = News.objects.filter(is_published=True).order_by('-published_date')[:5]
+    
+    # Get latest 3 published news items for the news section
     news = News.objects.filter(is_published=True).order_by('-published_date')[:3]
     
     # Handle contact form submission
@@ -192,12 +195,12 @@ def home(request):
                 comment.author_email = request.user.email
             comment.save()
             messages.success(request, 'Thank you for your comment!')
-            # Redirect to prevent form resubmission
             return redirect('home')
     else:
         form = CommentForm()
     
     context = {
+        'latest_news': latest_news,
         'news': news,
         'form': form,
     }
