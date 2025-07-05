@@ -1,19 +1,76 @@
 {% load static %}
-<!-- Mobile Toggle Button -->
-<button id="mobileToggle" class="d-md-none btn btn-dark btn-sm px-2 py-1" type="button" style="position: fixed; top: 90px; left: 10px; z-index: 1000; width: 60px; border-radius: 0%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: all 0.3s ease;">
-  <i class="fas fa-arrow-right me-1"></i>
+<!-- Unique Stylish Mobile Toggle Button -->
+<button id="mobileToggle" class="d-md-none" type="button" style="
+  position: fixed;
+  top: 90px;
+  left: 10px;
+  z-index: 1000;
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2), 
+              inset 0 2px 2px rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+">
+  <i class="fas fa-arrow-right" style="
+    color: white;
+    font-size: 1.5rem;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  "></i>
 </button>
 
-<!-- Add this CSS to make the arrow animate on hover -->
+<!-- Enhanced CSS Animation Effects -->
 <style>
-  #mobileToggle:hover i {
-    transform: translateX(3px);
-    transition: transform 0.3s ease;
+  #mobileToggle {
+    /* Glass morphism effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    background-color: rgba(110, 72, 170, 0.85);
   }
-  #mobileToggle i {
-    transition: transform 0.3s ease;
+  
+  #mobileToggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25), 
+                inset 0 2px 2px rgba(255,255,255,0.3);
+  }
+  
+  #mobileToggle:hover i {
+    transform: translateX(5px) rotate(90deg);
+  }
+  
+  #mobileToggle:active {
+    transform: scale(0.98);
+  }
+  
+  /* Animation when sidebar opens/closes */
+  .offcanvas.show ~ #mobileToggle i {
+    transform: rotate(180deg);
   }
 </style>
+
+<!-- JavaScript for dynamic icon change -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const button = document.getElementById('mobileToggle');
+  const offcanvasEl = document.getElementById('sidebarMenu');
+  const offcanvas = new bootstrap.Offcanvas(offcanvasEl);
+  
+
+  
+  offcanvasEl.addEventListener('hide.bs.offcanvas', function() {
+    button.innerHTML = '<i class="fas fa-arrow-right" style="color: white; font-size: 1.5rem;"></i>';
+    button.style.background = 'linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%)';
+  });
+});
+</script>
 
 <!-- Desktop Sidebar -->
 <div class="col-md-3 col-lg-2 d-none d-md-block bg-dark sidebar">
