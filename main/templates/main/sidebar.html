@@ -1,8 +1,19 @@
 {% load static %}
-{% comment %} <!-- Mobile Toggle Button -->
-<button class="d-md-none btn btn-dark btn-sm px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" style="position: fixed; top: 80px; left: 10px; z-index: 1040; width: 60px;">
-  <i class="fas fa-bars me-1"></i>
-</button> {% endcomment %}
+<!-- Mobile Toggle Button -->
+<button id="mobileToggle" class="d-md-none btn btn-dark btn-sm px-2 py-1" type="button" style="position: fixed; top: 90px; left: 10px; z-index: 1040; width: 60px; border-radius: 0%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: all 0.3s ease;">
+  <i class="fas fa-arrow-right me-1"></i>
+</button>
+
+<!-- Add this CSS to make the arrow animate on hover -->
+<style>
+  #mobileToggle:hover i {
+    transform: translateX(3px);
+    transition: transform 0.3s ease;
+  }
+  #mobileToggle i {
+    transition: transform 0.3s ease;
+  }
+</style>
 
 <!-- Desktop Sidebar -->
 <div class="col-md-3 col-lg-2 d-none d-md-block bg-dark sidebar">
@@ -142,10 +153,14 @@
   .swipe-area {
     touch-action: none;
   }
+  #mobileToggle {
+    transition: all 0.1s ease;
+    touch-action: none;
+  }
 </style>
 
 <script>
-// Initialize Hammer.js for swipe gestures
+// Initialize Hammer.js for swipe gestures and button drag functionality
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize offcanvas
   const offcanvasEl = document.getElementById('sidebarMenu');
@@ -171,10 +186,107 @@ document.addEventListener('DOMContentLoaded', function() {
   // Close offcanvas when clicking outside
   document.addEventListener('click', function(e) {
     if (!offcanvasEl.contains(e.target) && !e.target.closest('.swipe-area') && 
-        !e.target.classList.contains('btn') && offcanvas._isShown) {
+        !e.target.closest('#mobileToggle') && offcanvas._isShown) {
       offcanvas.hide();
     }
   });
+
+  // Toggle offcanvas when button is clicked
+  const button = document.getElementById('mobileToggle');
+  button.addEventListener('click', function() {
+    offcanvas.toggle();
+  });
+
+  // Draggable button functionality
+  let isDragging = false;
+  let currentX;
+  let currentY;
+  let initialX;
+  let initialY;
+
+  const constrainPosition = (x, y) => {
+    const rect = button.getBoundingClientRect();
+    const maxX = window.innerWidth - rect.width;
+    const maxY = window.innerHeight - rect.height;
+    return {
+      x: Math.max(0, Math.min(x, maxX)),
+      y: Math.max(0, Math.min(y, maxY))
+    };
+  };
+
+  const handleStart = (e) => {
+    // Only start dragging if not a click
+    if (e.type === 'mousedown' && e.button !== 0) return;
+    
+    const touch = e.type === 'touchstart' ? e.touches[0] : e;
+    const clickX = touch.clientX;
+    const clickY = touch.clientY;
+    
+    // Check if this is a click (small movement) or drag
+    const handleMoveCheck = (moveEvent) => {
+      const moveTouch = moveEvent.type === 'touchmove' ? moveEvent.touches[0] : moveEvent;
+      const moveX = moveTouch.clientX;
+      const moveY = moveTouch.clientY;
+      
+      // If movement is more than 5px, consider it a drag
+      if (Math.abs(moveX - clickX) > 5 || Math.abs(moveY - clickY) > 5) {
+        isDragging = true;
+        initialX = moveTouch.clientX - currentX;
+        initialY = moveTouch.clientY - currentY;
+        document.removeEventListener('touchmove', handleMoveCheck);
+        document.removeEventListener('mousemove', handleMoveCheck);
+      }
+    };
+    
+    document.addEventListener('touchmove', handleMoveCheck);
+    document.addEventListener('mousemove', handleMoveCheck);
+    
+    // If no movement after 200ms, consider it a click
+    setTimeout(() => {
+      if (!isDragging) {
+        document.removeEventListener('touchmove', handleMoveCheck);
+        document.removeEventListener('mousemove', handleMoveCheck);
+      }
+    }, 200);
+  };
+
+  const handleMove = (e) => {
+    if (isDragging) {
+      e.preventDefault();
+      const touch = e.type === 'touchmove' ? e.touches[0] : e;
+      const newX = touch.clientX - initialX;
+      const newY = touch.clientY - initialY;
+      const constrained = constrainPosition(newX, newY);
+      currentX = constrained.x;
+      currentY = constrained.y;
+      button.style.left = currentX + 'px';
+      button.style.top = currentY + 'px';
+    }
+  };
+
+  const handleEnd = () => {
+    if (isDragging) {
+      isDragging = false;
+      // Snap to nearest edge
+      const rect = button.getBoundingClientRect();
+      const snapThreshold = window.innerWidth / 2;
+      const newX = currentX < snapThreshold ? 10 : window.innerWidth - rect.width - 10;
+      currentX = newX;
+      button.style.left = newX + 'px';
+    }
+  };
+
+  // Initialize position
+  currentX = parseInt(button.style.left) || 10;
+  currentY = parseInt(button.style.top) || 80;
+
+  // Add event listeners
+  button.addEventListener('touchstart', handleStart);
+  button.addEventListener('mousedown', handleStart);
+  document.addEventListener('touchmove', handleMove);
+  document.addEventListener('mousemove', handleMove);
+  document.addEventListener('touchend', handleEnd);
+  document.addEventListener('mouseup', handleEnd);
 });
 
 function closeOffcanvas() {
