@@ -95,6 +95,14 @@ def inbox(request):
         last_message_time=Max('messages__timestamp')
     ).order_by('-last_message_time')
 
+    # Calculate total unread messages across all conversations
+    total_unread = Message.objects.filter(
+        conversation__participants=request.user,
+        is_read=False
+    ).exclude(
+        sender=request.user
+    ).count()
+
     conversations_with_other = []
     for conversation in conversations:
         # Get the other participant (not the current user)
@@ -118,9 +126,9 @@ def inbox(request):
         })
     
     return render(request, 'chat/inbox.html', {
-        'conversations_with_other': conversations_with_other
+        'conversations_with_other': conversations_with_other,
+        # 'unread_messages_count': total_unread  # Add this to context
     })
-
 @login_required
 def chat(request, conversation_id):
     conversation = get_object_or_404(

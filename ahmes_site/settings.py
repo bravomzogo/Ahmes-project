@@ -60,7 +60,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'main.context_processors.admin_counts',
-                'django.template.context_processors.media',  # Added for media URL access
+                'django.template.context_processors.media',
+                'main.context_processors.unread_messages_count',  # Added for media URL access
             ],
             'builtins': [  # Added for Cloudinary template tags
                 'cloudinary.templatetags.cloudinary',

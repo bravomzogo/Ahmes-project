@@ -1,5 +1,11 @@
 {% load static %}
-<div class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+{% comment %} <!-- Mobile Toggle Button -->
+<button class="d-md-none btn btn-dark btn-sm px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" style="position: fixed; top: 80px; left: 10px; z-index: 1040; width: 60px;">
+  <i class="fas fa-bars me-1"></i>
+</button> {% endcomment %}
+
+<!-- Desktop Sidebar -->
+<div class="col-md-3 col-lg-2 d-none d-md-block bg-dark sidebar">
   <div class="position-sticky pt-3">
     <ul class="nav flex-column">
       <li class="nav-item">
@@ -41,6 +47,9 @@
       <li class="nav-item">
         <a class="nav-link text-white {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}" href="{% url 'inbox' %}">
           <i class="fas fa-envelope me-2"></i> Messages
+          {% if unread_messages_count > 0 %}
+            <span class="badge bg-danger ms-2">{{ unread_messages_count }}</span>
+          {% endif %}
         </a>
       </li>
     </ul>
@@ -56,3 +65,122 @@
     </div>
   </div>
 </div>
+
+<!-- Mobile Offcanvas Sidebar with Swipe Support -->
+<div class="offcanvas offcanvas-start d-md-none bg-dark" tabindex="-1" id="sidebarMenu" style="visibility: hidden;">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title text-white">Menu</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body p-0">
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link text-white {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}" onclick="closeOffcanvas()">
+          <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'students' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_students' %}" onclick="closeOffcanvas()">
+          <i class="fas fa-users me-2"></i> Students
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'staff' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_staff' %}" onclick="closeOffcanvas()">
+          <i class="fas fa-user-tie me-2"></i> Staff
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'news' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_news' %}" onclick="closeOffcanvas()">
+          <i class="fas fa-newspaper me-2"></i> News
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'gallery' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_gallery' %}" onclick="closeOffcanvas()">
+          <i class="fas fa-images me-2"></i> Gallery
+          {% if gallery_count > 0 %}
+          <span class="badge bg-secondary ms-2">{{ gallery_count }}</span>
+          {% endif %}
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'comments' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'manage_comments' %}" onclick="closeOffcanvas()">
+          <i class="fas fa-comments me-2"></i> Comments
+          {% if pending_comments > 0 %}
+          <span class="badge bg-warning ms-2">{{ pending_comments }}</span>
+          {% endif %}
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}" href="{% url 'inbox' %}" onclick="closeOffcanvas()">
+          <i class="fas fa-envelope me-2"></i> Messages
+          {% if unread_messages_count > 0 %}
+            <span class="badge bg-danger ms-2">{{ unread_messages_count }}</span>
+          {% endif %}
+        </a>
+      </li>
+    </ul>
+    
+    <div class="mt-4">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{% url 'logout' %}" onclick="closeOffcanvas()">
+            <i class="fas fa-sign-out-alt me-2"></i> Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Swipe Detection Area -->
+<div class="swipe-area d-md-none" style="position: fixed; left: 0; top: 0; bottom: 0; width: 30px; z-index: 1039;"></div>
+
+<style>
+  .offcanvas-start {
+    transition: transform 0.3s ease-in-out;
+  }
+  .swipe-area {
+    touch-action: none;
+  }
+</style>
+
+<script>
+// Initialize Hammer.js for swipe gestures
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize offcanvas
+  const offcanvasEl = document.getElementById('sidebarMenu');
+  const offcanvas = new bootstrap.Offcanvas(offcanvasEl);
+  
+  // Make offcanvas visible after initialization to prevent flash
+  setTimeout(() => {
+    offcanvasEl.style.visibility = 'visible';
+  }, 100);
+
+  // Set up swipe detection
+  const swipeArea = document.querySelector('.swipe-area');
+  const hammer = new Hammer(swipeArea);
+  
+  hammer.on('swiperight', function() {
+    offcanvas.show();
+  });
+  
+  hammer.on('swipeleft', function() {
+    offcanvas.hide();
+  });
+  
+  // Close offcanvas when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!offcanvasEl.contains(e.target) && !e.target.closest('.swipe-area') && 
+        !e.target.classList.contains('btn') && offcanvas._isShown) {
+      offcanvas.hide();
+    }
+  });
+});
+
+function closeOffcanvas() {
+  const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('sidebarMenu'));
+  if (offcanvas) {
+    offcanvas.hide();
+  }
+}
+</script>
