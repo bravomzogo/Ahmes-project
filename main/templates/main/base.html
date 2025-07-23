@@ -51,6 +51,12 @@
       rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <!-- Bootstrap CSS (in <head>) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap JS (before closing </body>) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
     <style>
       :root {
@@ -1145,7 +1151,7 @@
                 href="{% url 'about' %}"
               >
                 <span class="nav-icon"><i class="fas fa-info-circle"></i></span>
-                <span class="nav-text">About Us</span>
+                <span class="nav-text">About</span>
                 <span class="nav-underline"></span>
               </a>
             </li>
@@ -1155,7 +1161,7 @@
                 href="{% url 'staff' %}"
               >
                 <span class="nav-icon"><i class="fas fa-users me-1"></i></span>
-                <span class="nav-text">Our Staff</span>
+                <span class="nav-text">Staff</span>
                 <span class="nav-underline"></span>
               </a>
             </li>
@@ -1166,7 +1172,7 @@
                 href="{% url 'contact' %}"
               >
                 <span class="nav-icon"><i class="fas fa-envelope"></i></span>
-                <span class="nav-text">Contact Us</span>
+                <span class="nav-text">Contact</span>
                 <span class="nav-underline"></span>
               </a>
             </li>
@@ -1176,10 +1182,17 @@
                 href="{% url 'gallery' %}"
               >
                 <span class="nav-icon"><i class="fas fa-images"></i></span>
-                <span class="nav-text">Our Gallery</span>
+                <span class="nav-text">Gallery</span>
                 <span class="nav-underline"></span>
               </a>
             </li>
+            <li class="nav-item">
+    <a class="nav-link {% if 'ahmes-tv' in request.path %}active{% endif %}" href="{% url 'ahmes_tv' %}">
+        <span class="nav-icon"><i class="fab fa-youtube"></i></span>
+        <span class="nav-text">TV</span>
+        <span class="nav-underline"></span>
+    </a>
+</li>
             {% if user.is_authenticated %}
             <li class="nav-item">
               <a

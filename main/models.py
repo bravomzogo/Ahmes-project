@@ -304,3 +304,26 @@ class Message(models.Model):
         if self.file:
             return self.file.resource_type == 'video'
         return False
+    
+
+
+
+# Add this to your models.py
+class YouTubeVideo(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    video_id = models.CharField(max_length=20, unique=True)
+    published_at = models.DateTimeField()
+    thumbnail_url = models.URLField(max_length=500)
+    duration = models.CharField(max_length=20, blank=True)
+    is_featured = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-published_at']
+        verbose_name = 'YouTube Video'
+        verbose_name_plural = 'YouTube Videos'

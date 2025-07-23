@@ -639,4 +639,44 @@ def get_typing_status(request, conversation_id):
     })
     
 
+from django.shortcuts import render
+from django.db.models import Q
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from .models import YouTubeVideo
 
+def ahmes_tv(request):
+    page = request.GET.get('page', 1)
+    search_query = request.GET.get('search', '')
+    
+    # Base filter to ensure only AHMES-related videos
+    videos = YouTubeVideo.objects.filter(
+        Q(title__icontains='AHMES') | Q(description__icontains='AHMES')
+    )
+    
+    # Additional search filtering if a query is provided
+    if search_query:
+        videos = videos.filter(
+            Q(title__icontains=search_query) | 
+            Q(description__icontains=search_query)
+        )
+    
+    # Order by published date (newest first)
+    videos = videos.order_by('-published_at')
+    
+    # Pagination: 9 videos per page
+    paginator = Paginator(videos, 9)
+    try:
+        videos_page = paginator.page(page)
+    except PageNotAnInteger:
+        videos_page = paginator.page(1)
+    except EmptyPage:
+        videos_page = paginator.page(paginator.num_pages)
+    
+    context = {
+        'videos': videos_page,
+        'search_query': search_query,
+        'paginator': paginator,
+        'page_obj': videos_page,
+    }
+    
+    return render(request, 'main/ahmes_tv.html', context)

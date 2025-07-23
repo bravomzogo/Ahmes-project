@@ -4,6 +4,11 @@ from django.conf.urls.static import static
 from . import views
 from .views import CustomLoginView, register, verify_email, inbox, chat, logout_view, get_conversations,mark_messages_read, get_new_messages
 
+
+
+
+
+
 urlpatterns = [
     # Public pages
     path('', views.home, name='home'),
@@ -66,5 +71,6 @@ urlpatterns = [
     path('under-development/', views.under_development, name='under_development'),
     path('conversations/typing/', views.handle_typing, name='handle_typing'),
     path('conversations/<int:conversation_id>/typing-status/', views.get_typing_status, name='typing_status'),
+    path('ahmes-tv/', views.ahmes_tv, name='ahmes_tv'),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

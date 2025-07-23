@@ -208,3 +208,8 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+
+
+
+# settings.py
+YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY', 'AIzaSyDJG6KsRQtU_RSZfun_nqEJRaWgDO1XQ6g')
