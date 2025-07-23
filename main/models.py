@@ -127,7 +127,8 @@ class StaffMember(models.Model):
     middle_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100)
     position = models.CharField(max_length=50, choices=POSITION_CHOICES)
-    qualification = models.CharField(max_length=200)
+    office_number = models.CharField(max_length=20, blank=True)
+    office_location = models.CharField(max_length=200, blank=True)
     specialization = models.CharField(max_length=200)
     campus = models.ForeignKey(
         Campus,
@@ -137,7 +138,6 @@ class StaffMember(models.Model):
     phone = models.CharField(max_length=20)
     email = models.EmailField()
     joined_date = models.DateField()
-    bio = models.TextField(blank=True)
     image = CloudinaryField('staff', folder="school/staff",
                           transformation={'quality': 'auto:good'})
     created_at = models.DateTimeField(auto_now_add=True)

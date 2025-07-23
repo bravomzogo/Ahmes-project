@@ -1,9 +1,9 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 {% block loader %}{% endblock %} 
 {% block title %}Staff | AHMES{% endblock %}
 
-{% load widget_tweaks %}
 {% block content %}
 <section class="section">
   <div class="container">
@@ -18,24 +18,23 @@
           <ul class="nav nav-tabs flex-nowrap" id="staffTab" role="tablist" style="overflow-x: auto; white-space: nowrap;">
             <li class="nav-item flex-shrink-0" role="presentation">
               <button class="nav-link active d-flex align-items-center py-2 px-3" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers" type="button" role="tab">
-                <i class="fas fa-chalkboard-teacher me-2" style='color: black;'></i>
-                <span class="text-nowrap" style='color: black;'>Teachers</span>
-                {% comment %} <span class="badge bg-primary ms-2">{{ teacher_count }}</span> {% endcomment %}
+                <i class="fas fa-chalkboard-teacher me-2" style="color: black;"></i>
+                <span class="text-nowrap" style="color: black;">Teachers</span>
+                <span class="badge bg-primary ms-2">{{ teacher_count }}</span>
               </button>
             </li>
             <li class="nav-item flex-shrink-0" role="presentation">
               <button class="nav-link d-flex align-items-center py-2 px-3" id="administrators-tab" data-bs-toggle="tab" data-bs-target="#administrators" type="button" role="tab">
-                <i class="fas fa-user-tie me-2" style='color: black;'></i>
-                {% comment %} <span class="badge bg-primary ms-2" style='color: black;'>{{ admin_count }}</span> {% endcomment %}
-                <span class="text-nowrap" style='color: black;'>Administrators</span>
-               
+                <i class="fas fa-user-tie me-2" style="color: black;"></i>
+                <span class="text-nowrap" style="color: black;">Administrators</span>
+                <span class="badge bg-primary ms-2">{{ admin_count }}</span>
               </button>
             </li>
             <li class="nav-item flex-shrink-0" role="presentation">
               <button class="nav-link d-flex align-items-center py-2 px-3" id="support-tab" data-bs-toggle="tab" data-bs-target="#support" type="button" role="tab">
-                <i class="fas fa-hands-helping me-2" style='color: black;'></i>
-                <span class="text-nowrap" style='color: black;'>Support Staff</span>
-                {% comment %} <span class="badge bg-primary ms-2">{{ support_count }}</span> {% endcomment %}
+                <i class="fas fa-hands-helping me-2" style="color: black;"></i>
+                <span class="text-nowrap" style="color: black;">Support Staff</span>
+                <span class="badge bg-primary ms-2">{{ support_count }}</span>
               </button>
             </li>
           </ul>
@@ -56,11 +55,16 @@
                       <img src="{% static 'images/default-staff.jpg' %}" class="card-img-top staff-image" alt="Default staff image">
                     {% endif %}
                     <div class="card-body">
-                      <h5 class="card-title">{{ staff.first_name }} {{ staff.last_name }}</h5>
-                      <p class="text-muted">{{ staff.qualification }}</p>
-                      <p><strong>Specialization:</strong> {{ staff.specialization }}</p>
+                      <h5 class="card-title">{{ staff.first_name }} {{ staff.middle_name }} {{ staff.last_name }}</h5>
                       <p><strong>Position:</strong> {{ staff.position }}</p>
-                      <p class="card-text">{{ staff.bio|truncatewords:20 }}</p>
+                      <p><strong>Specialization:</strong> {{ staff.specialization }}</p>
+                      {% if staff.office_number %}
+                        <p><strong>Office Number:</strong> {{ staff.office_number }}</p>
+                      {% endif %}
+                      {% if staff.office_location %}
+                        <p><strong>Office Location:</strong> {{ staff.office_location }}</p>
+                      {% endif %}
+                      <p><strong>Contact:</strong> {{ staff.phone }} | {{ staff.email }}</p>
                     </div>
                     <div class="card-footer bg-white">
                       <small class="text-muted">Campus: {{ staff.campus.name }}</small>
@@ -87,11 +91,16 @@
                       <img src="{% static 'images/default-staff.jpg' %}" class="card-img-top staff-image" alt="Default staff image">
                     {% endif %}
                     <div class="card-body">
-                      <h5 class="card-title">{{ staff.first_name }} {{ staff.last_name }}</h5>
-                      <p class="text-muted">{{ staff.qualification }}</p>
-                      <p><strong>Role:</strong> {{ staff.specialization }}</p>
+                      <h5 class="card-title">{{ staff.first_name }} {{ staff.middle_name }} {{ staff.last_name }}</h5>
                       <p><strong>Position:</strong> {{ staff.position }}</p>
-                      <p class="card-text">{{ staff.bio|truncatewords:20 }}</p>
+                      <p><strong>Role:</strong> {{ staff.specialization }}</p>
+                      {% if staff.office_number %}
+                        <p><strong>Office Number:</strong> {{ staff.office_number }}</p>
+                      {% endif %}
+                      {% if staff.office_location %}
+                        <p><strong>Office Location:</strong> {{ staff.office_location }}</p>
+                      {% endif %}
+                      <p><strong>Contact:</strong> {{ staff.phone }} | {{ staff.email }}</p>
                     </div>
                     <div class="card-footer bg-white">
                       <small class="text-muted">Campus: {{ staff.campus.name }}</small>
@@ -118,11 +127,16 @@
                       <img src="{% static 'images/default-staff.jpg' %}" class="card-img-top staff-image" alt="Default staff image">
                     {% endif %}
                     <div class="card-body">
-                      <h5 class="card-title">{{ staff.first_name }} {{ staff.last_name }}</h5>
-                      <p class="text-muted">{{ staff.qualification }}</p>
-                      <p><strong>Role:</strong> {{ staff.specialization }}</p>
+                      <h5 class="card-title">{{ staff.first_name }} {{ staff.middle_name }} {{ staff.last_name }}</h5>
                       <p><strong>Position:</strong> {{ staff.position }}</p>
-                      <p class="card-text">{{ staff.bio|truncatewords:20 }}</p>
+                      <p><strong>Role:</strong> {{ staff.specialization }}</p>
+                      {% if staff.office_number %}
+                        <p><strong>Office Number:</strong> {{ staff.office_number }}</p>
+                      {% endif %}
+                      {% if staff.office_location %}
+                        <p><strong>Office Location:</strong> {{ staff.office_location }}</p>
+                      {% endif %}
+                      <p><strong>Contact:</strong> {{ staff.phone }} | {{ staff.email }}</p>
                     </div>
                     <div class="card-footer bg-white">
                       <small class="text-muted">Campus: {{ staff.campus.name }}</small>
@@ -150,7 +164,7 @@
         <div class="card">
           <div class="card-body">
             <p class="card-text text-center">
-              We're always looking for talented educators and staff to join our team. If you're passionate about education and meet our qualifications, we'd love to hear from you.
+              We're always looking for talented educators and staff to join our team. If you're passionate about education, we'd love to hear from you.
             </p>
             <div class="text-center mt-4">
               <a href="{% url 'under_development' %}" class="btn btn-primary me-2">View Current Openings</a>

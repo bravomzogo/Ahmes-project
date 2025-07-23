@@ -2,7 +2,7 @@
 {% load static %}
 {% load widget_tweaks %}
 {% block loader %}{% endblock %} 
-{% block title %}Add News Item | AHMES{% endblock %}
+{% block title %}Add Staff Member | AHMES{% endblock %}
 {% block content %}
 <div class="container-fluid">
   <div class="row">
@@ -24,20 +24,40 @@
                 <div class="form-floating">
                   {{ user_form.username|add_class:"form-control" }}
                   <label>Username</label>
+                  {% if user_form.username.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ user_form.username.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="form-floating mt-3">
                   {{ user_form.email|add_class:"form-control" }}
                   <label>Email</label>
+                  {% if user_form.email.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ user_form.email.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-floating">
                   {{ user_form.password1|add_class:"form-control" }}
                   <label>Password</label>
+                  {% if user_form.password1.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ user_form.password1.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="form-floating mt-3">
                   {{ user_form.password2|add_class:"form-control" }}
                   <label>Confirm Password</label>
+                  {% if user_form.password2.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ user_form.password2.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -48,41 +68,95 @@
                 <div class="form-floating">
                   {{ staff_form.first_name|add_class:"form-control" }}
                   <label>First Name</label>
+                  {% if staff_form.first_name.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.first_name.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="form-floating mt-3">
                   {{ staff_form.middle_name|add_class:"form-control" }}
-                  <label>Middle Name</label>
+                  <label>Middle Name (Optional)</label>
+                  {% if staff_form.middle_name.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.middle_name.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="form-floating mt-3">
                   {{ staff_form.last_name|add_class:"form-control" }}
                   <label>Last Name</label>
+                  {% if staff_form.last_name.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.last_name.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="form-floating mt-3">
-                  {{ staff_form.position|add_class:"form-control" }}
+                  {{ staff_form.position|add_class:"form-select" }}
                   <label>Position</label>
+                  {% if staff_form.position.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.position.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="form-floating mt-3">
-                  {{ staff_form.qualification|add_class:"form-control" }}
-                  <label>Qualification</label>
+                  {{ staff_form.office_number|add_class:"form-control" }}
+                  <label>Office Number (Optional)</label>
+                  {% if staff_form.office_number.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.office_number.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
               </div>
 
               <div class="col-md-6">
                 <div class="form-floating">
+                  {{ staff_form.office_location|add_class:"form-control" }}
+                  <label>Office Location (Optional)</label>
+                  {% if staff_form.office_location.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.office_location.errors.as_text }}
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="form-floating mt-3">
                   {{ staff_form.specialization|add_class:"form-control" }}
                   <label>Specialization</label>
+                  {% if staff_form.specialization.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.specialization.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="form-floating mt-3">
                   {{ staff_form.campus|add_class:"form-select" }}
                   <label>Campus</label>
+                  {% if staff_form.campus.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.campus.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="form-floating mt-3">
                   {{ staff_form.joined_date|add_class:"form-control" }}
                   <label>Joined Date</label>
+                  {% if staff_form.joined_date.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.joined_date.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
                 <div class="mt-3">
                   <label class="form-label">Profile Image</label>
                   {{ staff_form.image|add_class:"form-control" }}
+                  {% if staff_form.image.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.image.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -94,19 +168,24 @@
                 <div class="form-floating">
                   {{ staff_form.phone|add_class:"form-control" }}
                   <label>Phone</label>
+                  {% if staff_form.phone.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.phone.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-floating">
                   {{ staff_form.email|add_class:"form-control" }}
-                  <label>Email</label>
+                  <label>Staff Email</label>
+                  {% if staff_form.email.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ staff_form.email.errors.as_text }}
+                    </div>
+                  {% endif %}
                 </div>
               </div>
-            </div>
-
-            <div class="mt-4">
-              <label class="form-label">Bio</label>
-              {{ staff_form.bio|add_class:"form-control" }}
             </div>
 
             <div class="text-end mt-4">
