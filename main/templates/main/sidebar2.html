@@ -1,0 +1,38 @@
+{% load static %}
+<div class="sidebar">
+  <div class="sidebar-header p-3">
+    <h3 class="text-center">AHMES Academic Admin</h3>
+  </div>
+  <ul class="nav flex-column p-2">
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'academic_admin_dashboard' %}">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'manage_classes' %}">
+        <i class="fas fa-school"></i> Classes
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'manage_academic_announcements' %}">
+        <i class="fas fa-bullhorn"></i> Announcements
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'manage_course_catalogs' %}">
+        <i class="fas fa-book"></i> Catalogs
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'manage_academic_calendars' %}">
+        <i class="fas fa-calendar-alt"></i>Calendars
+      </a>
+    </li>
+  </ul>
+  <div class="sidebar-footer p-3">
+    <a class="nav-link" href="{% url 'logout' %}">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</div>

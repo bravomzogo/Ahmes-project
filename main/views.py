@@ -1,9 +1,8 @@
-from pyclbr import Class
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Student, StaffMember, News, Comment, User
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, SchoolClass, Student, StaffMember, News, Comment, User
 from .forms import (GalleryForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm)
 from django.contrib import messages
@@ -748,7 +747,7 @@ def teacher_dashboard(request):
         raise PermissionDenied
     
     # Get classes taught by this teacher
-    classes_taught = Class.objects.filter(teacher=staff_profile)
+    classes_taught = SchoolClass.objects.filter(teacher=staff_profile)
     return render(request, 'academics/teacher_dashboard.html', {
         'staff': staff_profile,
         'classes_taught': classes_taught
@@ -769,18 +768,24 @@ def parent_dashboard(request):
 def academic_admin_dashboard(request):
     if not (request.user.is_admin or 
             (hasattr(request.user, 'staff_profile') and 
-            request.user.staff_profile.position == 'Administrator')):
+             request.user.staff_profile.position == 'Administrator')):
         raise PermissionDenied
     
     # Academic admin statistics
     total_students = Student.objects.count()
     total_teachers = StaffMember.objects.filter(position='Teacher').count()
-    active_classes = Class.objects.count()
+    active_classes = SchoolClass.objects.count()
+    academic_announcements = AcademicAnnouncement.objects.filter(is_published=True).count()
+    active_catalogs = CourseCatalog.objects.filter(is_active=True).count()
+    active_calendars = AcademicCalendar.objects.filter(is_active=True).count()
     
     return render(request, 'academics/academic_admin_dashboard.html', {
         'total_students': total_students,
         'total_teachers': total_teachers,
-        'active_classes': active_classes
+        'active_classes': active_classes,
+        'academic_announcements': academic_announcements,
+        'active_catalogs': active_catalogs,
+        'active_calendars': active_calendars,
     })
 
 def academic_services(request):
@@ -791,3 +796,211 @@ def academic_services(request):
         'announcements': AcademicAnnouncement.objects.filter(is_published=True)
     }
     return render(request, 'main/academic_services.html', academic_resources)
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from .models import SchoolClass, AcademicAnnouncement, CourseCatalog, AcademicCalendar
+from .forms import SchoolClassForm, AcademicAnnouncementForm, CourseCatalogForm, AcademicCalendarForm
+
+def is_academic_admin(user):
+    return user.is_authenticated and (
+        user.is_admin or 
+        (hasattr(user, 'staff_profile') and user.staff_profile.position == 'Administrator')
+    )
+
+# Dashboard
+@login_required
+@user_passes_test(is_academic_admin)
+def academic_admin_dashboard(request):
+    active_classes = SchoolClass.objects.count()
+    academic_announcements = AcademicAnnouncement.objects.filter(is_published=True).count()
+    active_catalogs = CourseCatalog.objects.filter(is_active=True).count()
+    active_calendars = AcademicCalendar.objects.filter(is_active=True).count()
+    
+    return render(request, 'academics/academic_admin_dashboard.html', {
+        'active_classes': active_classes,
+        'academic_announcements': academic_announcements,
+        'active_catalogs': active_catalogs,
+        'active_calendars': active_calendars,
+    })
+
+# --- Class Management ---
+@login_required
+@user_passes_test(is_academic_admin)
+def manage_classes(request):
+    classes = SchoolClass.objects.all().order_by('-created_at')
+    return render(request, 'main/manage_classes.html', {'classes': classes})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def add_class(request):
+    if request.method == 'POST':
+        form = SchoolClassForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Class added successfully!')
+            return redirect('manage_classes')
+    else:
+        form = SchoolClassForm()
+    return render(request, 'main/add_class.html', {'form': form})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def edit_class(request, pk):
+    class_obj = get_object_or_404(SchoolClass, pk=pk)
+    if request.method == 'POST':
+        form = SchoolClassForm(request.POST, instance=class_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Class updated successfully!')
+            return redirect('manage_classes')
+    else:
+        form = SchoolClassForm(instance=class_obj)
+    return render(request, 'main/edit_class.html', {'form': form, 'class': class_obj})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def delete_class(request, pk):
+    class_obj = get_object_or_404(SchoolClass, pk=pk)
+    if request.method == 'POST':
+        class_obj.delete()
+        messages.success(request, 'Class deleted successfully!')
+        return redirect('manage_classes')
+    return render(request, 'main/delete_class.html', {'class': class_obj})
+
+# --- Academic Announcements ---
+@login_required
+@user_passes_test(is_academic_admin)
+def manage_academic_announcements(request):
+    announcements = AcademicAnnouncement.objects.all().order_by('-created_at')
+    return render(request, 'main/manage_academic_announcements.html', {'announcements': announcements})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def add_academic_announcement(request):
+    if request.method == 'POST':
+        form = AcademicAnnouncementForm(request.POST)
+        if form.is_valid():
+            announcement = form.save(commit=False)
+            announcement.author = request.user
+            announcement.save()
+            messages.success(request, 'Announcement added successfully!')
+            return redirect('manage_academic_announcements')
+    else:
+        form = AcademicAnnouncementForm()
+    return render(request, 'main/add_academic_announcement.html', {'form': form})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def edit_academic_announcement(request, pk):
+    announcement = get_object_or_404(AcademicAnnouncement, pk=pk)
+    if request.method == 'POST':
+        form = AcademicAnnouncementForm(request.POST, instance=announcement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Announcement updated successfully!')
+            return redirect('manage_academic_announcements')
+    else:
+        form = AcademicAnnouncementForm(instance=announcement)
+    return render(request, 'main/edit_academic_announcement.html', {'form': form, 'announcement': announcement})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def delete_academic_announcement(request, pk):
+    announcement = get_object_or_404(AcademicAnnouncement, pk=pk)
+    if request.method == 'POST':
+        announcement.delete()
+        messages.success(request, 'Announcement deleted successfully!')
+        return redirect('manage_academic_announcements')
+    return render(request, 'main/delete_academic_announcement.html', {'announcement': announcement})
+
+# --- Course Catalogs ---
+@login_required
+@user_passes_test(is_academic_admin)
+def manage_course_catalogs(request):
+    catalogs = CourseCatalog.objects.all().order_by('-created_at')
+    return render(request, 'main/manage_course_catalogs.html', {'catalogs': catalogs})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def add_course_catalog(request):
+    if request.method == 'POST':
+        form = CourseCatalogForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Course catalog added successfully!')
+            return redirect('manage_course_catalogs')
+    else:
+        form = CourseCatalogForm()
+    return render(request, 'main/add_course_catalog.html', {'form': form})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def edit_course_catalog(request, pk):
+    catalog = get_object_or_404(CourseCatalog, pk=pk)
+    if request.method == 'POST':
+        form = CourseCatalogForm(request.POST, request.FILES, instance=catalog)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Course catalog updated successfully!')
+            return redirect('manage_course_catalogs')
+    else:
+        form = CourseCatalogForm(instance=catalog)
+    return render(request, 'main/edit_course_catalog.html', {'form': form, 'catalog': catalog})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def delete_course_catalog(request, pk):
+    catalog = get_object_or_404(CourseCatalog, pk=pk)
+    if request.method == 'POST':
+        catalog.delete()
+        messages.success(request, 'Course catalog deleted successfully!')
+        return redirect('manage_course_catalogs')
+    return render(request, 'main/delete_course_catalog.html', {'catalog': catalog})
+
+# --- Academic Calendars ---
+@login_required
+@user_passes_test(is_academic_admin)
+def manage_academic_calendars(request):
+    calendars = AcademicCalendar.objects.all().order_by('-created_at')
+    return render(request, 'main/manage_academic_calendars.html', {'calendars': calendars})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def add_academic_calendar(request):
+    if request.method == 'POST':
+        form = AcademicCalendarForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Academic calendar added successfully!')
+            return redirect('manage_academic_calendars')
+    else:
+        form = AcademicCalendarForm()
+    return render(request, 'main/add_academic_calendar.html', {'form': form})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def edit_academic_calendar(request, pk):
+    calendar = get_object_or_404(AcademicCalendar, pk=pk)
+    if request.method == 'POST':
+        form = AcademicCalendarForm(request.POST, request.FILES, instance=calendar)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Academic calendar updated successfully!')
+            return redirect('manage_academic_calendars')
+    else:
+        form = AcademicCalendarForm(instance=calendar)
+    return render(request, 'main/edit_academic_calendar.html', {'form': form, 'calendar': calendar})
+
+@login_required
+@user_passes_test(is_academic_admin)
+def delete_academic_calendar(request, pk):
+    calendar = get_object_or_404(AcademicCalendar, pk=pk)
+    if request.method == 'POST':
+        calendar.delete()
+        messages.success(request, 'Academic calendar deleted successfully!')
+        return redirect('manage_academic_calendars')
+    return render(request, 'main/delete_academic_calendar.html', {'calendar': calendar})

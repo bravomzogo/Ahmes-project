@@ -329,7 +329,7 @@ class YouTubeVideo(models.Model):
         verbose_name_plural = 'YouTube Videos'
 
 
-class Class(models.Model):
+class SchoolClass(models.Model):
     name = models.CharField(max_length=100)
     level = models.ForeignKey(Level, on_delete=models.CASCADE)
     teacher = models.ForeignKey(StaffMember, on_delete=models.CASCADE)

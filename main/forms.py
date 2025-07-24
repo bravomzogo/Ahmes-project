@@ -221,3 +221,48 @@ class MessageForm(forms.ModelForm):
             if file.size > max_size:
                 raise forms.ValidationError(f"File too large. Maximum size is {max_size/1024/1024}MB.")
         return file
+    
+
+
+from django import forms
+from .models import SchoolClass, AcademicAnnouncement, CourseCatalog, AcademicCalendar, Level, StaffMember, Student
+
+class SchoolClassForm(forms.ModelForm):
+    class Meta:
+        model = SchoolClass
+        fields = ['name', 'level', 'teacher', 'students', 'academic_year']
+        widgets = {
+            'level': forms.Select(),
+            'teacher': forms.Select(),
+            'students': forms.SelectMultiple(),
+            'academic_year': forms.TextInput(attrs={'placeholder': 'e.g., 2025-2026'}),
+        }
+
+class AcademicAnnouncementForm(forms.ModelForm):
+    class Meta:
+        model = AcademicAnnouncement
+        fields = ['title', 'content', 'date', 'is_published']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'is_published': forms.CheckboxInput(),
+        }
+
+class CourseCatalogForm(forms.ModelForm):
+    class Meta:
+        model = CourseCatalog
+        fields = ['title', 'file', 'academic_year', 'is_active']
+        widgets = {
+            'academic_year': forms.TextInput(attrs={'placeholder': 'e.g., 2025-2026'}),
+            'is_active': forms.CheckboxInput(),
+            'file': forms.FileInput(),
+        }
+
+class AcademicCalendarForm(forms.ModelForm):
+    class Meta:
+        model = AcademicCalendar
+        fields = ['title', 'file', 'academic_year', 'is_active']
+        widgets = {
+            'academic_year': forms.TextInput(attrs={'placeholder': 'e.g., 2025-2026'}),
+            'is_active': forms.CheckboxInput(),
+            'file': forms.FileInput(),
+        }

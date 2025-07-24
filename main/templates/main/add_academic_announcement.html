@@ -1,0 +1,157 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block loader %}{% endblock %}
+{% block title %}Add Academic Announcement | AHMES{% endblock %}
+
+{% block content %}
+<div class="wrapper">
+  <!-- Sidebar -->
+  {% include 'main/sidebar2.html' %}
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container-fluid py-4">
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-4 border-bottom pb-2">
+        <h1 class="h3 mb-0 text-gray-800">
+          <i class="fas fa-bullhorn me-2"></i>Add New Academic Announcement
+        </h1>
+      </div>
+
+      <!-- Form Card -->
+      <div class="card shadow rounded-4">
+        <div class="card-body p-4">
+          <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <h5 class="mb-4 border-bottom pb-2">
+              <i class="fas fa-info-circle me-2"></i>Announcement Details
+            </h5>
+            
+            <div class="row g-4">
+              <!-- Left Column -->
+              <div class="col-md-6">
+                <div class="form-floating">
+                  {{ form.title|add_class:"form-control" }}
+                  <label for="{{ form.title.id_for_label }}">Title</label>
+                  {% if form.title.errors %}
+                    <div class="invalid-feedback d-block">{{ form.title.errors.as_text }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="form-floating mt-3">
+                  {{ form.content|add_class:"form-control" }}
+                  <label for="{{ form.content.id_for_label }}">Content</label>
+                  {% if form.content.errors %}
+                    <div class="invalid-feedback d-block">{{ form.content.errors.as_text }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Right Column -->
+              <div class="col-md-6">
+                <div class="form-floating">
+                  {{ form.date|add_class:"form-control" }}
+                  <label for="{{ form.date.id_for_label }}">Date</label>
+                  {% if form.date.errors %}
+                    <div class="invalid-feedback d-block">{{ form.date.errors.as_text }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="form-check mt-4">
+                  {{ form.is_published|add_class:"form-check-input" }}
+                  <label class="form-check-label" for="{{ form.is_published.id_for_label }}">
+                    Publish Announcement
+                  </label>
+                  {% if form.is_published.errors %}
+                    <div class="invalid-feedback d-block">{{ form.is_published.errors.as_text }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="text-end mt-5">
+              <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4">
+                <i class="fas fa-save me-2"></i>Save Announcement
+              </button>
+              <a href="{% url 'manage_academic_announcements' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4 ms-2">
+                <i class="fas fa-times me-2"></i>Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --sidebar-width: 250px;
+    --primary-color: #1a5276;
+    --primary-dark: #154360;
+    --secondary-color: #f39c12;
+  }
+
+  body {
+    background-color: #f8f9fc;
+  }
+
+  .wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .sidebar {
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background: var(--primary-dark);
+    color: #fff;
+    min-height: 100vh;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  }
+
+  .main-content {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+  }
+
+  .form-floating > .form-control {
+    height: calc(3.5rem + 2px);
+  }
+
+  .form-check-input {
+    transform: scale(1.25);
+    margin-right: 0.5rem;
+  }
+
+  .invalid-feedback {
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+</script>
+{% endblock %}

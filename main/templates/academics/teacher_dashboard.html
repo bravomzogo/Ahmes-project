@@ -2,119 +2,6 @@
 {% load static %}
 
 {% block content %}
-<section class="page-header">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="content">
-          <h1 class="page-name">Teacher Dashboard</h1>
-          <ol class="breadcrumb">
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'services' %}">Academics</a></li>
-            <li class="active">Dashboard</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="user-dashboard page-wrapper">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="dashboard-wrapper user-dashboard">
-          <div class="media">
-            <div class="pull-left">
-              <img class="media-object user-img" src="{% if staff.image %}{{ staff.image.url }}{% else %}{% static 'images/default-user.jpg' %}{% endif %}" alt="Image">
-            </div>
-            <div class="media-body">
-              <h2 class="media-heading">Welcome, {{ staff.first_name }} {{ staff.last_name }}</h2>
-              <p>Position: {{ staff.position }}</p>
-              <p>Specialization: {{ staff.specialization }}</p>
-              <p>Campus: {{ staff.campus.name }}</p>
-            </div>
-          </div>
-          
-          <div class="row mt-50">
-            <div class="col-md-4">
-              <div class="dashboard-card">
-                <h3><i class="fas fa-chalkboard"></i> My Classes</h3>
-                <p>Manage your classes and students</p>
-                <a href="#" class="btn btn-main">View Classes</a>
-              </div>
-            </div>
-            
-            <div class="col-md-4">
-              <div class="dashboard-card">
-                <h3><i class="fas fa-tasks"></i> Assignments</h3>
-                <p>Create and grade assignments</p>
-                <a href="#" class="btn btn-main">Manage Assignments</a>
-              </div>
-            </div>
-            
-            <div class="col-md-4">
-              <div class="dashboard-card">
-                <h3><i class="fas fa-chart-line"></i> Gradebook</h3>
-                <p>Record and manage student grades</p>
-                <a href="#" class="btn btn-main">View Gradebook</a>
-              </div>
-            </div>
-          </div>
-          
-          <div class="row mt-30">
-            <div class="col-md-6">
-              <div class="panel panel-default recent-classes">
-                <div class="panel-heading">
-                  <h3 class="panel-title">Your Classes</h3>
-                </div>
-                <div class="panel-body">
-                  {% if classes_taught %}
-                    <ul class="list-unstyled">
-                      {% for class in classes_taught %}
-                        <li>
-                          <i class="fas fa-book"></i> {{ class.name }}
-                          <span class="badge">{{ class.student_count }} students</span>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  {% else %}
-                    <p>You are not currently assigned to any classes.</p>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-md-6">
-              <div class="panel panel-default recent-activity">
-                <div class="panel-heading">
-                  <h3 class="panel-title">Recent Activity</h3>
-                </div>
-                <div class="panel-body">
-                  <ul class="list-unstyled">
-                    <li>
-                      <i class="fas fa-exclamation-circle"></i> 3 assignments pending grading
-                    </li>
-                    <li>
-                      <i class="fas fa-calendar-alt"></i> Staff meeting tomorrow at 10 AM
-                    </li>
-                    <li>
-                      <i class="fas fa-envelope"></i> New message from department head
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-{% endblock %}{% extends 'main/base.html' %}
-{% load static %}
-
-{% block content %}
 
 <style>
   .teacher-dashboard-wrapper {
@@ -355,7 +242,6 @@
 <div class="teacher-dashboard-wrapper">
   <div class="teacher-breadcrumb">
     <ol>
-      <li><a href="{% url 'home' %}">Home</a></li>
       <li><a href="{% url 'services' %}">Academics</a></li>
       <li class="active">Dashboard</li>
     </ol>

@@ -13,7 +13,7 @@ from .models import (
     Conversation,
     Message,
     YouTubeVideo,
-    Class,
+    SchoolClass,
     CourseCatalog,
     AcademicCalendar,
     AcademicAnnouncement
@@ -103,7 +103,7 @@ class YouTubeVideoAdmin(admin.ModelAdmin):
     list_filter = ('is_featured', 'published_at')
     search_fields = ('title', 'description', 'video_id')
 
-@admin.register(Class)
+@admin.register(SchoolClass)
 class ClassAdmin(admin.ModelAdmin):
     list_display = ('name', 'level', 'teacher', 'academic_year', 'student_count')
     list_filter = ('level', 'academic_year')

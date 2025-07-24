@@ -1,0 +1,154 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block loader %}{% endblock %}
+{% block title %}Manage Classes | AHMES{% endblock %}
+
+{% block content %}
+<div class="wrapper">
+  <!-- Sidebar -->
+  {% include 'main/sidebar2.html' %}
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container-fluid py-4">
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-4 border-bottom pb-2">
+        <h1 class="h3 mb-0 text-gray-800">
+          <i class="fas fa-school me-2"></i>Manage Classes
+        </h1>
+        <a href="{% url 'add_class' %}" class="btn btn-primary btn-lg rounded-pill">
+          <i class="fas fa-plus me-2"></i>Add New Class
+        </a>
+      </div>
+
+      <!-- Table Card -->
+      <div class="card shadow rounded-4">
+        <div class="card-body p-4">
+          {% if classes %}
+            <div class="table-responsive">
+              <table class="table table-hover table-bordered align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Teacher</th>
+                    <th>Student Count</th>
+                    <th>Academic Year</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for class in classes %}
+                  <tr>
+                    <td>{{ class.name }}</td>
+                    <td>{{ class.level.name }}</td>
+                    <td>{{ class.teacher.first_name }} {{ class.teacher.last_name }}</td>
+                    <td>{{ class.student_count }}</td>
+                    <td>{{ class.academic_year }}</td>
+                    <td>
+                      <a href="{% url 'edit_class' class.pk %}" class="btn btn-sm btn-outline-primary rounded-pill me-2">
+                        <i class="fas fa-edit"></i> Edit
+                      </a>
+                      <a href="{% url 'delete_class' class.pk %}" class="btn btn-sm btn-outline-danger rounded-pill">
+                        <i class="fas fa-trash"></i> Delete
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="alert alert-info" role="alert">
+              No classes found.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --sidebar-width: 250px;
+    --primary-color: #1a5276;
+    --primary-dark: #154360;
+    --secondary-color: #f39c12;
+  }
+
+  body {
+    background-color: #f8f9fc;
+  }
+
+  .wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .sidebar {
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background: var(--primary-dark);
+    color: #fff;
+    transition: all 0.3s;
+    min-height: 100vh;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  }
+
+  .sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 1rem;
+    margin: 0 0.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+  }
+
+  .sidebar .nav-link:hover,
+  .sidebar .nav-link.active {
+    color: #fff;
+    background: var(--secondary-color);
+  }
+
+  .main-content {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+  }
+
+  .table th, .table td {
+    vertical-align: middle !important;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      margin-left: -var(--sidebar-width);
+    }
+    .sidebar.active {
+      margin-left: 0;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Highlight current nav item
+    const currentUrl = window.location.pathname;
+    document.querySelectorAll(".sidebar .nav-link").forEach((link) => {
+      if (link.href.includes(currentUrl)) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+{% endblock %}
