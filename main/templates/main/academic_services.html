@@ -1,0 +1,114 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<section class="dashboard section">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="dashboard-header text-center">
+          <h2>Academic Services & Resources</h2>
+          <p class="lead">Comprehensive academic support for students, faculty, and staff</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Academic Resources Section -->
+    <div class="row mt-30">
+      <div class="col-md-4">
+        <div class="resource-card">
+          <h4><i class="fas fa-book"></i> Course Catalogs</h4>
+          <ul class="list-unstyled">
+            {% for catalog in catalogs %}
+              <li><a href="{{ catalog.file.url }}">{{ catalog.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="resource-card">
+          <h4><i class="fas fa-calendar-alt"></i> Academic Calendars</h4>
+          <ul class="list-unstyled">
+            {% for calendar in calendars %}
+              <li><a href="{{ calendar.file.url }}">{{ calendar.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="resource-card">
+          <h4><i class="fas fa-bullhorn"></i> Announcements</h4>
+          <ul class="list-unstyled">
+            {% for announcement in announcements %}
+              <li>{{ announcement.title }} - {{ announcement.date|date:"M d, Y" }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Dashboard Portals Section -->
+    <div class="row mt-50">
+      <div class="col-md-12">
+        <div class="section-title">
+          <h3>Academic Portals</h3>
+        </div>
+        
+        <div class="row">
+          <!-- Student Portal -->
+          <div class="col-md-3 col-sm-6">
+            <div class="dashboard-card">
+              <div class="card-icon">
+                <i class="fas fa-user-graduate"></i>
+              </div>
+              <h3>Student Portal</h3>
+              <p>Access your courses, assignments, grades and academic resources</p>
+              <a href="{% url 'student_login' %}" class="btn btn-main">Login</a>
+            </div>
+          </div>
+          
+          <!-- Teacher Portal -->
+          <div class="col-md-3 col-sm-6">
+            <div class="dashboard-card">
+              <div class="card-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+              </div>
+              <h3>Teacher Portal</h3>
+              <p>Manage your classes, upload materials, and track student progress</p>
+              <a href="{% url 'teacher_login' %}" class="btn btn-main">Login</a>
+            </div>
+          </div>
+          
+          <!-- Parent Portal -->
+          <div class="col-md-3 col-sm-6">
+            <div class="dashboard-card">
+              <div class="card-icon">
+                <i class="fas fa-user-friends"></i>
+              </div>
+              <h3>Parent Portal</h3>
+              <p>Monitor your child's academic performance and school activities</p>
+              <a href="{% url 'parent_login' %}" class="btn btn-main">Login</a>
+            </div>
+          </div>
+          
+          <!-- Academic Admin Portal -->
+          <div class="col-md-3 col-sm-6">
+            <div class="dashboard-card">
+              <div class="card-icon">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <h3>Academic Admin</h3>
+              <p>Manage curriculum, academic calendar, and institutional reports</p>
+              <a href="{% url 'academic_admin_login' %}" class="btn btn-main">Login</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

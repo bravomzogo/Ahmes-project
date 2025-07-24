@@ -1,0 +1,443 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="content">
+          <h1 class="page-name">Teacher Dashboard</h1>
+          <ol class="breadcrumb">
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'services' %}">Academics</a></li>
+            <li class="active">Dashboard</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="user-dashboard page-wrapper">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="dashboard-wrapper user-dashboard">
+          <div class="media">
+            <div class="pull-left">
+              <img class="media-object user-img" src="{% if staff.image %}{{ staff.image.url }}{% else %}{% static 'images/default-user.jpg' %}{% endif %}" alt="Image">
+            </div>
+            <div class="media-body">
+              <h2 class="media-heading">Welcome, {{ staff.first_name }} {{ staff.last_name }}</h2>
+              <p>Position: {{ staff.position }}</p>
+              <p>Specialization: {{ staff.specialization }}</p>
+              <p>Campus: {{ staff.campus.name }}</p>
+            </div>
+          </div>
+          
+          <div class="row mt-50">
+            <div class="col-md-4">
+              <div class="dashboard-card">
+                <h3><i class="fas fa-chalkboard"></i> My Classes</h3>
+                <p>Manage your classes and students</p>
+                <a href="#" class="btn btn-main">View Classes</a>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="dashboard-card">
+                <h3><i class="fas fa-tasks"></i> Assignments</h3>
+                <p>Create and grade assignments</p>
+                <a href="#" class="btn btn-main">Manage Assignments</a>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="dashboard-card">
+                <h3><i class="fas fa-chart-line"></i> Gradebook</h3>
+                <p>Record and manage student grades</p>
+                <a href="#" class="btn btn-main">View Gradebook</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mt-30">
+            <div class="col-md-6">
+              <div class="panel panel-default recent-classes">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Your Classes</h3>
+                </div>
+                <div class="panel-body">
+                  {% if classes_taught %}
+                    <ul class="list-unstyled">
+                      {% for class in classes_taught %}
+                        <li>
+                          <i class="fas fa-book"></i> {{ class.name }}
+                          <span class="badge">{{ class.student_count }} students</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p>You are not currently assigned to any classes.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="panel panel-default recent-activity">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Recent Activity</h3>
+                </div>
+                <div class="panel-body">
+                  <ul class="list-unstyled">
+                    <li>
+                      <i class="fas fa-exclamation-circle"></i> 3 assignments pending grading
+                    </li>
+                    <li>
+                      <i class="fas fa-calendar-alt"></i> Staff meeting tomorrow at 10 AM
+                    </li>
+                    <li>
+                      <i class="fas fa-envelope"></i> New message from department head
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .teacher-dashboard-wrapper {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+  }
+  
+  .teacher-breadcrumb {
+    background: transparent;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .teacher-breadcrumb ol {
+    list-style: none;
+    display: inline-flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  
+  .teacher-breadcrumb li a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .teacher-breadcrumb li a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+  }
+  
+  .teacher-breadcrumb li.active {
+    color: #555;
+  }
+  
+  .teacher-breadcrumb li + li:before {
+    content: '>';
+    margin-right: 0.5rem;
+    color: #555;
+  }
+  
+  .teacher-dashboard-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    width: 100%;
+    max-width: 1200px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 0 auto;
+  }
+  
+  .teacher-dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  }
+  
+  .teacher-dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+  
+  .teacher-dashboard-header h2 {
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.75rem;
+  }
+  
+  .teacher-dashboard-header p {
+    opacity: 0.9;
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+  }
+  
+  .teacher-dashboard-body {
+    padding: 2rem;
+  }
+  
+  .teacher-profile {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+  
+  .teacher-profile img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #667eea;
+  }
+  
+  .teacher-profile-info h2 {
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem;
+  }
+  
+  .teacher-profile-info p {
+    margin: 0.25rem 0;
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-item {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .dashboard-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-item h3 {
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem;
+    color: #333;
+  }
+  
+  .dashboard-item p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0 0 1rem;
+  }
+  
+  .dashboard-item a {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+  }
+  
+  .dashboard-item a:hover {
+    background: linear-gradient(135deg, #5a6fd1 0%, #6a4295 100%);
+    transform: translateY(-2px);
+  }
+  
+  .recent-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  .recent-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+  }
+  
+  .recent-card h3 {
+    font-size: 1.25rem;
+    margin: 0 0 1rem;
+    color: #333;
+  }
+  
+  .recent-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .recent-card ul li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    font-size: 0.9rem;
+    color: #555;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .recent-card ul li:last-child {
+    border-bottom: none;
+  }
+  
+  .recent-card ul li i {
+    color: #667eea;
+    font-size: 1.1rem;
+  }
+  
+  .recent-card ul li .badge {
+    background: #667eea;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: auto;
+  }
+  
+  .recent-card p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+  }
+  
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #f5c6cb;
+  }
+</style>
+
+<div class="teacher-dashboard-wrapper">
+  <div class="teacher-breadcrumb">
+    <ol>
+      <li><a href="{% url 'home' %}">Home</a></li>
+      <li><a href="{% url 'services' %}">Academics</a></li>
+      <li class="active">Dashboard</li>
+    </ol>
+  </div>
+  
+  <div class="teacher-dashboard-card">
+    <div class="teacher-dashboard-header">
+      <h2>Teacher Dashboard</h2>
+      <p>Manage your classes, assignments, and grades</p>
+    </div>
+    
+    <div class="teacher-dashboard-body">
+      <div class="teacher-profile">
+        <img src="{% if staff.image %}{{ staff.image.url }}{% else %}{% static 'images/default-user.jpg' %}{% endif %}" alt="Profile Image">
+        <div class="teacher-profile-info">
+          <h2>Welcome, {{ staff.first_name }} {{ staff.last_name }}</h2>
+          <p><i class="fas fa-briefcase"></i> Position: {{ staff.position }}</p>
+          <p><i class="fas fa-graduation-cap"></i> Specialization: {{ staff.specialization }}</p>
+          <p><i class="fas fa-university"></i> Campus: {{ staff.campus.name }}</p>
+        </div>
+      </div>
+      
+      <div class="dashboard-grid">
+        <div class="dashboard-item">
+          <h3><i class="fas fa-chalkboard"></i> My Classes</h3>
+          <p>Manage your classes and students</p>
+          <a href="#"><i class="fas fa-eye"></i> View Classes</a>
+        </div>
+        <div class="dashboard-item">
+          <h3><i class="fas fa-tasks"></i> Assignments</h3>
+          <p>Create and grade assignments</p>
+          <a href="#"><i class="fas fa-edit"></i> Manage Assignments</a>
+        </div>
+        <div class="dashboard-item">
+          <h3><i class="fas fa-chart-line"></i> Gradebook</h3>
+          <p>Record and manage student grades</p>
+          <a href="#"><i class="fas fa-book"></i> View Gradebook</a>
+        </div>
+      </div>
+      
+      <div class="recent-section">
+        <div class="recent-card">
+          <h3>Your Classes</h3>
+          {% if classes_taught %}
+            <ul>
+              {% for class in classes_taught %}
+                <li>
+                  <i class="fas fa-book"></i> {{ class.name }}
+                  <span class="badge">{{ class.student_count }} students</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>You are not currently assigned to any classes.</p>
+          {% endif %}
+        </div>
+        
+        <div class="recent-card">
+          <h3>Recent Activity</h3>
+          <ul>
+            <li><i class="fas fa-exclamation-circle"></i> 3 assignments pending grading</li>
+            <li><i class="fas fa-calendar-alt"></i> Staff meeting tomorrow at 10 AM</li>
+            <li><i class="fas fa-envelope"></i> New message from department head</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Add hover animation for dashboard items
+  document.querySelectorAll('.dashboard-item').forEach(item => {
+    item.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-3px)';
+      this.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.1)';
+    });
+    item.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+      this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.05)';
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,267 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .parent-login-wrapper {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+  }
+  
+  .parent-breadcrumb {
+    background: transparent;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .parent-breadcrumb ol {
+    list-style: none;
+    display: inline-flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  
+  .parent-breadcrumb li a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .parent-breadcrumb li a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+  }
+  
+  .parent-breadcrumb li.active {
+    color: #555;
+  }
+  
+  .parent-breadcrumb li + li:before {
+    content: '>';
+    margin-right: 0.5rem;
+    color: #555;
+  }
+  
+  .parent-login-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    width: 100%;
+    max-width: 500px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 0 auto;
+  }
+  
+  .parent-login-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  }
+  
+  .parent-login-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+  
+  .parent-login-header h2 {
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.75rem;
+    margin-top: 1.5rem; /* Space for logo */
+  }
+  
+  .parent-login-header p {
+    opacity: 0.9;
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+  }
+  
+  .parent-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+  }
+  
+  .parent-login-body {
+    padding: 2rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-control {
+    height: 3rem;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    padding-left: 3rem;
+    font-size: 1rem;
+    transition: all 0.3s;
+    width: 100%;
+  }
+  
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+  
+  .btn-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    height: 3rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 8px;
+    width: 100%;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-login:hover {
+    background: linear-gradient(135deg, #5a6fd1 0%, #6a4295 100%);
+    transform: translateY(-2px);
+  }
+  
+  .login-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+  }
+  
+  .login-footer a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0 1rem;
+  }
+  
+  .login-footer a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+  }
+  
+  .input-icon {
+    position: relative;
+  }
+  
+  .input-icon i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #667eea;
+    font-size: 1.1rem;
+  }
+  
+  .checkbox label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .checkbox input {
+    margin-right: 0.5rem;
+  }
+  
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #f5c6cb;
+  }
+</style>
+
+<div class="parent-login-wrapper">
+  <div class="parent-breadcrumb">
+    <ol>
+      <li><a href="{% url 'academics_service' %}">Academics</a></li>
+      <li class="active">Parent Login</li>
+    </ol>
+  </div>
+  
+  <div class="parent-login-card">
+    <div class="parent-login-header">
+      <h2>Parent Portal</h2>
+      <p>Secure access to the parent portal system</p>
+    </div>
+    
+    <div class="parent-login-body">
+      {% if messages %}
+        <div class="alert alert-danger">
+          {% for message in messages %}
+            {{ message }}
+          {% endfor %}
+        </div>
+      {% endif %}
+      
+      <form method="post" action="{% url 'parent_login' %}">
+        {% csrf_token %}
+        
+        <div class="form-group input-icon">
+          <i class="fas fa-envelope"></i>
+          <input type="email" class="form-control" name="username" placeholder="Email" required>
+        </div>
+        
+        <div class="form-group input-icon">
+          <i class="fas fa-lock"></i>
+          <input type="password" class="form-control" name="password" placeholder="Password" required>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+        </div>
+        
+        <div class="form-group checkbox">
+          <label>
+            <input type="checkbox"> Remember my credentials
+          </label>
+        </div>
+      </form>
+      
+      <div class="login-footer">
+        <a href="#"><i class="fas fa-headset"></i> Contact support</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Add subtle focus animation
+  document.querySelectorAll('.form-control').forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentNode.style.transform = 'scale(1.02)';
+    });
+    input.addEventListener('blur', function() {
+      this.parentNode.style.transform = 'scale(1)';
+    });
+  });
+</script>
+
+{% endblock %}

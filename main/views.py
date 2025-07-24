@@ -1,8 +1,9 @@
+from pyclbr import Class
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import Campus, Gallery, Level, Student, StaffMember, News, Comment, User
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Student, StaffMember, News, Comment, User
 from .forms import (GalleryForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm)
 from django.contrib import messages
@@ -680,3 +681,113 @@ def ahmes_tv(request):
     }
     
     return render(request, 'main/ahmes_tv.html', context)
+
+
+
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.decorators import login_required
+
+class StudentLoginView(LoginView):
+    template_name = 'academics/student_login.html'
+    
+    def form_valid(self, form):
+        user = form.get_user()
+        if not hasattr(user, 'student_profile'):
+            messages.error(self.request, "This account doesn't have student access.")
+            return redirect('student_login')
+        login(self.request, user)
+        return redirect('student_dashboard')
+
+class TeacherLoginView(LoginView):
+    template_name = 'academics/teacher_login.html'
+    
+    def form_valid(self, form):
+        user = form.get_user()
+        staff_profile = getattr(user, 'staff_profile', None)
+        if not staff_profile or staff_profile.position != 'Teacher':
+            messages.error(self.request, "This account doesn't have teacher access.")
+            return redirect('teacher_login')
+        login(self.request, user)
+        return redirect('teacher_dashboard')
+
+class ParentLoginView(LoginView):
+    template_name = 'academics/parent_login.html'
+    
+    def form_valid(self, form):
+        user = form.get_user()
+        # Check if user has associated students (parent)
+        if not Student.objects.filter(parent_email=user.email).exists():
+            messages.error(self.request, "This account isn't associated with any student.")
+            return redirect('parent_login')
+        login(self.request, user)
+        return redirect('parent_dashboard')
+
+class AcademicAdminLoginView(LoginView):
+    template_name = 'academics/academic_admin_login.html'
+    
+    def form_valid(self, form):
+        user = form.get_user()
+        staff_profile = getattr(user, 'staff_profile', None)
+        if not user.is_admin and (not staff_profile or staff_profile.position != 'Administrator'):
+            messages.error(self.request, "This account doesn't have academic admin access.")
+            return redirect('academic_admin_login')
+        login(self.request, user)
+        return redirect('academic_admin_dashboard')
+
+@login_required
+def student_dashboard(request):
+    if not hasattr(request.user, 'student_profile'):
+        raise PermissionDenied
+    student = request.user.student_profile
+    return render(request, 'academics/student_dashboard.html', {'student': student})
+
+@login_required
+def teacher_dashboard(request):
+    staff_profile = getattr(request.user, 'staff_profile', None)
+    if not staff_profile or staff_profile.position != 'Teacher':
+        raise PermissionDenied
+    
+    # Get classes taught by this teacher
+    classes_taught = Class.objects.filter(teacher=staff_profile)
+    return render(request, 'academics/teacher_dashboard.html', {
+        'staff': staff_profile,
+        'classes_taught': classes_taught
+    })
+
+@login_required
+def parent_dashboard(request):
+    # Get all students associated with this parent (by email)
+    students = Student.objects.filter(parent_email=request.user.email)
+    if not students.exists():
+        raise PermissionDenied
+    
+    return render(request, 'academics/parent_dashboard.html', {
+        'students': students
+    })
+
+@login_required
+def academic_admin_dashboard(request):
+    if not (request.user.is_admin or 
+            (hasattr(request.user, 'staff_profile') and 
+            request.user.staff_profile.position == 'Administrator')):
+        raise PermissionDenied
+    
+    # Academic admin statistics
+    total_students = Student.objects.count()
+    total_teachers = StaffMember.objects.filter(position='Teacher').count()
+    active_classes = Class.objects.count()
+    
+    return render(request, 'academics/academic_admin_dashboard.html', {
+        'total_students': total_students,
+        'total_teachers': total_teachers,
+        'active_classes': active_classes
+    })
+
+def academic_services(request):
+    # Get any academic-specific data you need
+    academic_resources = {
+        'catalogs': CourseCatalog.objects.all(),
+        'calendars': AcademicCalendar.objects.all(),
+        'announcements': AcademicAnnouncement.objects.filter(is_published=True)
+    }
+    return render(request, 'main/academic_services.html', academic_resources)

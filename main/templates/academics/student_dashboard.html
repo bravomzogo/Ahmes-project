@@ -1,0 +1,95 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="content">
+          <h1 class="page-name">Student Dashboard</h1>
+          <ol class="breadcrumb">
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'services' %}">Academics</a></li>
+            <li class="active">Dashboard</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="user-dashboard page-wrapper">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="dashboard-wrapper user-dashboard">
+          <div class="media">
+            <div class="pull-left">
+              <img class="media-object user-img" src="{% if student.image %}{{ student.image.url }}{% else %}{% static 'images/default-user.jpg' %}{% endif %}" alt="Image">
+            </div>
+            <div class="media-body">
+              <h2 class="media-heading">Welcome, {{ student.first_name }}</h2>
+              <p>Admission Number: {{ student.admission_number }}</p>
+              <p>Class: {{ student.level.name }}</p>
+              <p>Campus: {{ student.campus.name }}</p>
+            </div>
+          </div>
+          
+          <div class="row mt-50">
+            <div class="col-md-4">
+              <div class="dashboard-card">
+                <h3><i class="fas fa-book"></i> My Courses</h3>
+                <p>View your current courses and materials</p>
+                <a href="#" class="btn btn-main">View Courses</a>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="dashboard-card">
+                <h3><i class="fas fa-tasks"></i> Assignments</h3>
+                <p>View and submit your assignments</p>
+                <a href="#" class="btn btn-main">View Assignments</a>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="dashboard-card">
+                <h3><i class="fas fa-chart-line"></i> Grades</h3>
+                <p>Check your academic performance</p>
+                <a href="#" class="btn btn-main">View Grades</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mt-30">
+            <div class="col-md-12">
+              <div class="panel panel-default recent-activity">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Recent Activity</h3>
+                </div>
+                <div class="panel-body">
+                  <ul class="list-unstyled">
+                    <li>
+                      <i class="fas fa-bookmark"></i> New assignment posted for Mathematics
+                      <span class="date">2 hours ago</span>
+                    </li>
+                    <li>
+                      <i class="fas fa-check-circle"></i> Assignment submitted for English
+                      <span class="date">1 day ago</span>
+                    </li>
+                    <li>
+                      <i class="fas fa-comment"></i> New feedback on your Science project
+                      <span class="date">3 days ago</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

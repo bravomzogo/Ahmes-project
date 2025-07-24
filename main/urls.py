@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
-from .views import CustomLoginView, register, verify_email, inbox, chat, logout_view, get_conversations,mark_messages_read, get_new_messages
+from .views import CustomLoginView, register, verify_email, inbox, chat, logout_view, get_conversations,mark_messages_read, get_new_messages, StudentLoginView, TeacherLoginView, ParentLoginView, AcademicAdminLoginView,student_dashboard, teacher_dashboard, parent_dashboard, academic_admin_dashboard
 
 
 
@@ -72,5 +72,21 @@ urlpatterns = [
     path('conversations/typing/', views.handle_typing, name='handle_typing'),
     path('conversations/<int:conversation_id>/typing-status/', views.get_typing_status, name='typing_status'),
     path('ahmes-tv/', views.ahmes_tv, name='ahmes_tv'),
+
+
+     # Academics URLs
+    path('academics/', views.academic_services, name='academics_service'),
+    
+    # Login URLs
+    path('academics/student/login/', StudentLoginView.as_view(), name='student_login'),
+    path('academics/teacher/login/', TeacherLoginView.as_view(), name='teacher_login'),
+    path('academics/parent/login/', ParentLoginView.as_view(), name='parent_login'),
+    path('academics/admin/login/', AcademicAdminLoginView.as_view(), name='academic_admin_login'),
+    
+    # Dashboard URLs
+    path('academics/student/dashboard/', student_dashboard, name='student_dashboard'),
+    path('academics/teacher/dashboard/', teacher_dashboard, name='teacher_dashboard'),
+    path('academics/parent/dashboard/', parent_dashboard, name='parent_dashboard'),
+    path('academics/admin/dashboard/', academic_admin_dashboard, name='academic_admin_dashboard'),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

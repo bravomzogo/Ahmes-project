@@ -327,3 +327,52 @@ class YouTubeVideo(models.Model):
         ordering = ['-published_at']
         verbose_name = 'YouTube Video'
         verbose_name_plural = 'YouTube Videos'
+
+
+class Class(models.Model):
+    name = models.CharField(max_length=100)
+    level = models.ForeignKey(Level, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(StaffMember, on_delete=models.CASCADE)
+    students = models.ManyToManyField(Student)
+    academic_year = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.level.name} ({self.academic_year})"
+
+    @property
+    def student_count(self):
+        return self.students.count()
+    
+
+
+class CourseCatalog(models.Model):
+    title = models.CharField(max_length=200)
+    file = models.FileField(upload_to='academic/catalogs/')
+    academic_year = models.CharField(max_length=20)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.academic_year})"
+
+class AcademicCalendar(models.Model):
+    title = models.CharField(max_length=200)
+    file = models.FileField(upload_to='academic/calendars/')
+    academic_year = models.CharField(max_length=20)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.academic_year})"
+
+class AcademicAnnouncement(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    date = models.DateField()
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
