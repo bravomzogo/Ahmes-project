@@ -1,89 +1,148 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% block loader %}{% endblock %}
+{% block title %}Student Dashboard | AHMES{% endblock %}
 
 {% block content %}
-<section class="page-header">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="content">
-          <h1 class="page-name">Student Dashboard</h1>
-          <ol class="breadcrumb">
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'services' %}">Academics</a></li>
-            <li class="active">Dashboard</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<div class="wrapper">
+  <!-- Sidebar -->
+  {% comment %} {% include 'main/sidebar.html' %} {% endcomment %}
 
-<section class="user-dashboard page-wrapper">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="dashboard-wrapper user-dashboard">
-          <div class="media">
-            <div class="pull-left">
-              <img class="media-object user-img" src="{% if student.image %}{{ student.image.url }}{% else %}{% static 'images/default-user.jpg' %}{% endif %}" alt="Image">
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container-fluid py-4">
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-4 border-bottom pb-2">
+        <h1 class="h3 mb-0 text-gray-800">
+          <i class="fas fa-user-graduate me-2"></i>Student Dashboard
+        </h1>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'academics_service' %}">Academics</a></li>
+          <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+      </div>
+
+      <!-- Student Profile -->
+      <div class="card shadow rounded-4 mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 me-4">
+              <img src="{% if student.profile_picture %}{{ student.profile_picture.url }}{% else %}{% static 'main/images/default-profile.png' %}{% endif %}" 
+                   class="rounded-circle shadow" 
+                   width="120" height="120" 
+                   alt="Profile Picture">
             </div>
-            <div class="media-body">
-              <h2 class="media-heading">Welcome, {{ student.first_name }}</h2>
-              <p>Admission Number: {{ student.admission_number }}</p>
-              <p>Class: {{ student.level.name }}</p>
-              <p>Campus: {{ student.campus.name }}</p>
-            </div>
-          </div>
-          
-          <div class="row mt-50">
-            <div class="col-md-4">
-              <div class="dashboard-card">
-                <h3><i class="fas fa-book"></i> My Courses</h3>
-                <p>View your current courses and materials</p>
-                <a href="#" class="btn btn-main">View Courses</a>
-              </div>
-            </div>
-            
-            <div class="col-md-4">
-              <div class="dashboard-card">
-                <h3><i class="fas fa-tasks"></i> Assignments</h3>
-                <p>View and submit your assignments</p>
-                <a href="#" class="btn btn-main">View Assignments</a>
-              </div>
-            </div>
-            
-            <div class="col-md-4">
-              <div class="dashboard-card">
-                <h3><i class="fas fa-chart-line"></i> Grades</h3>
-                <p>Check your academic performance</p>
-                <a href="#" class="btn btn-main">View Grades</a>
+            <div class="flex-grow-1">
+              <h2 class="h4 mb-1">Welcome, {{ student.first_name }} {{ student.last_name }}</h2>
+              <div class="row mt-3">
+                <div class="col-md-4">
+                  <p class="mb-1"><strong>Admission Number:</strong> {{ student.admission_number }}</p>
+                </div>
+                <div class="col-md-4">
+                  <p class="mb-1"><strong>Class:</strong> {{ student.level.name }}</p>
+                </div>
+                <div class="col-md-4">
+                  <p class="mb-1"><strong>Campus:</strong> {{ student.campus.name }}</p>
+                </div>
               </div>
             </div>
           </div>
-          
-          <div class="row mt-30">
-            <div class="col-md-12">
-              <div class="panel panel-default recent-activity">
-                <div class="panel-heading">
-                  <h3 class="panel-title">Recent Activity</h3>
+        </div>
+      </div>
+
+      <!-- Quick Access Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="card shadow rounded-4 h-100">
+            <div class="card-body text-center p-4">
+              <div class="icon-circle bg-primary text-white mb-3">
+                <i class="fas fa-book fa-2x"></i>
+              </div>
+              <h3 class="h5 mb-3">My Courses</h3>
+              <p class="text-muted mb-4">View your current courses and learning materials</p>
+              <a href="#" class="btn btn-primary rounded-pill px-4">
+                <i class="fas fa-arrow-right me-2"></i>View Courses
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card shadow rounded-4 h-100">
+            <div class="card-body text-center p-4">
+              <div class="icon-circle bg-success text-white mb-3">
+                <i class="fas fa-tasks fa-2x"></i>
+              </div>
+              <h3 class="h5 mb-3">Assignments</h3>
+              <p class="text-muted mb-4">View and submit your academic assignments</p>
+              <a href="#" class="btn btn-success rounded-pill px-4">
+                <i class="fas fa-arrow-right me-2"></i>View Assignments
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card shadow rounded-4 h-100">
+            <div class="card-body text-center p-4">
+              <div class="icon-circle bg-info text-white mb-3">
+                <i class="fas fa-chart-line fa-2x"></i>
+              </div>
+              <h3 class="h5 mb-3">Grades</h3>
+              <p class="text-muted mb-4">Check your academic performance and progress</p>
+              <a href="#" class="btn btn-info rounded-pill px-4">
+                <i class="fas fa-arrow-right me-2"></i>View Grades
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card shadow rounded-4">
+        <div class="card-header bg-white border-bottom-0 py-3">
+          <h3 class="h5 mb-0">
+            <i class="fas fa-bell me-2 text-primary"></i>Recent Activity
+          </h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <div class="list-group-item border-0 py-3">
+              <div class="d-flex align-items-center">
+                <div class="icon-circle-sm bg-primary text-white me-3">
+                  <i class="fas fa-bookmark"></i>
                 </div>
-                <div class="panel-body">
-                  <ul class="list-unstyled">
-                    <li>
-                      <i class="fas fa-bookmark"></i> New assignment posted for Mathematics
-                      <span class="date">2 hours ago</span>
-                    </li>
-                    <li>
-                      <i class="fas fa-check-circle"></i> Assignment submitted for English
-                      <span class="date">1 day ago</span>
-                    </li>
-                    <li>
-                      <i class="fas fa-comment"></i> New feedback on your Science project
-                      <span class="date">3 days ago</span>
-                    </li>
-                  </ul>
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">New assignment posted for Mathematics</h6>
+                  <small class="text-muted">2 hours ago</small>
                 </div>
+                <a href="#" class="btn btn-sm btn-outline-primary rounded-pill">View</a>
+              </div>
+            </div>
+            
+            <div class="list-group-item border-0 py-3">
+              <div class="d-flex align-items-center">
+                <div class="icon-circle-sm bg-success text-white me-3">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">Assignment submitted for English</h6>
+                  <small class="text-muted">1 day ago</small>
+                </div>
+                <a href="#" class="btn btn-sm btn-outline-success rounded-pill">View</a>
+              </div>
+            </div>
+            
+            <div class="list-group-item border-0 py-3">
+              <div class="d-flex align-items-center">
+                <div class="icon-circle-sm bg-info text-white me-3">
+                  <i class="fas fa-comment"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">New feedback on your Science project</h6>
+                  <small class="text-muted">3 days ago</small>
+                </div>
+                <a href="#" class="btn btn-sm btn-outline-info rounded-pill">View</a>
               </div>
             </div>
           </div>
@@ -91,5 +150,83 @@
       </div>
     </div>
   </div>
-</section>
+</div>
+
+{% block extra_css %}
+<style>
+  :root {
+    --sidebar-width: 250px;
+    --primary-color: #1a5276;
+    --primary-dark: #154360;
+    --secondary-color: #f39c12;
+  }
+
+  body {
+    background-color: #f8f9fc;
+  }
+
+  .wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .sidebar {
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background: var(--primary-dark);
+    color: #fff;
+    min-height: 100vh;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  }
+
+  .main-content {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+  }
+
+  .icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+  }
+
+  .icon-circle-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+  }
+
+  .breadcrumb-item a {
+    color: var(--primary-color);
+  }
+
+  .list-group-item {
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .list-group-item:first-child {
+    border-top: 0;
+  }
+</style>
+{% endblock %}
 {% endblock %}

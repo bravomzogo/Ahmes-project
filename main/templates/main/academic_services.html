@@ -3,24 +3,114 @@
 
 {% block content %}
 
+<style>
+  .dashboard {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .particles-js {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  .dashboard-content {
+    position: relative;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    height: 100%;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border-top: 4px solid #4e73df;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #4e73df;
+  }
+  
+  .btn-main {
+    background: #4e73df;
+    color: white;
+    border-radius: 4px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-main:hover {
+    background: #3a5bbf;
+    color: white;
+  }
+  
+  .resource-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    border-left: 4px solid #4e73df;
+  }
+  
+  .resource-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .resource-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .resource-list li:last-child {
+    border-bottom: none;
+  }
+  
+  .resource-list a {
+    color: #4e73df;
+  }
+</style>
 
-<section class="dashboard section">
-  <div class="container">
+<section class="dashboard section py-4">
+  <div id="particles-js" class="particles-js"></div>
+  
+  <div class="container dashboard-content">
     <div class="row">
-      <div class="col-md-12">
-        <div class="dashboard-header text-center">
-          <h2>Academic Services & Resources</h2>
-          <p class="lead">Comprehensive academic support for students, faculty, and staff</p>
-        </div>
+      <div class="col-md-12 text-center mb-4">
+        <h2 class="mb-3">Academic Services & Resources</h2>
+        <p class="text-muted">Access all your academic needs in one place</p>
       </div>
     </div>
     
     <!-- Academic Resources Section -->
-    <div class="row mt-30">
+    <div class="row mb-5">
       <div class="col-md-4">
         <div class="resource-card">
-          <h4><i class="fas fa-book"></i> Course Catalogs</h4>
-          <ul class="list-unstyled">
+          <h4><i class="fas fa-book mr-2"></i> Course Catalogs</h4>
+          <ul class="resource-list">
             {% for catalog in catalogs %}
               <li><a href="{{ catalog.file.url }}">{{ catalog.title }}</a></li>
             {% endfor %}
@@ -30,8 +120,8 @@
       
       <div class="col-md-4">
         <div class="resource-card">
-          <h4><i class="fas fa-calendar-alt"></i> Academic Calendars</h4>
-          <ul class="list-unstyled">
+          <h4><i class="fas fa-calendar-alt mr-2"></i> Academic Calendars</h4>
+          <ul class="resource-list">
             {% for calendar in calendars %}
               <li><a href="{{ calendar.file.url }}">{{ calendar.title }}</a></li>
             {% endfor %}
@@ -41,10 +131,14 @@
       
       <div class="col-md-4">
         <div class="resource-card">
-          <h4><i class="fas fa-bullhorn"></i> Announcements</h4>
-          <ul class="list-unstyled">
+          <h4><i class="fas fa-bullhorn mr-2"></i> Announcements</h4>
+          <ul class="resource-list">
             {% for announcement in announcements %}
-              <li>{{ announcement.title }} - {{ announcement.date|date:"M d, Y" }}</li>
+              <li>
+                <strong>{{ announcement.title }}</strong>
+                <p>{{ announcement.content }}</p>
+                <div class="text-muted small">{{ announcement.date|date:"M d, Y" }}</div>
+              </li>
             {% endfor %}
           </ul>
         </div>
@@ -52,63 +146,134 @@
     </div>
     
     <!-- Dashboard Portals Section -->
-    <div class="row mt-50">
-      <div class="col-md-12">
-        <div class="section-title">
-          <h3>Academic Portals</h3>
+    <div class="row">
+      <div class="col-md-12 text-center mb-4">
+        <h3 class="mb-3">Academic Portals</h3>
+        <p class="text-muted">Select your portal to login</p>
+      </div>
+      
+      <div class="col-md-3 col-sm-6">
+        <div class="dashboard-card">
+          <div class="card-icon">
+            <i class="fas fa-user-graduate"></i>
+          </div>
+          <h4>Student Portal</h4>
+          <p class="text-muted small">Access your academic resources</p>
+          <a href="{% url 'student_login' %}" class="btn btn-main btn-sm">Login</a>
         </div>
-        
-        <div class="row">
-          <!-- Student Portal -->
-          <div class="col-md-3 col-sm-6">
-            <div class="dashboard-card">
-              <div class="card-icon">
-                <i class="fas fa-user-graduate"></i>
-              </div>
-              <h3>Student Portal</h3>
-              <p>Access your courses, assignments, grades and academic resources</p>
-              <a href="{% url 'student_login' %}" class="btn btn-main">Login</a>
-            </div>
+      </div>
+      
+      <div class="col-md-3 col-sm-6">
+        <div class="dashboard-card">
+          <div class="card-icon">
+            <i class="fas fa-chalkboard-teacher"></i>
           </div>
-          
-          <!-- Teacher Portal -->
-          <div class="col-md-3 col-sm-6">
-            <div class="dashboard-card">
-              <div class="card-icon">
-                <i class="fas fa-chalkboard-teacher"></i>
-              </div>
-              <h3>Teacher Portal</h3>
-              <p>Manage your classes, upload materials, and track student progress</p>
-              <a href="{% url 'teacher_login' %}" class="btn btn-main">Login</a>
-            </div>
+          <h4>Teacher Portal</h4>
+          <p class="text-muted small">Manage your classes</p>
+          <a href="{% url 'teacher_login' %}" class="btn btn-main btn-sm">Login</a>
+        </div>
+      </div>
+      
+      <div class="col-md-3 col-sm-6">
+        <div class="dashboard-card">
+          <div class="card-icon">
+            <i class="fas fa-user-friends"></i>
           </div>
-          
-          <!-- Parent Portal -->
-          <div class="col-md-3 col-sm-6">
-            <div class="dashboard-card">
-              <div class="card-icon">
-                <i class="fas fa-user-friends"></i>
-              </div>
-              <h3>Parent Portal</h3>
-              <p>Monitor your child's academic performance and school activities</p>
-              <a href="{% url 'parent_login' %}" class="btn btn-main">Login</a>
-            </div>
+          <h4>Parent Portal</h4>
+          <p class="text-muted small">Monitor student progress</p>
+          <a href="{% url 'parent_login' %}" class="btn btn-main btn-sm">Login</a>
+        </div>
+      </div>
+      
+      <div class="col-md-3 col-sm-6">
+        <div class="dashboard-card">
+          <div class="card-icon">
+            <i class="fas fa-tasks"></i>
           </div>
-          
-          <!-- Academic Admin Portal -->
-          <div class="col-md-3 col-sm-6">
-            <div class="dashboard-card">
-              <div class="card-icon">
-                <i class="fas fa-tasks"></i>
-              </div>
-              <h3>Academic Admin</h3>
-              <p>Manage curriculum, academic calendar, and institutional reports</p>
-              <a href="{% url 'academic_admin_login' %}" class="btn btn-main">Login</a>
-            </div>
-          </div>
+          <h4>Academic Admin</h4>
+          <p class="text-muted small">Manage institutional data</p>
+          <a href="{% url 'academic_admin_login' %}" class="btn btn-main btn-sm">Login</a>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Particles.js for background animation -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    particlesJS('particles-js', {
+      "particles": {
+        "number": {
+          "value": 60,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#4e73df"
+        },
+        "shape": {
+          "type": "circle",
+          "stroke": {
+            "width": 0,
+            "color": "#000000"
+          }
+        },
+        "opacity": {
+          "value": 0.3,
+          "random": false
+        },
+        "size": {
+          "value": 3,
+          "random": true
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#4e73df",
+          "opacity": 0.2,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 2,
+          "direction": "none",
+          "random": false,
+          "straight": false,
+          "out_mode": "out",
+          "bounce": false
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "grab"
+          },
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          },
+          "resize": true
+        },
+        "modes": {
+          "grab": {
+            "distance": 140,
+            "line_linked": {
+              "opacity": 1
+            }
+          },
+          "push": {
+            "particles_nb": 4
+          }
+        }
+      }
+    });
+  });
+</script>
+
 {% endblock %}

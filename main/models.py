@@ -6,6 +6,7 @@ from datetime import timedelta
 import secrets
 from cloudinary.models import CloudinaryField
 from django.core.validators import FileExtensionValidator
+from django.templatetags.static import static
 
 class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
@@ -64,6 +65,7 @@ class Level(models.Model):
     def __str__(self):
         return self.name
 
+
 class Student(models.Model):
     GENDER_CHOICES = [
         ('M', 'Male'),
@@ -98,11 +100,50 @@ class Student(models.Model):
     parent_phone = models.CharField(max_length=20)
     parent_email = models.EmailField()
     address = models.TextField()
+    username = models.CharField(max_length=150, unique=True, blank=True, null=True)
+    password = models.CharField(max_length=128, blank=True, null=True)
+    profile_picture = CloudinaryField(
+        'students/profile_pictures',
+        folder="school/students/profile_pictures",
+        transformation={'quality': 'auto:good', 'width': 300, 'height': 300, 'crop': 'fill'},
+        blank=True,
+        null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.admission_number}"
+
+    def save(self, *args, **kwargs):
+        if not self.username:
+            # Generate username if not provided (e.g., firstname.lastname)
+            self.username = f"{self.first_name.lower()}.{self.last_name.lower()}"
+            counter = 1
+            while Student.objects.filter(username=self.username).exists():
+                self.username = f"{self.first_name.lower()}.{self.last_name.lower()}{counter}"
+                counter += 1
+        
+        # Create/update user account if password is provided
+        if self.password and not self.user:
+            user = User.objects.create_user(
+                username=self.username,
+                password=self.password,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                email=self.parent_email
+            )
+            self.user = user
+        elif self.password and self.user:
+            self.user.set_password(self.password)
+            self.user.save()
+        
+        super().save(*args, **kwargs)
+
+    def get_profile_picture_url(self):
+        if self.profile_picture:
+            return self.profile_picture.url
+        return static('main/images/default-profile.png')
 
     class Meta:
         ordering = ['-created_at']

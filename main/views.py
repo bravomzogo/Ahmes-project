@@ -295,12 +295,22 @@ def add_student(request):
     if request.method == 'POST':
         form = StudentForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            # Generate a random password if not provided
+            if not form.cleaned_data.get('password'):
+                random_password = User.objects.make_random_password()
+                form.instance.password = random_password
+            
+            student = form.save()
+            
             messages.success(request, 'Student added successfully!')
             return redirect('manage_students')
     else:
         form = StudentForm()
-    return render(request, 'main/add_student.html', {'form': form})
+    
+    return render(request, 'main/add_student.html', {
+        'form': form,
+        'title': 'Add New Student'
+    })
 
 @login_required
 @user_passes_test(is_admin)

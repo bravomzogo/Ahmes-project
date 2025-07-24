@@ -42,7 +42,18 @@ class StaffRegistrationForm(UserCreationForm):
             user.save()
         return user
 
+
+
 class StudentForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'placeholder': 'Password'}),
+        required=False
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password'}),
+        required=False
+    )
+    
     class Meta:
         model = Student
         fields = '__all__'
@@ -50,7 +61,25 @@ class StudentForm(forms.ModelForm):
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'admission_date': forms.DateInput(attrs={'type': 'date'}),
+            'profile_picture': forms.FileInput(attrs={'accept': 'image/*'}),
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+        
+        if password and password != confirm_password:
+            raise forms.ValidationError("Passwords don't match")
+        
+        return cleaned_data
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].required = False
+        if self.instance and self.instance.user:
+            self.fields['username'].initial = self.instance.user.username
+
 
 class StaffMemberForm(forms.ModelForm):
     class Meta:
