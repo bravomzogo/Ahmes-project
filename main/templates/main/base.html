@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -22,12 +23,16 @@
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
     />
 
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
     />
 
     <!-- Google Fonts -->
@@ -37,26 +42,10 @@
     />
 
     <!-- AOS Animation -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
     <link
       href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"
       rel="stylesheet"
     />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-    <!-- Bootstrap CSS (in <head>) -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Bootstrap JS (before closing </body>) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 
     <style>
       :root {
@@ -960,30 +949,31 @@
           margin-right: 10px;
         }
       }
-     /* Loader Styles */
-    .loader-container {
+
+      /* Loader Styles */
+      .loader-container {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(26, 82, 118, 0.98); /* Matching your primary color */
+        background-color: rgba(26, 82, 118, 0.98);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         z-index: 9999;
         transition: opacity 0.8s ease-out;
-    }
-    
-    .loader-wrapper {
+      }
+
+      .loader-wrapper {
         text-align: center;
         position: relative;
         width: 200px;
         height: 200px;
-    }
-    
-    .school-logo {
+      }
+
+      .school-logo {
         width: 120px;
         height: 120px;
         margin: 0 auto 20px;
@@ -995,10 +985,10 @@
         border-radius: 50%;
         animation: fadeIn 1s ease-in-out;
         position: relative;
-        top: 40px; /* Adjusted to center the logo */
-    }
-    
-    .loader {
+        top: 40px;
+      }
+
+      .loader {
         position: absolute;
         top: 0;
         left: 0;
@@ -1008,9 +998,9 @@
         border-radius: 50%;
         border-top-color: var(--secondary-color);
         animation: spin 1.5s linear infinite;
-    }
-    
-    .loader:after {
+      }
+
+      .loader:after {
         content: '';
         position: absolute;
         top: 10px;
@@ -1021,26 +1011,26 @@
         border-radius: 50%;
         border-top-color: rgba(243, 156, 18, 0.6);
         animation: spin 1.2s linear infinite reverse;
-    }
-    
-    .progress-container {
+      }
+
+      .progress-container {
         width: 200px;
         height: 4px;
         background: rgba(255, 255, 255, 0.1);
         border-radius: 2px;
         margin-top: 30px;
         overflow: hidden;
-    }
-    
-    .progress-bar {
+      }
+
+      .progress-bar {
         height: 100%;
         width: 0;
         background: linear-gradient(90deg, var(--secondary-color), var(--secondary-dark));
         transition: width 0.3s ease;
         border-radius: 2px;
-    }
-    
-    .loader-text {
+      }
+
+      .loader-text {
         color: white;
         font-family: 'Poppins', sans-serif;
         font-size: 18px;
@@ -1049,110 +1039,109 @@
         text-align: center;
         text-transform: uppercase;
         letter-spacing: 1px;
-    }
-    
-    .loader-subtext {
+      }
+
+      .loader-subtext {
         color: rgba(255, 255, 255, 0.7);
         font-size: 14px;
         margin-top: 10px;
         font-weight: 300;
-    }
-    
-    @keyframes spin {
+      }
+
+      @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
-    }
-    
-    /* Hide loader when page is loaded */
-    .loaded .loader-container {
+      }
+
+      /* Hide loader when page is loaded */
+      .loaded .loader-container {
         opacity: 0;
         pointer-events: none;
-    }
-    /* Academics Page Styles */
-.dashboard-card {
-  background: #fff;
-  border-radius: 5px;
-  padding: 30px 20px;
-  text-align: center;
-  margin-bottom: 30px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  height: 100%;
-}
+      }
 
-.dashboard-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
+      /* Academics Page Styles */
+      .dashboard-card {
+        background: #fff;
+        border-radius: 5px;
+        padding: 30px 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+      }
 
-.dashboard-card .card-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 20px;
-  background: #f8f9fa;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  color: var(--main-color);
-}
+      .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
 
-.dashboard-card h3 {
-  font-size: 20px;
-  margin-bottom: 15px;
-}
+      .dashboard-card .card-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        color: var(--main-color);
+      }
 
-.dashboard-card p {
-  color: #6c757d;
-  margin-bottom: 20px;
-}
+      .dashboard-card h3 {
+        font-size: 20px;
+        margin-bottom: 15px;
+      }
 
-.resource-card {
-  background: #fff;
-  border-radius: 5px;
-  padding: 25px;
-  margin-bottom: 30px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  height: 100%;
-}
+      .dashboard-card p {
+        color: #6c757d;
+        margin-bottom: 20px;
+      }
 
-.resource-card h4 {
-  font-size: 18px;
-  margin-bottom: 15px;
-  color: var(--main-color);
-}
+      .resource-card {
+        background: #fff;
+        border-radius: 5px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        height: 100%;
+      }
 
-.resource-card h4 i {
-  margin-right: 10px;
-}
+      .resource-card h4 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        color: var(--main-color);
+      }
 
-.resource-card p {
-  color: #6c757d;
-  margin-bottom: 15px;
-}
+      .resource-card h4 i {
+        margin-right: 10px;
+      }
+
+      .resource-card p {
+        color: #6c757d;
+        margin-bottom: 15px;
+      }
     </style>
     {% block extra_css %}{% endblock %}
   </head>
   <body>
- {% block loader %}
+    {% block loader %}
     <!-- Professional Loader -->
     <div class="loader-container">
-        <div class="loader-wrapper">
-            <div class="school-logo"></div>
-            <div class="loader"></div>
-        </div>
-        
-        <div class="progress-container">
-            <div class="progress-bar" id="pageLoadProgress"></div>
-        </div>
-        
-        <div class="loader-text">AHMES SECONDARY SCHOOL</div>
-        <div class="loader-subtext">Forward Ever, Backward Never.</div>
+      <div class="loader-wrapper">
+        <div class="school-logo"></div>
+        <div class="loader"></div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="pageLoadProgress"></div>
+      </div>
+      <div class="loader-text">AHMES SECONDARY SCHOOL</div>
+      <div class="loader-subtext">Forward Ever, Backward Never.</div>
     </div>
     {% endblock %}
-    <!-- Announcement Bar --><br />
-  
+
+    <br>
 
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
@@ -1195,22 +1184,23 @@
                 <span class="nav-text">Home</span>
                 <span class="nav-underline"></span>
               </a>
-            </li>,
-             <li class="nav-item">
-    <a class="nav-link {% if 'services' in request.path %}active{% endif %}" href="{% url 'academics_service' %}">
-        <span class="nav-icon"><i class="fas fa-book-open"></i></span>
-        <span class="nav-text">Academics</span>
-        <span class="nav-underline"></span>
-    </a>
-</li>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link {% if 'services' in request.path %}active{% endif %}"
+                href="{% url 'academics_service' %}"
+              >
+                <span class="nav-icon"><i class="fas fa-book-open"></i></span>
+                <span class="nav-text">Academics</span>
+                <span class="nav-underline"></span>
+              </a>
+            </li>
             <li class="nav-item">
               <a
                 class="nav-link {% if 'services' in request.path %}active{% endif %}"
                 href="{% url 'services' %}"
               >
-                <span class="nav-icon"
-                  ><i class="fas fa-concierge-bell"></i
-                ></span>
+                <span class="nav-icon"><i class="fas fa-concierge-bell"></i></span>
                 <span class="nav-text">Services</span>
                 <span class="nav-underline"></span>
               </a>
@@ -1235,7 +1225,6 @@
                 <span class="nav-underline"></span>
               </a>
             </li>
-
             <li class="nav-item">
               <a
                 class="nav-link {% if 'contact' in request.path %}active{% endif %}"
@@ -1257,12 +1246,15 @@
               </a>
             </li>
             <li class="nav-item">
-    <a class="nav-link {% if 'ahmes-tv' in request.path %}active{% endif %}" href="{% url 'ahmes_tv' %}">
-        <span class="nav-icon"><i class="fab fa-youtube"></i></span>
-        <span class="nav-text">TV</span>
-        <span class="nav-underline"></span>
-    </a>
-</li>
+              <a
+                class="nav-link {% if 'ahmes-tv' in request.path %}active{% endif %}"
+                href="{% url 'ahmes_tv' %}"
+              >
+                <span class="nav-icon"><i class="fab fa-youtube"></i></span>
+                <span class="nav-text">TV</span>
+                <span class="nav-underline"></span>
+              </a>
+            </li>
             {% if user.is_authenticated %}
             <li class="nav-item">
               <a
@@ -1276,33 +1268,40 @@
             </li>
             {% endif %}
             <li class="nav-item">
-  {% if request.user.is_authenticated %}
-    <a
-      class="nav-link"
-      href="{% url 'logout' %}"
-      onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-    >
-      <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
-      <span class="nav-text">Logout</span>
-      <span class="nav-underline"></span>
-    </a>
-    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
-      {% csrf_token %}
-    </form>
-  {% else %}
-    <a
-      class="nav-link {% if 'login' in request.path %}active{% endif %}"
-      href="{% url 'login' %}"
-    >
-      <span class="nav-icon"><i class="fas fa-sign-in-alt"></i></span>
-      <span class="nav-text">Login</span>
-      <span class="nav-underline"></span>
-    </a>
-  {% endif %}
-</li>
-
+              {% if request.user.is_authenticated %}
+              <a
+                class="nav-link"
+                href="{% url 'logout' %}"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+              >
+                <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+                <span class="nav-text">Logout</span>
+                <span class="nav-underline"></span>
+              </a>
+              <form
+                id="logout-form"
+                action="{% url 'logout' %}"
+                method="post"
+                style="display: none;"
+              >
+                {% csrf_token %}
+              </form>
+              {% else %}
+              <a
+                class="nav-link {% if 'login' in request.path %}active{% endif %}"
+                href="{% url 'login' %}"
+              >
+                <span class="nav-icon"><i class="fas fa-sign-in-alt"></i></span>
+                <span class="nav-text">Login</span>
+                <span class="nav-underline"></span>
+              </a>
+              {% endif %}
+            </li>
             <li class="nav-item">
-              <a class="nav-link cta-button" href="{% url 'admin_login' %}">
+              <a
+                class="nav-link cta-button"
+                href="{% url 'admin_login' %}"
+              >
                 <span class="nav-icon"><i class="fas fa-lock"></i></span>
                 <span class="nav-text">Admin</span>
               </a>
@@ -1418,12 +1417,12 @@
           </div>
         </div>
         <div class="copyright">
-         <p style="font-family: Arial, sans-serif; font-size: 16px; color: #555; text-align: center;">
-  Copyright © 2025 AHMES - Developed by Udom Student 
-  <span style="font-family: 'Courier New', monospace; font-size: 20px; color: #3498db; letter-spacing: 1px; font-weight: bold; text-transform: uppercase; background: linear-gradient(90deg, #3498db, #2ecc71); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-    Shaibu Mzogo
-  </span>
-</p>
+          <p style="font-family: Arial, sans-serif; font-size: 16px; color: #555; text-align: center;">
+            Copyright © 2025 AHMES - Developed by Udom Student 
+            <span style="font-family: 'Courier New', monospace; font-size: 20px; color: #3498db; letter-spacing: 1px; font-weight: bold; text-transform: uppercase; background: linear-gradient(90deg, #3498db, #2ecc71); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+              Shaibu Mzogo
+            </span>
+          </p>
         </div>
       </div>
     </footer>
@@ -1434,10 +1433,14 @@
     </a>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
 
     <!-- AOS Animation -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -1511,45 +1514,26 @@
           });
         });
 
-        // Mobile dropdown toggle
-        if (window.innerWidth <= 991.98) {
-          document.querySelectorAll(".dropdown-toggle").forEach((dropdown) => {
-            dropdown.addEventListener("click", function (e) {
-              e.preventDefault();
-              const parent = this.closest(".nav-item.dropdown");
-              parent.classList.toggle("show");
-              const menu = parent.querySelector(".dropdown-menu");
-              menu.classList.toggle("show");
-            });
-          });
-        }
-      });
-       // Enhanced page loading simulation
-    document.addEventListener('DOMContentLoaded', function() {
-        // Simulate progress (for demonstration)
+        // Enhanced page loading simulation
         let progress = 0;
-        const progressBar = document.getElementById('pageLoadProgress');
-        const progressInterval = setInterval(function() {
-            progress += Math.random() * 10;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(progressInterval);
-                
-                // Add loaded class with slight delay for smooth transition
-                setTimeout(function() {
-                    document.body.classList.add('loaded');
-                }, 200);
-            }
-            progressBar.style.width = progress + '%';
+        const progressBar = document.getElementById("pageLoadProgress");
+        const progressInterval = setInterval(function () {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(progressInterval);
+            setTimeout(function () {
+              document.body.classList.add("loaded");
+            }, 200);
+          }
+          progressBar.style.width = progress + "%";
         }, 150);
-        
+
         // Fallback in case load event doesn't fire
-        setTimeout(function() {
-            document.body.classList.add('loaded');
-        }, 2000); // 4 seconds maximum wait time
-        
-        // Rest of your existing JavaScript...
-    });
+        setTimeout(function () {
+          document.body.classList.add("loaded");
+        }, 2000);
+      });
     </script>
     {% block extra_js %}{% endblock %}
   </body>

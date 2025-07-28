@@ -1,38 +1,136 @@
 {% load static %}
-<div class="sidebar">
+
+<!-- Mobile Toggle Button -->
+<button class="d-md-none btn btn-dark btn-sm px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#academicAdminSidebar" style="position: fixed; top: 80px; left: 10px; z-index: 1040; width: 40px;">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- Desktop Sidebar -->
+<div class="col-md-3 col-lg-2 d-none d-md-block sidebar bg-dark text-white">
   <div class="sidebar-header p-3">
     <h3 class="text-center">AHMES Academic Admin</h3>
   </div>
   <ul class="nav flex-column p-2">
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'academic_admin_dashboard' %}">
-        <i class="fas fa-tachometer-alt"></i> Dashboard
+      <a class="nav-link text-white {% if request.resolver_match.url_name == 'academic_admin_dashboard' %}active bg-secondary{% endif %}" href="{% url 'academic_admin_dashboard' %}">
+        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'manage_classes' %}">
-        <i class="fas fa-school"></i> Classes
+      <a class="nav-link text-white {% if 'manage_classes' in request.resolver_match.url_name %}active bg-secondary{% endif %}" href="{% url 'manage_classes' %}">
+        <i class="fas fa-school me-2"></i> Classes
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'manage_academic_announcements' %}">
-        <i class="fas fa-bullhorn"></i> Announcements
+      <a class="nav-link text-white {% if 'manage_academic_announcements' in request.resolver_match.url_name %}active bg-secondary{% endif %}" href="{% url 'manage_academic_announcements' %}">
+        <i class="fas fa-bullhorn me-2"></i> Announcements
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'manage_course_catalogs' %}">
-        <i class="fas fa-book"></i> Catalogs
+      <a class="nav-link text-white {% if 'manage_course_catalogs' in request.resolver_match.url_name %}active bg-secondary{% endif %}" href="{% url 'manage_course_catalogs' %}">
+        <i class="fas fa-book me-2"></i> Catalogs
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'manage_academic_calendars' %}">
-        <i class="fas fa-calendar-alt"></i>Calendars
+      <a class="nav-link text-white {% if 'manage_academic_calendars' in request.resolver_match.url_name %}active bg-secondary{% endif %}" href="{% url 'manage_academic_calendars' %}">
+        <i class="fas fa-calendar-alt me-2"></i> Calendars
       </a>
     </li>
   </ul>
   <div class="sidebar-footer p-3">
-    <a class="nav-link" href="{% url 'logout' %}">
-      <i class="fas fa-sign-out-alt"></i> Logout
+    <a class="nav-link text-white" href="{% url 'logout' %}">
+      <i class="fas fa-sign-out-alt me-2"></i> Logout
     </a>
   </div>
 </div>
+
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start d-md-none bg-dark text-white" tabindex="-1" id="academicAdminSidebar">
+  <div class="offcanvas-header">
+    <h3 class="offcanvas-title">AHMES Academic Admin</h3>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body p-0">
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link text-white {% if request.resolver_match.url_name == 'academic_admin_dashboard' %}active bg-secondary{% endif %}" href="{% url 'academic_admin_dashboard' %}" onclick="closeAcademicAdminSidebar()">
+          <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'manage_classes' in request.resolver_match.url_name %}active bg-secondary{% endif %}" href="{% url 'manage_classes' %}" onclick="closeAcademicAdminSidebar()">
+          <i class="fas fa-school me-2"></i> Classes
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'manage_academic_announcements' in request.resolver_match.url_name %}active bg-secondary{% endif %}" href="{% url 'manage_academic_announcements' %}" onclick="closeAcademicAdminSidebar()">
+          <i class="fas fa-bullhorn me-2"></i> Announcements
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'manage_course_catalogs' in request.resolver_match.url_name %}active bg-secondary{% endif %}" href="{% url 'manage_course_catalogs' %}" onclick="closeAcademicAdminSidebar()">
+          <i class="fas fa-book me-2"></i> Catalogs
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {% if 'manage_academic_calendars' in request.resolver_match.url_name %}active bg-secondary{% endif %}" href="{% url 'manage_academic_calendars' %}" onclick="closeAcademicAdminSidebar()">
+          <i class="fas fa-calendar-alt me-2"></i> Calendars
+        </a>
+      </li>
+    </ul>
+    
+    <div class="sidebar-footer p-3 mt-auto">
+      <a class="nav-link text-white" href="{% url 'logout' %}" onclick="closeAcademicAdminSidebar()">
+        <i class="fas fa-sign-out-alt me-2"></i> Logout
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function closeAcademicAdminSidebar() {
+  const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('academicAdminSidebar'));
+  if (offcanvas) {
+    offcanvas.hide();
+  }
+}
+</script>
+
+<style>
+.sidebar {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.nav-link.active {
+  font-weight: bold;
+}
+
+.nav-link:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+/* Ensure proper spacing for nav items */
+.nav-item {
+  margin-bottom: 5px;
+}
+
+/* Style for the offcanvas header */
+.offcanvas-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+}
+
+/* Make the offcanvas title stand out */
+.offcanvas-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+</style>

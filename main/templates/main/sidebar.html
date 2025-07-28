@@ -1,8 +1,9 @@
 {% load static %}
-{% comment %} <!-- Mobile Toggle Button -->
-<button class="d-md-none btn btn-dark btn-sm px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" style="position: fixed; top: 80px; left: 10px; z-index: 1040; width: 60px;">
-  <i class="fas fa-bars me-1"></i>
-</button> {% endcomment %}
+
+<!-- Mobile Toggle Button -->
+<button class="d-md-none btn btn-dark btn-sm px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" style="position: fixed; top: 80px; left: 10px; z-index: 1040; width: 40px;">
+  <i class="fas fa-bars"></i>
+</button>
 
 <!-- Desktop Sidebar -->
 <div class="col-md-3 col-lg-2 d-none d-md-block bg-dark sidebar">
@@ -66,8 +67,8 @@
   </div>
 </div>
 
-<!-- Mobile Offcanvas Sidebar with Swipe Support -->
-<div class="offcanvas offcanvas-start d-md-none bg-dark" tabindex="-1" id="sidebarMenu" style="visibility: hidden;">
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start d-md-none bg-dark" tabindex="-1" id="sidebarMenu">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title text-white">Menu</h5>
     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -132,51 +133,7 @@
   </div>
 </div>
 
-<!-- Swipe Detection Area -->
-<div class="swipe-area d-md-none" style="position: fixed; left: 0; top: 0; bottom: 0; width: 30px; z-index: 1039;"></div>
-
-<style>
-  .offcanvas-start {
-    transition: transform 0.3s ease-in-out;
-  }
-  .swipe-area {
-    touch-action: none;
-  }
-</style>
-
 <script>
-// Initialize Hammer.js for swipe gestures
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize offcanvas
-  const offcanvasEl = document.getElementById('sidebarMenu');
-  const offcanvas = new bootstrap.Offcanvas(offcanvasEl);
-  
-  // Make offcanvas visible after initialization to prevent flash
-  setTimeout(() => {
-    offcanvasEl.style.visibility = 'visible';
-  }, 100);
-
-  // Set up swipe detection
-  const swipeArea = document.querySelector('.swipe-area');
-  const hammer = new Hammer(swipeArea);
-  
-  hammer.on('swiperight', function() {
-    offcanvas.show();
-  });
-  
-  hammer.on('swipeleft', function() {
-    offcanvas.hide();
-  });
-  
-  // Close offcanvas when clicking outside
-  document.addEventListener('click', function(e) {
-    if (!offcanvasEl.contains(e.target) && !e.target.closest('.swipe-area') && 
-        !e.target.classList.contains('btn') && offcanvas._isShown) {
-      offcanvas.hide();
-    }
-  });
-});
-
 function closeOffcanvas() {
   const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('sidebarMenu'));
   if (offcanvas) {
