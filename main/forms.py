@@ -295,3 +295,37 @@ class AcademicCalendarForm(forms.ModelForm):
             'is_active': forms.CheckboxInput(),
             'file': forms.FileInput(),
         }
+
+
+from .models import Subject, Result
+
+class SubjectForm(forms.ModelForm):
+    class Meta:
+        model = Subject
+        fields = ['name',  'description', 'level']
+
+class ResultForm(forms.ModelForm):
+    class Meta:
+        model = Result
+        fields = ['student', 'subject', 'school_class', 'term', 'academic_year', 
+                 'exam_score', 'test_score', 'assignment_score']
+        
+    def __init__(self, *args, **kwargs):
+        teacher = kwargs.pop('teacher', None)
+        super().__init__(*args, **kwargs)
+        
+        if teacher:
+            # Filter students and classes based on the teacher's classes
+            classes_taught = SchoolClass.objects.filter(teacher=teacher)
+            self.fields['school_class'].queryset = classes_taught
+            self.fields['student'].queryset = Student.objects.filter(
+                schoolclass__in=classes_taught
+            ).distinct()
+            self.fields['subject'].queryset = Subject.objects.filter(
+                level__in=classes_taught.values_list('level', flat=True)
+            ).distinct()
+
+class ResultApprovalForm(forms.ModelForm):
+    class Meta:
+        model = Result
+        fields = ['is_approved']

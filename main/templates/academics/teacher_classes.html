@@ -1,0 +1,58 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">My Classes</h1>
+    <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Class Name</th>
+              <th>Level</th>
+              <th>Student Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for class in classes_taught %}
+            <tr>
+              <td>{{ class.name }}</td>
+              <td>{{ class.level }}</td>
+              <td>{{ class.student_count }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center">No classes assigned</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      {% if is_paginated %}
+      <div class="pagination mt-4">
+        <span class="page-links">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-primary">Previous</a>
+          {% endif %}
+          <span class="page-current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </span>
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-primary">Next</a>
+          {% endif %}
+        </span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

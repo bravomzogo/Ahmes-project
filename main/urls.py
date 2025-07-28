@@ -86,4 +86,19 @@ path('ad/academic-calendars/add/', add_academic_calendar, name='add_academic_cal
 path('ad/academic-calendars/edit/<int:pk>/', views.edit_academic_calendar, name='edit_academic_calendar'),
 path('ad/academic-calendars/delete/<int:pk>/', views.delete_academic_calendar, name='delete_academic_calendar'),
 
+    # Teacher URLs
+    path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
+    path('teacher/results/', views.teacher_result_dashboard, name='teacher_result_dashboard'),
+    path('teacher/results/add/', views.add_result, name='add_result'),
+    path('teacher/results/edit/<int:pk>/', views.edit_result, name='edit_result'),
+    path('teacher/results/delete/<int:pk>/', views.delete_result, name='delete_result'),
+    path('teacher/classes/', views.teacher_classes, name='teacher_classes'),
+    path('teacher/gradebook/', views.teacher_gradebook, name='teacher_gradebook'),
+    
+    # Admin URLs
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin/results/', views.admin_result_dashboard, name='admin_result_dashboard'),
+    path('admin/results/review/<int:pk>/', views.review_result, name='review_result'),
+    path('admin/results/bulk-approve/', views.bulk_approve_results, name='bulk_approve_results'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

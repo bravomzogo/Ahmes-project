@@ -43,48 +43,48 @@
           </div>
         </div>
 
-        <!-- Academic Announcements Card -->
+        <!-- Pending Results Card -->
         <div class="col-xl-3 col-md-6 mb-4">
           <div class="card border-left-warning shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                    Academic Announcements
+                    Pending Results
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
-                    {{ academic_announcements }}
+                    {{ pending_results_count }}
                   </div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-bullhorn fa-2x text-gray-300"></i>
+                  <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
                 </div>
               </div>
-              <a href="{% url 'manage_academic_announcements' %}" class="small-box-footer mt-2">
+              <a href="{% url 'admin_result_dashboard' %}" class="small-box-footer mt-2">
                 More info <i class="fas fa-arrow-circle-right"></i>
               </a>
             </div>
           </div>
         </div>
 
-        <!-- Active Course Catalogs Card -->
+        <!-- Approved Results Card -->
         <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border-left-secondary shadow h-100 py-2">
+          <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
-                    Active Course Catalogs
+                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                    Approved Results
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
-                    {{ active_catalogs }}
+                    {{ approved_results_count }}
                   </div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-book fa-2x text-gray-300"></i>
+                  <i class="fas fa-check-circle fa-2x text-gray-300"></i>
                 </div>
               </div>
-              <a href="{% url 'manage_course_catalogs' %}" class="small-box-footer mt-2">
+              <a href="{% url 'admin_result_dashboard' %}?status=approved" class="small-box-footer mt-2">
                 More info <i class="fas fa-arrow-circle-right"></i>
               </a>
             </div>
@@ -98,7 +98,7 @@
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                    Active Academic Calendars
+                    Active Calendars
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
                     {{ active_calendars }}
@@ -129,8 +129,8 @@
                 <a href="{% url 'add_class' %}" class="btn btn-info btn-block">
                   <i class="fas fa-school mr-2"></i> Add New Class
                 </a>
-                <a href="{% url 'add_academic_announcement' %}" class="btn btn-warning btn-block">
-                  <i class="fas fa-bullhorn mr-2"></i> Add Announcement
+                <a href="{% url 'bulk_approve_results' %}" class="btn btn-warning btn-block">
+                  <i class="fas fa-clipboard-check mr-2"></i> Bulk Approve Results
                 </a>
                 <a href="{% url 'add_course_catalog' %}" class="btn btn-secondary btn-block">
                   <i class="fas fa-book mr-2"></i> Add Course Catalog
@@ -142,6 +142,52 @@
             </div>
           </div>
         </div>
+
+        <!-- Recent Pending Results -->
+        <div class="col-lg-8 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Recent Pending Results</h6>
+            </div>
+            <div class="card-body">
+              {% if pending_results %}
+                <div class="table-responsive">
+                  <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                      <tr>
+                        <th>Student</th>
+                        <th>Subject</th>
+                        <th>Teacher</th>
+                        <th>Score</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for result in pending_results %}
+                      <tr>
+                        <td>{{ result.student }}</td>
+                        <td>{{ result.subject }}</td>
+                        <td>{{ result.teacher }}</td>
+                        <td>{{ result.total_score }}</td>
+                        <td>
+                          <a href="{% url 'review_result' result.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Review
+                          </a>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                <a href="{% url 'admin_result_dashboard' %}" class="btn btn-primary mt-2">
+                  View All Pending Results
+                </a>
+              {% else %}
+                <p>No pending results to review.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <!-- /.container-fluid -->
@@ -149,6 +195,7 @@
   <!-- End of Main Content -->
 </div>
 {% endblock %}
+
 {% block extra_css %}
 <style>
   :root {
@@ -267,6 +314,7 @@
   }
 </style>
 {% endblock %}
+
 {% block extra_js %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {

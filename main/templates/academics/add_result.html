@@ -1,0 +1,138 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block loader %}{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Result | AHMES{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-4 border-bottom pb-2">
+    <h1 class="h2"><i class="fas fa-clipboard me-2"></i>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Result</h1>
+    <a href="{% url 'teacher_result_dashboard' %}" class="btn btn-outline-secondary rounded-pill">
+      <i class="fas fa-arrow-left me-2"></i>Back to Results
+    </a>
+  </div>
+
+  <div class="card shadow rounded-4">
+    <div class="card-body p-4">
+      <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <!-- Student & Subject -->
+        <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-user-graduate me-2"></i>Student & Subject</h5>
+        <div class="row g-4 mb-4">
+          <div class="col-md-6">
+            <div class="form-floating">
+              {{ form.student|add_class:"form-control" }}
+              <label>Student</label>
+              {% if form.student.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.student.errors }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-floating">
+              {{ form.subject|add_class:"form-control" }}
+              <label>Subject</label>
+              {% if form.subject.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.subject.errors }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Class & Term Info -->
+        <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-school me-2"></i>Class & Term Info</h5>
+        <div class="row g-4 mb-4">
+          <div class="col-md-4">
+            <div class="form-floating">
+              {{ form.school_class|add_class:"form-control" }}
+              <label>Class</label>
+              {% if form.school_class.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.school_class.errors }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              {{ form.term|add_class:"form-control" }}
+              <label>Term</label>
+              {% if form.term.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.term.errors }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              {{ form.academic_year|add_class:"form-control" }}
+              <label>Academic Year</label>
+              {% if form.academic_year.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.academic_year.errors }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Scores -->
+        <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-pen-alt me-2"></i>Scores</h5>
+        <div class="row g-4 mb-4">
+          <div class="col-md-4">
+            <div class="form-floating">
+              {{ form.exam_score|add_class:"form-control" }}
+              <label>Exam Score</label>
+              {% if form.exam_score.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.exam_score.errors }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              {{ form.test_score|add_class:"form-control" }}
+              <label>Test Score</label>
+              {% if form.test_score.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.test_score.errors }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              {{ form.assignment_score|add_class:"form-control" }}
+              <label>Assignment Score</label>
+              {% if form.assignment_score.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.assignment_score.errors }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="text-end mt-4">
+          <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4">
+            <i class="fas fa-save me-2"></i>Save Result
+          </button>
+          <a href="{% url 'teacher_result_dashboard' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4 ms-2">
+            <i class="fas fa-times me-2"></i>Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

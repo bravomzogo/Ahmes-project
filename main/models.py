@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils.translation import gettext_lazy as _
@@ -417,3 +418,97 @@ class AcademicAnnouncement(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
+class Subject(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=20, unique=True)
+    description = models.TextField(blank=True)
+    level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name='subjects')
+    
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
+class Result(models.Model):
+    TERM_CHOICES = [
+        ('1', 'First Term'),
+        ('2', 'Second Term'),
+    ]
+    
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='results')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    school_class = models.ForeignKey(SchoolClass, on_delete=models.CASCADE)
+    term = models.CharField(max_length=1, choices=TERM_CHOICES)
+    academic_year = models.CharField(max_length=20)
+    exam_score = models.DecimalField(max_digits=5, decimal_places=2)
+    test_score = models.DecimalField(max_digits=5, decimal_places=2)
+    assignment_score = models.DecimalField(max_digits=5, decimal_places=2)
+    total_score = models.DecimalField(max_digits=5, decimal_places=2, editable=False)
+    grade = models.CharField(max_length=2, editable=False)
+    remark = models.CharField(max_length=100, editable=False)
+    teacher = models.ForeignKey(StaffMember, on_delete=models.CASCADE, related_name='results_given')
+    date_created = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_results')
+    date_approved = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('student', 'subject', 'term', 'academic_year')
+    
+    class Result(models.Model):
+     TERM_CHOICES = [
+        ('1', 'First Term'),
+        ('2', 'Second Term'),
+        ('3', 'Third Term'),
+     ]
+    
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='results')
+    subject = models.ForeignKey('Subject', on_delete=models.CASCADE)
+    school_class = models.ForeignKey('SchoolClass', on_delete=models.CASCADE)
+    term = models.CharField(max_length=1, choices=TERM_CHOICES)
+    academic_year = models.CharField(max_length=20)
+    exam_score = models.DecimalField(max_digits=5, decimal_places=2)
+    test_score = models.DecimalField(max_digits=5, decimal_places=2)
+    assignment_score = models.DecimalField(max_digits=5, decimal_places=2)
+    total_score = models.DecimalField(max_digits=5, decimal_places=2, editable=False)
+    grade = models.CharField(max_length=2, editable=False)
+    remark = models.CharField(max_length=100, editable=False)
+    teacher = models.ForeignKey('StaffMember', on_delete=models.CASCADE, related_name='results_given')
+    date_created = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_results')
+    date_approved = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('student', 'subject', 'term', 'academic_year')
+    
+    def save(self, *args, **kwargs):
+        # Calculate total score
+        self.total_score = (
+            self.exam_score * Decimal('0.6') +
+            self.test_score * Decimal('0.2') +
+            self.assignment_score * Decimal('0.2')
+        )
+        
+        # Determine grade and remark
+        if self.total_score >= Decimal('75'):
+            self.grade = 'A'
+            self.remark = 'Excellent'
+        elif self.total_score >= Decimal('65'):
+            self.grade = 'B'
+            self.remark = 'Very Good'
+        elif self.total_score >= Decimal('55'):
+            self.grade = 'C'
+            self.remark = 'Good'
+        elif self.total_score >= Decimal('45'):
+            self.grade = 'D'
+            self.remark = 'Pass'
+        else:
+            self.grade = 'F'
+            self.remark = 'Fail'
+        
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.student} - {self.subject} ({self.term})"

@@ -1,0 +1,29 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Delete Result</h1>
+    <a href="{% url 'teacher_result_dashboard' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left mr-2"></i> Back to Results
+    </a>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <h4>Confirm Deletion</h4>
+      <p>Are you sure you want to delete the result for {{ result.student }} in {{ result.subject }} ({{ result.get_term_display }})?</p>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+          <i class="fas fa-trash mr-2"></i> Delete Result
+        </button>
+        <a href="{% url 'teacher_result_dashboard' %}" class="btn btn-secondary">
+          Cancel
+        </a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

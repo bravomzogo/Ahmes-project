@@ -1,0 +1,59 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Review Result</h1>
+    <a href="{% url 'admin_result_dashboard' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left mr-2"></i> Back to Results
+    </a>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <h4>Result Details</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Student:</strong> {{ result.student }}</p>
+          <p><strong>Subject:</strong> {{ result.subject }}</p>
+          <p><strong>Class:</strong> {{ result.school_class }}</p>
+          <p><strong>Term:</strong> {{ result.get_term_display }}</p>
+          <p><strong>Academic Year:</strong> {{ result.academic_year }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Exam Score:</strong> {{ result.exam_score }}</p>
+          <p><strong>Test Score:</strong> {{ result.test_score }}</p>
+          <p><strong>Assignment Score:</strong> {{ result.assignment_score }}</p>
+          <p><strong>Total Score:</strong> {{ result.total_score }}</p>
+          <p><strong>Grade:</strong> {{ result.grade }}</p>
+          <p><strong>Remark:</strong> {{ result.remark }}</p>
+          <p><strong>Status:</strong> 
+            {% if result.is_approved %}
+              <span class="badge badge-success">Approved</span>
+            {% else %}
+              <span class="badge badge-warning">Pending</span>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          {{ form.is_approved.label_tag }}
+          {{ form.is_approved }}
+          {% if form.is_approved.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.is_approved.errors }}
+            </div>
+          {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save mr-2"></i> Save Approval Status
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

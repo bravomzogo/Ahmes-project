@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, SchoolClass, Student, StaffMember, News, Comment, User
-from .forms import (GalleryForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Result, SchoolClass, Student, StaffMember, News, Comment, User
+from .forms import (GalleryForm, ResultApprovalForm, ResultForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm)
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
@@ -1014,3 +1014,235 @@ def delete_academic_calendar(request, pk):
         messages.success(request, 'Academic calendar deleted successfully!')
         return redirect('manage_academic_calendars')
     return render(request, 'main/delete_academic_calendar.html', {'calendar': calendar})
+
+def is_teacher(user):
+    return user.is_authenticated and (
+        hasattr(user, 'staff_profile') and 
+        user.staff_profile.position == 'Teacher'
+    )
+
+@login_required
+@user_passes_test(is_teacher)
+def teacher_result_dashboard(request):
+    teacher = request.user.staff_profile
+    status_filter = request.GET.get('status', '')  # Get status from URL params
+    
+    # Base queryset - all results for this teacher
+    results = Result.objects.filter(teacher=teacher).select_related(
+        'student', 
+        'subject', 
+        'school_class'
+    ).order_by('-date_created')
+    
+    # Apply status filter if specified
+    if status_filter == 'pending':
+        results = results.filter(is_approved=False)
+    elif status_filter == 'approved':
+        results = results.filter(is_approved=True)
+    
+    # Counts for the tabs
+    total_count = Result.objects.filter(teacher=teacher).count()
+    pending_count = Result.objects.filter(teacher=teacher, is_approved=False).count()
+    approved_count = Result.objects.filter(teacher=teacher, is_approved=True).count()
+    
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(results, 25)  # Show 25 results per page
+    
+    try:
+        results_page = paginator.page(page)
+    except PageNotAnInteger:
+        results_page = paginator.page(1)
+    except EmptyPage:
+        results_page = paginator.page(paginator.num_pages)
+    
+    context = {
+        'teacher': teacher,
+        'results': results_page,
+        'total_count': total_count,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'current_status': status_filter,
+    }
+    
+    return render(request, 'academics/teacher_result_dashboard.html', context)
+
+    
+@login_required
+@user_passes_test(is_teacher)
+def add_result(request):
+    teacher = request.user.staff_profile
+    
+    if request.method == 'POST':
+        form = ResultForm(request.POST, teacher=teacher)
+        if form.is_valid():
+            result = form.save(commit=False)
+            result.teacher = teacher
+            result.save()
+            messages.success(request, 'Result added successfully! It will be visible after approval.')
+            return redirect('teacher_result_dashboard')
+    else:
+        form = ResultForm(teacher=teacher)
+    
+    return render(request, 'academics/add_result.html', {
+        'form': form,
+        'teacher': teacher
+    })
+
+@login_required
+@user_passes_test(is_teacher)
+def edit_result(request, pk):
+    teacher = request.user.staff_profile
+    result = get_object_or_404(Result, pk=pk, teacher=teacher)
+    
+    if request.method == 'POST':
+        form = ResultForm(request.POST, instance=result, teacher=teacher)
+        if form.is_valid():
+            # If editing an approved result, it needs to be re-approved
+            if result.is_approved:
+                result.is_approved = False
+                result.approved_by = None
+                result.date_approved = None
+            form.save()
+            messages.success(request, 'Result updated successfully! It will need re-approval if previously approved.')
+            return redirect('teacher_result_dashboard')
+    else:
+        form = ResultForm(instance=result, teacher=teacher)
+    
+    return render(request, 'academics/edit_result.html', {
+        'form': form,
+        'result': result
+    })
+
+@login_required
+@user_passes_test(is_teacher)
+def delete_result(request, pk):
+    teacher = request.user.staff_profile
+    result = get_object_or_404(Result, pk=pk, teacher=teacher)
+    
+    if request.method == 'POST':
+        result.delete()
+        messages.success(request, 'Result deleted successfully!')
+        return redirect('teacher_result_dashboard')
+    
+    return render(request, 'academics/delete_result.html', {'result': result})
+
+
+@login_required
+@user_passes_test(is_academic_admin)
+def admin_result_dashboard(request):
+    # Get all pending results
+    pending_results = Result.objects.filter(
+        is_approved=False
+    ).order_by('-date_created')
+    
+    # Get recently approved results
+    approved_results = Result.objects.filter(
+        is_approved=True
+    ).order_by('-date_approved')[:20]
+    
+    return render(request, 'academics/admin_result_dashboard.html', {
+        'pending_results': pending_results,
+        'approved_results': approved_results,
+    })
+
+@login_required
+@user_passes_test(is_academic_admin)
+def review_result(request, pk):
+    result = get_object_or_404(Result, pk=pk)
+    
+    if request.method == 'POST':
+        form = ResultApprovalForm(request.POST, instance=result)
+        if form.is_valid():
+            result = form.save(commit=False)
+            if result.is_approved:
+                result.approved_by = request.user
+                result.date_approved = timezone.now()
+                result.save()
+                messages.success(request, 'Result approved successfully!')
+            else:
+                result.save()
+                messages.success(request, 'Result approval status updated!')
+            return redirect('admin_result_dashboard')
+    else:
+        form = ResultApprovalForm(instance=result)
+    
+    return render(request, 'academics/review_result.html', {
+        'form': form,
+        'result': result
+    })
+
+@login_required
+@user_passes_test(is_academic_admin)
+def bulk_approve_results(request):
+    if request.method == 'POST':
+        result_ids = request.POST.getlist('result_ids')
+        results = Result.objects.filter(id__in=result_ids, is_approved=False)
+        
+        updated = results.update(
+            is_approved=True,
+            approved_by=request.user,
+            date_approved=timezone.now()
+        )
+        
+        messages.success(request, f'Successfully approved {updated} results!')
+        return redirect('admin_result_dashboard')
+    
+    # Get all pending results for the checkbox form
+    pending_results = Result.objects.filter(is_approved=False).order_by('teacher', 'student')
+    return render(request, 'academics/bulk_approve_results.html', {
+        'pending_results': pending_results
+    })
+
+
+@login_required
+def parent_view_results(request):
+    # Get all students associated with this parent (by email)
+    students = Student.objects.filter(parent_email=request.user.email)
+    
+    if not students.exists():
+        raise PermissionDenied
+    
+    # Get all approved results for these students
+    results = Result.objects.filter(
+        student__in=students,
+        is_approved=True
+    ).order_by('-academic_year', 'term', 'subject')
+    
+    # Group results by student, then by academic year and term
+    results_by_student = {}
+    for student in students:
+        student_results = results.filter(student=student)
+        results_by_year_term = {}
+        
+        for result in student_results:
+            key = f"{result.academic_year} - {result.get_term_display()}"
+            if key not in results_by_year_term:
+                results_by_year_term[key] = []
+            results_by_year_term[key].append(result)
+        
+        results_by_student[student] = results_by_year_term
+    
+    return render(request, 'academics/parent_view_results.html', {
+        'results_by_student': results_by_student
+    })
+
+
+@login_required
+@user_passes_test(is_teacher)
+def teacher_classes(request):
+    teacher = request.user.staff_profile
+    classes_taught = SchoolClass.objects.filter(teacher=teacher)
+    return render(request, 'academics/teacher_classes.html', {
+        'classes_taught': classes_taught
+    })
+
+
+@login_required
+@user_passes_test(is_teacher)
+def teacher_gradebook(request):
+    teacher = request.user.staff_profile
+    results = Result.objects.filter(teacher=teacher, is_approved=True)
+    return render(request, 'academics/teacher_gradebook.html', {
+        'results': results
+    })

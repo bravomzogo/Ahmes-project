@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block content %}
-
 <style>
   .teacher-dashboard-wrapper {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -214,7 +213,7 @@
     font-size: 1.1rem;
   }
   
-  .recent-card ul li .badge {
+  .badge {
     background: #667eea;
     color: white;
     padding: 0.25rem 0.5rem;
@@ -223,19 +222,47 @@
     margin-left: auto;
   }
   
-  .recent-card p {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 0;
+  .badge-pending {
+    background-color: #f39c12;
   }
   
-  .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    border: 1px solid #f5c6cb;
+  .badge-approved {
+    background-color: #2ecc71;
+  }
+  
+  .result-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .result-table th, .result-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .result-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+  }
+  
+  .action-buttons a {
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    text-decoration: none;
+  }
+  
+  .btn-edit {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .btn-delete {
+    background-color: #e74c3c;
+    color: white;
   }
 </style>
 
@@ -250,7 +277,7 @@
   <div class="teacher-dashboard-card">
     <div class="teacher-dashboard-header">
       <h2>Teacher Dashboard</h2>
-      <p>Manage your classes, assignments, and grades</p>
+      <p>Manage your classes, assignments, and results</p>
     </div>
     
     <div class="teacher-dashboard-body">
@@ -268,17 +295,17 @@
         <div class="dashboard-item">
           <h3><i class="fas fa-chalkboard"></i> My Classes</h3>
           <p>Manage your classes and students</p>
-          <a href="#"><i class="fas fa-eye"></i> View Classes</a>
+          <a href="{% url 'teacher_classes' %}"><i class="fas fa-eye"></i> View Classes</a>
         </div>
         <div class="dashboard-item">
-          <h3><i class="fas fa-tasks"></i> Assignments</h3>
-          <p>Create and grade assignments</p>
-          <a href="#"><i class="fas fa-edit"></i> Manage Assignments</a>
+          <h3><i class="fas fa-tasks"></i> Results</h3>
+          <p>Enter and manage student results</p>
+          <a href="{% url 'teacher_result_dashboard' %}"><i class="fas fa-edit"></i> Manage Results</a>
         </div>
         <div class="dashboard-item">
           <h3><i class="fas fa-chart-line"></i> Gradebook</h3>
-          <p>Record and manage student grades</p>
-          <a href="#"><i class="fas fa-book"></i> View Gradebook</a>
+          <p>View student performance</p>
+          <a href="{% url 'teacher_gradebook' %}"><i class="fas fa-book"></i> View Gradebook</a>
         </div>
       </div>
       
@@ -300,12 +327,36 @@
         </div>
         
         <div class="recent-card">
-          <h3>Recent Activity</h3>
-          <ul>
-            <li><i class="fas fa-exclamation-circle"></i> 3 assignments pending grading</li>
-            <li><i class="fas fa-calendar-alt"></i> Staff meeting tomorrow at 10 AM</li>
-            <li><i class="fas fa-envelope"></i> New message from department head</li>
-          </ul>
+          <h3>Recent Results</h3>
+          {% if recent_results %}
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Subject</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for result in recent_results %}
+                <tr>
+                  <td>{{ result.student }}</td>
+                  <td>{{ result.subject }}</td>
+                  <td>{{ result.total_score }}</td>
+                  <td>
+                    <span class="badge {% if result.is_approved %}badge-approved{% else %}badge-pending{% endif %}">
+                      {% if result.is_approved %}Approved{% else %}Pending{% endif %}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <a href="{% url 'teacher_result_dashboard' %}" class="btn btn-primary mt-3">View All Results</a>
+          {% else %}
+            <p>No results submitted yet.</p>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -325,5 +376,4 @@
     });
   });
 </script>
-
 {% endblock %}

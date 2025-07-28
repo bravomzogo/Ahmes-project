@@ -1,0 +1,57 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Student Results</h1>
+  </div>
+
+  {% for student, results_by_year_term in results_by_student.items %}
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">{{ student }}'s Results</h6>
+    </div>
+    <div class="card-body">
+      {% for year_term, results in results_by_year_term.items %}
+      <h5>{{ year_term }}</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Class</th>
+              <th>Exam Score</th>
+              <th>Test Score</th>
+              <th>Assignment Score</th>
+              <th>Total Score</th>
+              <th>Grade</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for result in results %}
+            <tr>
+              <td>{{ result.subject }}</td>
+              <td>{{ result.school_class }}</td>
+              <td>{{ result.exam_score }}</td>
+              <td>{{ result.test_score }}</td>
+              <td>{{ result.assignment_score }}</td>
+              <td>{{ result.total_score }}</td>
+              <td>{{ result.grade }}</td>
+              <td>{{ result.remark }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% empty %}
+      <p>No approved results available for {{ student }}.</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <p>No students associated with your account.</p>
+  {% endfor %}
+</div>
+{% endblock %}
