@@ -96,9 +96,9 @@ path('ad/academic-calendars/delete/<int:pk>/', views.delete_academic_calendar, n
     path('teacher/gradebook/', views.teacher_gradebook, name='teacher_gradebook'),
     
     # Admin URLs
-    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('admin/results/', views.admin_result_dashboard, name='admin_result_dashboard'),
-    path('admin/results/review/<int:pk>/', views.review_result, name='review_result'),
-    path('admin/results/bulk-approve/', views.bulk_approve_results, name='bulk_approve_results'),
+    path('ad/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('ad/results/', views.admin_result_dashboard, name='admin_result_dashboard'),
+    path('ad/results/review/<int:pk>/', views.review_result, name='review_result'),
+    path('ad/results/bulk-approve/', views.bulk_approve_results, name='bulk_approve_results'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

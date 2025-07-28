@@ -10,29 +10,33 @@
     </a>
   </div>
 
-  <div class="card shadow mb-4">
-    <div class="card-header py-3">
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link {% if not request.GET.status %}active{% endif %}" 
-             href="{% url 'teacher_result_dashboard' %}">
-            All Results
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.GET.status == 'pending' %}active{% endif %}" 
-             href="{% url 'teacher_result_dashboard' %}?status=pending">
-            Pending Approval
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.GET.status == 'approved' %}active{% endif %}" 
-             href="{% url 'teacher_result_dashboard' %}?status=approved">
-            Approved
-          </a>
-        </li>
-      </ul>
-    </div>
+ <div class="card shadow mb-4">
+  <div class="card-header py-3">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link {% if not request.GET.status %}active bg-primary{% endif %} fw-bold text-always-black" 
+           href="{% url 'teacher_result_dashboard' %}" 
+           role="tab">
+          All Results
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.GET.status == 'pending' %}active bg-warning{% endif %} fw-bold text-always-black" 
+           href="{% url 'teacher_result_dashboard' %}?status=pending" 
+           role="tab">
+          Pending Approval
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.GET.status == 'approved' %}active bg-success{% endif %} fw-bold text-always-black" 
+           href="{% url 'teacher_result_dashboard' %}?status=approved" 
+           role="tab">
+          Approved
+        </a>
+      </li>
+    </ul>
+  </div>
+
     <div class="card-body">
       <div class="table-responsive">
         <table class="table table-bordered" width="100%" cellspacing="0">
@@ -65,14 +69,11 @@
               <td>{{ result.grade }}</td>
               <td>
                 {% if result.is_approved %}
-                  <span class="badge badge-success">
+                  <span class="badge badge-success" style="background-color: #05b373ff; color: white; padding: 5px 10px; border-radius: 4px;">
                     <i class="fas fa-check-circle mr-1"></i> Approved
-                    {% if result.date_approved %}
-                      <small class="d-block">{{ result.date_approved|date:"M d, Y" }}</small>
-                    {% endif %}
                   </span>
                 {% else %}
-                  <span class="badge badge-warning">
+                  <span class="badge badge-warning" style="background-color: #f6c23e; color: white; padding: 5px 10px; border-radius: 4px;">
                     <i class="fas fa-clock mr-1"></i> Pending
                   </span>
                 {% endif %}
