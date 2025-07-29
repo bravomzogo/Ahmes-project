@@ -1,6 +1,6 @@
+from pyexpat.errors import messages
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, Student, StaffMember, News, Comment, Gallery, Message
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -8,8 +8,10 @@ from django.utils import timezone
 from datetime import timedelta
 import secrets
 import logging
-from .models import EmailVerification
-from cloudinary.forms import CloudinaryFileField  # Import CloudinaryFileField
+from .models import AcademicAnnouncement, AcademicCalendar, CourseCatalog, Result, SchoolClass, Subject, User, Parent, Student, StaffMember, News, Comment, Gallery, Message, EmailVerification
+from cloudinary.forms import CloudinaryFileField
+from django.db import transaction
+from django.core.validators import FileExtensionValidator
 
 logger = logging.getLogger(__name__)
 
@@ -42,44 +44,172 @@ class StaffRegistrationForm(UserCreationForm):
             user.save()
         return user
 
-
-
 class StudentForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'placeholder': 'Password'}),
-        required=False
+    parent_name = forms.CharField(max_length=200, required=True)
+    parent_phone = forms.CharField(max_length=20, required=True)
+    parent_email = forms.EmailField(required=True)
+    parent_address = forms.CharField(widget=forms.Textarea, required=True)
+    parent_profile_picture = CloudinaryFileField(
+        options={
+            'folder': 'school/parents/profile_pictures',
+            'transformation': {'quality': 'auto:good', 'width': 300, 'height': 300, 'crop': 'fill'},
+            'overwrite': True,
+            'resource_type': 'image',
+        },
+        required=False,
+        widget=forms.ClearableFileInput
     )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password'}),
-        required=False
+    profile_picture = CloudinaryFileField(
+        options={
+            'folder': 'school/students/profile_pictures',
+            'transformation': {'quality': 'auto:good', 'width': 300, 'height': 300, 'crop': 'fill'},
+            'overwrite': True,
+            'resource_type': 'image',
+        },
+        required=False,
+        widget=forms.ClearableFileInput
     )
-    
+
     class Meta:
         model = Student
-        fields = '__all__'
-        exclude = ['user']
+        fields = [
+            'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth',
+            'admission_number', 'campus', 'level', 'admission_date',
+            'profile_picture', 'parent_name', 'parent_phone',
+            'parent_email', 'parent_address', 'parent_profile_picture'
+        ]
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'admission_date': forms.DateInput(attrs={'type': 'date'}),
-            'profile_picture': forms.FileInput(attrs={'accept': 'image/*'}),
         }
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get('password')
-        confirm_password = cleaned_data.get('confirm_password')
-        
-        if password and password != confirm_password:
-            raise forms.ValidationError("Passwords don't match")
-        
-        return cleaned_data
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['username'].required = False
-        if self.instance and self.instance.user:
-            self.fields['username'].initial = self.instance.user.username
 
+    def clean_parent_email(self):
+        email = self.cleaned_data.get('parent_email').lower()
+        if Parent.objects.filter(email=email).exclude(id=self.instance.parent_id if self.instance else None).exists():
+            raise forms.ValidationError("A parent with this email already exists.")
+        if User.objects.filter(email=email).exclude(id=self.instance.user_id if self.instance else None).exists():
+            raise forms.ValidationError("A user with this email already exists.")
+        return email
+
+    def clean_admission_number(self):
+        admission_number = self.cleaned_data.get('admission_number')
+        if admission_number and Student.objects.filter(admission_number=admission_number).exclude(id=self.instance.id if self.instance else None).exists():
+            raise forms.ValidationError("A student with this admission number already exists.")
+        return admission_number
+
+    def save(self, commit=True):
+        with transaction.atomic():
+            logger.debug(f"Starting save for StudentForm with data: {self.cleaned_data}")
+            # Create or update Parent instance
+            parent_data = {
+                'name': self.cleaned_data['parent_name'],
+                'phone': self.cleaned_data['parent_phone'],
+                'email': self.cleaned_data['parent_email'],
+                'address': self.cleaned_data['parent_address'],
+                'profile_picture': self.cleaned_data['parent_profile_picture'],
+            }
+            logger.debug(f"Parent data: {parent_data}")
+            parent, created = Parent.objects.get_or_create(
+                email=parent_data['email'],
+                defaults=parent_data
+            )
+            if not created:
+                for key, value in parent_data.items():
+                    if key != 'profile_picture' or value:
+                        setattr(parent, key, value)
+                parent.save()
+            logger.debug(f"Parent {'created' if created else 'updated'}: {parent}")
+
+            # Create or update Parent User
+            parent_user = parent.user
+            parent_username = None
+            parent_password = None
+            if not parent_user:
+                parent_username = parent.name.replace(' ', '').lower()
+                counter = 1
+                while User.objects.filter(username=parent_username).exists():
+                    parent_username = f"{parent.name.replace(' ', '').lower()}{counter}"
+                    counter += 1
+                parent_password = secrets.token_urlsafe(3)  # Generate a secure random password
+                parent_user = User.objects.create_user(
+                    username=parent_username,
+                    email=parent.email,
+                    password=parent_username+parent_password,
+                    first_name=parent.name.split()[0],
+                    last_name=parent.name.split()[-1] if len(parent.name.split()) > 1 else '',
+                    is_parent=True 
+                )
+                parent.user = parent_user
+                parent.save()
+                logger.debug(f"Parent user created: {parent_username}")
+
+            # Create or update Student instance
+            student = super().save(commit=False)
+            student.parent = parent
+            logger.debug(f"Student instance prepared: {student}")
+
+            # Create or update Student User
+            student_user = student.user
+            student_username = None
+            student_password = None
+            if not student_user:
+                student_username = student.last_name.lower()
+                counter = 1
+                while User.objects.filter(username=student_username).exists():
+                    student_username = f"{student.last_name.lower()}{counter}"
+                    counter += 1
+                student_password = secrets.token_urlsafe(3)  # Generate a secure random password
+                student_user = User.objects.create_user(
+                    username=student_username,
+                    email=parent.email,
+                    password=student_username+student_password,
+                    first_name=student.first_name,
+                    last_name=student.last_name
+                    
+                )
+                student.user = student_user
+                logger.debug(f"Student user created: {student_username}")
+
+            if commit:
+                try:
+                    student.save()
+                    logger.debug(f"Student saved: {student}")
+                except Exception as e:
+                    logger.error(f"Failed to save student: {str(e)}")
+                    raise
+
+                # Send credentials for both parent and student to parent email
+                try:
+                    send_mail(
+                        subject='School Account Credentials for You and Your Child',
+                        message=render_to_string('emails/credentials.txt', {
+                            'student': student,
+                            'student_username': student_username,
+                            'student_password': student_password,
+                            'parent': parent,
+                            'parent_username': parent_username,
+                            'parent_password': parent_password,
+                            'support_email': settings.DEFAULT_FROM_EMAIL
+                        }),
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[parent.email],
+                        html_message=render_to_string('emails/credentials.html', {
+                            'student': student,
+                            'student_username': student_username,
+                            'student_password': student_password,
+                            'parent': parent,
+                            'parent_username': parent_username,
+                            'parent_password': parent_password,
+                            'support_email': settings.DEFAULT_FROM_EMAIL
+                        }),
+                        fail_silently=False,
+                    )
+                    logger.info(f"Credentials email sent to {parent.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send credentials email to {parent.email}: {str(e)}")
+                    messages.warning(None, f"Student saved, but failed to send credentials email: {str(e)}")
+
+            return student
 
 class StaffMemberForm(forms.ModelForm):
     class Meta:
@@ -191,7 +321,6 @@ class RegisterForm(UserCreationForm):
                 'support_email': settings.DEFAULT_FROM_EMAIL
             }
             
-            # Render-specific email sending
             send_mail(
                 subject='Verify Your Ahmes School Account',
                 message=render_to_string('emails/verification_email.txt', context),
@@ -205,15 +334,10 @@ class RegisterForm(UserCreationForm):
         
         except Exception as e:
             logger.error(f"Email sending failed: {str(e)}")
-            # Only raise in production to prevent user creation if email fails
             if not settings.DEBUG:
                 raise forms.ValidationError(
                     "We couldn't send the verification email. Please try again later."
                 )
-
-from django import forms
-from .models import Message
-from django.core.validators import FileExtensionValidator
 
 class MessageForm(forms.ModelForm):
     class Meta:
@@ -250,11 +374,6 @@ class MessageForm(forms.ModelForm):
             if file.size > max_size:
                 raise forms.ValidationError(f"File too large. Maximum size is {max_size/1024/1024}MB.")
         return file
-    
-
-
-from django import forms
-from .models import SchoolClass, AcademicAnnouncement, CourseCatalog, AcademicCalendar, Level, StaffMember, Student
 
 class SchoolClassForm(forms.ModelForm):
     class Meta:
@@ -296,13 +415,10 @@ class AcademicCalendarForm(forms.ModelForm):
             'file': forms.FileInput(),
         }
 
-
-from .models import Subject, Result
-
 class SubjectForm(forms.ModelForm):
     class Meta:
         model = Subject
-        fields = ['name',  'description', 'level']
+        fields = ['name', 'description', 'level']
 
 class ResultForm(forms.ModelForm):
     class Meta:
@@ -315,7 +431,6 @@ class ResultForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         if teacher:
-            # Filter students and classes based on the teacher's classes
             classes_taught = SchoolClass.objects.filter(teacher=teacher)
             self.fields['school_class'].queryset = classes_taught
             self.fields['student'].queryset = Student.objects.filter(

@@ -10,8 +10,10 @@ from django.core.validators import FileExtensionValidator
 from django.templatetags.static import static
 
 class User(AbstractUser):
+    is_parent = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_staff_member = models.BooleanField(default=False)
+    is_student = models.BooleanField(default=False)
     last_activity = models.DateTimeField(null=True, blank=True)
     
     groups = models.ManyToManyField(
@@ -67,6 +69,42 @@ class Level(models.Model):
         return self.name
 
 
+
+
+class Parent(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='parent_profile',
+        null=True,
+        blank=True
+    )
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField(unique=True)
+    address = models.TextField()
+    profile_picture = CloudinaryField(
+        'parents/profile_pictures',
+        folder="school/parents/profile_pictures",
+        transformation={'quality': 'auto:good', 'width': 300, 'height': 300, 'crop': 'fill'},
+        blank=True,
+        null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_profile_picture_url(self):
+        if self.profile_picture:
+            return self.profile_picture.url
+        return static('main/images/default-profile.png')
+
+    class Meta:
+        verbose_name = 'Parent'
+        verbose_name_plural = 'Parents'
+
 class Student(models.Model):
     GENDER_CHOICES = [
         ('M', 'Male'),
@@ -97,12 +135,13 @@ class Student(models.Model):
         related_name='students'
     )
     admission_date = models.DateField()
-    parent_name = models.CharField(max_length=200)
-    parent_phone = models.CharField(max_length=20)
-    parent_email = models.EmailField()
-    address = models.TextField()
-    username = models.CharField(max_length=150, unique=True, blank=True, null=True)
-    password = models.CharField(max_length=128, blank=True, null=True)
+    parent = models.ForeignKey(
+        Parent,
+        on_delete=models.CASCADE,
+        related_name='students',
+        null=True,
+        blank=True
+    )
     profile_picture = CloudinaryField(
         'students/profile_pictures',
         folder="school/students/profile_pictures",
@@ -117,27 +156,15 @@ class Student(models.Model):
         return f"{self.first_name} {self.last_name} - {self.admission_number}"
 
     def save(self, *args, **kwargs):
-        if not self.username:
-            # Generate username if not provided (e.g., firstname.lastname)
-            self.username = f"{self.first_name.lower()}.{self.last_name.lower()}"
+        # Generate unique admission number if not provided
+        if not self.admission_number:
+            base_number = f"ADM-{self.last_name[:4].upper()}-{timezone.now().year}"
             counter = 1
-            while Student.objects.filter(username=self.username).exists():
-                self.username = f"{self.first_name.lower()}.{self.last_name.lower()}{counter}"
+            admission_number = base_number
+            while Student.objects.filter(admission_number=admission_number).exists():
+                admission_number = f"{base_number}-{counter:03d}"
                 counter += 1
-        
-        # Create/update user account if password is provided
-        if self.password and not self.user:
-            user = User.objects.create_user(
-                username=self.username,
-                password=self.password,
-                first_name=self.first_name,
-                last_name=self.last_name,
-                email=self.parent_email
-            )
-            self.user = user
-        elif self.password and self.user:
-            self.user.set_password(self.password)
-            self.user.save()
+            self.admission_number = admission_number
         
         super().save(*args, **kwargs)
 

@@ -77,7 +77,7 @@
     font-weight: 600;
     margin: 0;
     font-size: 1.75rem;
-    margin-top: 1.5rem; /* Space for logo */
+    margin-top: 1.5rem;
   }
   
   .parent-login-header p {
@@ -114,6 +114,17 @@
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     outline: none;
+  }
+  
+  .form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: none;
+  }
+  
+  .invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
   }
   
   .btn-login {
@@ -186,6 +197,24 @@
     margin-right: 0.5rem;
   }
   
+  .alert {
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  
+  .alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+  }
+  
   .alert-danger {
     background-color: #f8d7da;
     color: #721c24;
@@ -207,15 +236,16 @@
   <div class="parent-login-card">
     <div class="parent-login-header">
       <h2>Parent Portal</h2>
-      <p>Secure access to the parent portal system</p>
+      <p>Access your account with the credentials sent to your email</p>
     </div>
     
     <div class="parent-login-body">
-      {% if messages %}
+    
+     
+      
+      {% if form.non_field_errors %}
         <div class="alert alert-danger">
-          {% for message in messages %}
-            {{ message }}
-          {% endfor %}
+          {{ form.non_field_errors.as_text }}
         </div>
       {% endif %}
       
@@ -223,13 +253,40 @@
         {% csrf_token %}
         
         <div class="form-group input-icon">
-          <i class="fas fa-envelope"></i>
-          <input type="email" class="form-control" name="username" placeholder="Email" required>
+          <i class="fas fa-user"></i>
+          <input type="text" 
+                 class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                 name="username" 
+                 placeholder="Username" 
+                 required 
+                 aria-label="Username"
+                 value="{{ form.username.value|default_if_none:'' }}">
+          {% if form.username.errors %}
+            <div class="invalid-feedback">
+              {{ form.username.errors.as_text }}
+            </div>
+          {% endif %}
         </div>
         
         <div class="form-group input-icon">
           <i class="fas fa-lock"></i>
-          <input type="password" class="form-control" name="password" placeholder="Password" required>
+          <input type="password" 
+                 class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                 name="password" 
+                 placeholder="Password" 
+                 required 
+                 aria-label="Password">
+          {% if form.password.errors %}
+            <div class="invalid-feedback">
+              {{ form.password.errors.as_text }}
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="form-group checkbox">
+          <label>
+            <input type="checkbox" name="remember" aria-label="Remember me"> Remember my credentials
+          </label>
         </div>
         
         <div class="form-group">
@@ -237,23 +294,17 @@
             <i class="fas fa-sign-in-alt"></i> Login
           </button>
         </div>
-        
-        <div class="form-group checkbox">
-          <label>
-            <input type="checkbox"> Remember my credentials
-          </label>
-        </div>
       </form>
       
       <div class="login-footer">
-        <a href="#"><i class="fas fa-headset"></i> Contact support</a>
+        {% comment %} <a href="{% url 'password_reset' %}"><i class="fas fa-key"></i> Forgot password?</a> {% endcomment %}
+        {% comment %} <a href="{% url 'support_contact' %}"><i class="fas fa-headset"></i> Contact support</a> {% endcomment %}
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // Add subtle focus animation
   document.querySelectorAll('.form-control').forEach(input => {
     input.addEventListener('focus', function() {
       this.parentNode.style.transform = 'scale(1.02)';

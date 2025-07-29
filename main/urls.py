@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from . import views
 from .views import (
-    CustomLoginView, add_academic_announcement, add_academic_calendar, add_class, add_course_catalog, manage_academic_announcements, manage_academic_calendars, manage_classes, manage_course_catalogs, register, verify_email, inbox, chat, logout_view, 
+    CustomLoginView, add_academic_announcement, add_academic_calendar, add_class, add_course_catalog, manage_academic_announcements, manage_academic_calendars, manage_classes, manage_course_catalogs, parent_view_results, register, verify_email, inbox, chat, logout_view, 
     get_conversations, mark_messages_read, get_new_messages, 
     StudentLoginView, TeacherLoginView, ParentLoginView, AcademicAdminLoginView,
     student_dashboard, teacher_dashboard, parent_dashboard, academic_admin_dashboard
@@ -80,6 +80,7 @@ path('ad/course-catalogs/', manage_course_catalogs, name='manage_course_catalogs
 path('ad/course-catalogs/add/', add_course_catalog, name='add_course_catalog'),
 path('ad/course-catalogs/edit/<int:pk>/', views.edit_course_catalog, name='edit_course_catalog'),
 path('ad/course-catalogs/delete/<int:pk>/', views.delete_course_catalog, name='delete_course_catalog'),
+path('parent/results/', parent_view_results, name='parent_view_results'),
 
 path('ad/academic-calendars/', manage_academic_calendars, name='manage_academic_calendars'),
 path('ad/academic-calendars/add/', add_academic_calendar, name='add_academic_calendar'),

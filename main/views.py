@@ -1,8 +1,10 @@
+from venv import logger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Result, SchoolClass, Student, StaffMember, News, Comment, User
+from django.views import View
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Parent, Result, SchoolClass, Student, StaffMember, News, Comment, User
 from .forms import (GalleryForm, ResultApprovalForm, ResultForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm)
 from django.contrib import messages
@@ -18,6 +20,7 @@ import secrets
 import json
 from django.utils import timezone
 from django.core.cache import cache
+from django.contrib.auth.forms import AuthenticationForm
 
 class CustomLoginView(LoginView):
     template_name = 'auth/login.html'
@@ -295,23 +298,24 @@ def add_student(request):
     if request.method == 'POST':
         form = StudentForm(request.POST, request.FILES)
         if form.is_valid():
-            # Generate a random password if not provided
-            if not form.cleaned_data.get('password'):
-                random_password = User.objects.make_random_password()
-                form.instance.password = random_password
-            
-            student = form.save()
-            
-            messages.success(request, 'Student added successfully!')
-            return redirect('manage_students')
+            try:
+                with transaction.atomic():
+                    student = form.save()
+                    logger.info(f"Student saved successfully: {student}")
+                    messages.success(request, 'Student and parent added successfully! Credentials sent to parent email.')
+                    return redirect('manage_students')
+            except Exception as e:
+                logger.error(f"Error saving student: {str(e)}")
+                messages.error(request, f"Error adding student: {str(e)}")
+        else:
+            logger.debug(f"Form validation failed: {form.errors.as_text()}")
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = StudentForm()
-    
     return render(request, 'main/add_student.html', {
         'form': form,
         'title': 'Add New Student'
     })
-
 @login_required
 @user_passes_test(is_admin)
 def edit_student(request, pk):
@@ -719,17 +723,56 @@ class TeacherLoginView(LoginView):
         login(self.request, user)
         return redirect('teacher_dashboard')
 
-class ParentLoginView(LoginView):
+class ParentLoginView(View):
     template_name = 'academics/parent_login.html'
-    
-    def form_valid(self, form):
-        user = form.get_user()
-        # Check if user has associated students (parent)
-        if not Student.objects.filter(parent_email=user.email).exists():
-            messages.error(self.request, "This account isn't associated with any student.")
-            return redirect('parent_login')
-        login(self.request, user)
-        return redirect('parent_dashboard')
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            if request.user.is_parent:
+                logger.debug(f"Authenticated parent {request.user.username} redirected to dashboard")
+                return redirect('parent_dashboard')  # Replace with your parent dashboard URL
+            else:
+                messages.error(request, 'This page is for parent accounts only.')
+                logger.warning(f"Non-parent user {request.user.username} attempted parent login")
+                return redirect('home')  # Replace with your home URL
+        form = AuthenticationForm()
+        return render(request, self.template_name, {
+            'form': form,
+            'title': 'Parent Login'
+        })
+
+    def post(self, request, *args, **kwargs):
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if user.is_parent:
+                    login(request, user)
+                    # Handle "remember me" checkbox
+                       # Handle "remember me" checkbox
+                    if not request.POST.get('remember'):
+                        request.session.set_expiry(0)  # Session expires on browser close
+                    else:
+                        request.session.set_expiry(1209600)  # 2 weeks
+                    logger.info(f"Parent {username} logged in successfully")
+                    next_url = request.POST.get('next', 'parent_dashboard')
+                    return redirect(next_url)
+                else:
+                    messages.error(request, 'This account is not a parent account.')
+                    logger.warning(f"Non-parent user {username} attempted parent login")
+            else:
+                messages.error(request, 'Invalid username or password.')
+                logger.error(f"Invalid login attempt for username {username}")
+        else:
+            messages.error(request, 'Please correct the errors below.')
+            logger.debug(f"Form validation failed: {form.errors.as_text()}")
+
+        return render(request, self.template_name, {
+            'form': form,
+            'title': 'Parent Login'
+        })
 
 class AcademicAdminLoginView(LoginView):
     template_name = 'academics/academic_admin_login.html'
@@ -765,11 +808,21 @@ def teacher_dashboard(request):
 
 @login_required
 def parent_dashboard(request):
-    # Get all students associated with this parent (by email)
-    students = Student.objects.filter(parent_email=request.user.email)
+    # Check if the user is a parent
+    if not request.user.is_parent:
+        raise PermissionDenied("This page is for parent accounts only.")
+
+    # Get the Parent object linked to the user
+    try:
+        parent = Parent.objects.get(user=request.user)
+    except Parent.DoesNotExist:
+        raise PermissionDenied("No parent profile found for this account.")
+
+    # Get all students associated with this parent
+    students = Student.objects.filter(parent=parent)
     if not students.exists():
-        raise PermissionDenied
-    
+        raise PermissionDenied("No students associated with this parent account.")
+
     return render(request, 'academics/parent_dashboard.html', {
         'students': students
     })
@@ -1245,4 +1298,36 @@ def teacher_gradebook(request):
     results = Result.objects.filter(teacher=teacher, is_approved=True)
     return render(request, 'academics/teacher_gradebook.html', {
         'results': results
+    })
+
+
+# main/views.py or academics/views.py
+@login_required
+def parent_view_results(request):
+    # Get all students associated with this parent (by email)
+    parent = request.user.parent_profile
+    students = Student.objects.filter(parent=parent)
+    
+    # Get all approved results for these students
+    results = Result.objects.filter(
+        student__in=students,
+        is_approved=True
+    ).order_by('-academic_year', 'term', 'subject')
+    
+    # Group results by student, then by academic year and term
+    results_by_student = {}
+    for student in students:
+        student_results = results.filter(student=student)
+        results_by_year_term = {}
+        
+        for result in student_results:
+            key = f"{result.academic_year} - {result.get_term_display()}"
+            if key not in results_by_year_term:
+                results_by_year_term[key] = []
+            results_by_year_term[key].append(result)
+        
+        results_by_student[student] = results_by_year_term
+    
+    return render(request, 'academics/parent_view_results.html', {
+        'results_by_student': results_by_student
     })
