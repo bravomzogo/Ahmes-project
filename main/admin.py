@@ -1,194 +1,260 @@
+from datetime import timezone
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from .models import (
-    User, Campus, Level, Parent, Student, StaffMember, News, Comment, Gallery,
-    EmailVerification, Conversation, Message, YouTubeVideo, SchoolClass,
-    CourseCatalog, AcademicCalendar, AcademicAnnouncement, Subject, Result
+    User, Campus, Level, Parent, Student, StaffMember, News, Comment, 
+    Gallery, EmailVerification, Conversation, Message, YouTubeVideo,
+    SchoolClass, CourseCatalog, AcademicCalendar, AcademicAnnouncement,
+    Subject, Result
 )
+from django.utils.html import format_html
+from django.urls import reverse
 
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_admin', 'is_staff_member', 'is_online', 'last_activity')
-    list_filter = ('is_admin', 'is_staff_member', 'groups')
+
+# Custom User Admin
+class CustomUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name', 
+                    'is_parent', 'is_admin', 'is_staff_member', 'is_student',
+                    'is_online', 'last_activity')
+    list_filter = ('is_parent', 'is_admin', 'is_staff_member', 'is_student')
     search_fields = ('username', 'email', 'first_name', 'last_name')
-    ordering = ('-last_activity',)
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'first_name', 'last_name', 'password')}),
-        ('Permissions', {'fields': ('is_admin', 'is_staff_member', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Activity', {'fields': ('last_activity', 'last_login')}),
+        (None, {'fields': ('username', 'password')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
+                                   'groups', 'user_permissions')}),
+        ('User Types', {'fields': ('is_parent', 'is_admin', 'is_staff_member', 'is_student')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined', 'last_activity')}),
     )
-    readonly_fields = ('last_activity', 'last_login')
 
-@admin.register(Campus)
+
+# Parent Admin
+class ParentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'phone', 'created_at', 'profile_picture_tag')
+    search_fields = ('name', 'email', 'phone')
+    readonly_fields = ('created_at', 'updated_at', 'profile_picture_tag')
+    
+    def profile_picture_tag(self, obj):
+        if obj.profile_picture:
+            return format_html('<img src="{}" width="50" height="50" />'.format(obj.profile_picture.url))
+        return "No Image"
+    profile_picture_tag.short_description = 'Profile Picture'
+
+
+# Student Admin
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'admission_number', 'gender', 'campus', 'level', 
+                    'admission_date', 'parent_link', 'profile_picture_tag')
+    list_filter = ('gender', 'campus', 'level')
+    search_fields = ('first_name', 'last_name', 'admission_number', 'parent__name')
+    readonly_fields = ('created_at', 'updated_at', 'profile_picture_tag')
+    raw_id_fields = ('parent',)
+    
+    def full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+    full_name.short_description = 'Name'
+    
+    def parent_link(self, obj):
+        if obj.parent:
+            url = reverse("admin:main_parent_change", args=[obj.parent.id])
+            return format_html('<a href="{}">{}</a>', url, obj.parent.name)
+        return "-"
+    parent_link.short_description = 'Parent'
+    
+    def profile_picture_tag(self, obj):
+        if obj.profile_picture:
+            return format_html('<img src="{}" width="50" height="50" />'.format(obj.profile_picture.url))
+        return "No Image"
+    profile_picture_tag.short_description = 'Profile Picture'
+
+
+# Staff Member Admin
+class StaffMemberAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'position', 'campus', 'specialization', 'joined_date', 'image_tag')
+    list_filter = ('position', 'campus')
+    search_fields = ('first_name', 'last_name', 'email', 'specialization')
+    readonly_fields = ('created_at', 'updated_at', 'image_tag')
+    
+    def full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+    full_name.short_description = 'Name'
+    
+    def image_tag(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="50" />'.format(obj.image.url))
+        return "No Image"
+    image_tag.short_description = 'Image'
+
+
+# News Admin
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'published_date', 'is_published', 'image_tag')
+    list_filter = ('is_published', 'published_date')
+    search_fields = ('title', 'content', 'author__username')
+    readonly_fields = ('published_date', 'updated_date', 'image_tag')
+    
+    def image_tag(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="50" />'.format(obj.image.url))
+        return "No Image"
+    image_tag.short_description = 'Image'
+
+
+# Gallery Admin
+class GalleryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'media_type', 'author', 'published_date', 'is_published', 'media_preview')
+    list_filter = ('media_type', 'is_published')
+    search_fields = ('title', 'description')
+    readonly_fields = ('published_date', 'media_preview')
+    
+    def media_preview(self, obj):
+        if obj.media_type == 'image' and obj.image:
+            return format_html('<img src="{}" width="50" height="50" />'.format(obj.image.url))
+        elif obj.media_type == 'video' and obj.video:
+            return "Video"
+        return "No Media"
+    media_preview.short_description = 'Preview'
+
+
+# Message Admin
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('conversation', 'sender', 'timestamp', 'is_read', 'content_preview', 'file_type')
+    list_filter = ('is_read', 'timestamp')
+    search_fields = ('content', 'sender__username')
+    readonly_fields = ('timestamp', 'read_at', 'file_preview')
+    
+    def content_preview(self, obj):
+        return obj.content[:50] + "..." if len(obj.content) > 50 else obj.content
+    content_preview.short_description = 'Content'
+    
+    def file_type(self, obj):
+        if obj.file:
+            return obj.file.resource_type
+        return "-"
+    file_type.short_description = 'File Type'
+    
+    def file_preview(self, obj):
+        if obj.file:
+            if obj.file.resource_type == 'image':
+                return format_html('<img src="{}" width="150" />'.format(obj.file.url))
+            elif obj.file.resource_type == 'video':
+                return format_html('<video width="150" controls><source src="{}"></video>'.format(obj.file.url))
+            return format_html('<a href="{}">Download File</a>'.format(obj.file.url))
+        return "No File"
+    file_preview.short_description = 'File Preview'
+
+
+# YouTube Video Admin
+class YouTubeVideoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'video_id', 'published_at', 'is_featured', 'thumbnail_preview')
+    list_filter = ('is_featured',)
+    search_fields = ('title', 'description', 'video_id')
+    readonly_fields = ('created_at', 'updated_at', 'thumbnail_preview')
+    
+    def thumbnail_preview(self, obj):
+        if obj.thumbnail_url:
+            return format_html('<img src="{}" width="100" />'.format(obj.thumbnail_url))
+        return "No Thumbnail"
+    thumbnail_preview.short_description = 'Thumbnail'
+
+
+# School Class Admin
+class SchoolClassAdmin(admin.ModelAdmin):
+    list_display = ('name', 'level', 'teacher', 'academic_year', 'student_count')
+    list_filter = ('level', 'academic_year')
+    search_fields = ('name', 'teacher__first_name', 'teacher__last_name')
+    filter_horizontal = ('students',)
+    
+    def student_count(self, obj):
+        return obj.students.count()
+    student_count.short_description = 'Students'
+
+
+# Subject Admin
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'level')
+    list_filter = ('level',)
+    search_fields = ('name', 'code')
+
+
+# Result Admin
+class ResultAdmin(admin.ModelAdmin):
+    list_display = ('student', 'subject', 'term', 'academic_year', 'total_score', 'grade', 'is_approved')
+    list_filter = ('term', 'academic_year', 'grade', 'is_approved')
+    search_fields = ('student__first_name', 'student__last_name', 'subject__name')
+    readonly_fields = ('total_score', 'grade', 'remark', 'date_created')
+    raw_id_fields = ('student', 'teacher', 'approved_by')
+    
+    def save_model(self, request, obj, form, change):
+        if obj.is_approved and not obj.approved_by:
+            obj.approved_by = request.user
+            obj.date_approved = timezone.now()
+        super().save_model(request, obj, form, change)
+
+
+# Simple Model Admins (for models that don't need special configuration)
 class CampusAdmin(admin.ModelAdmin):
     list_display = ('name', 'location')
     search_fields = ('name', 'location')
-    list_filter = ('location',)
-    fields = ('name', 'location', 'description', 'image')
 
-@admin.register(Level)
 class LevelAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
-    fields = ('name', 'description')
 
-@admin.register(Parent)
-class ParentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'phone', 'created_at')
-    search_fields = ('name', 'email', 'phone')
-    list_filter = ('created_at',)
-    raw_id_fields = ('user',)
-    fields = ('user', 'name', 'phone', 'email', 'address', 'profile_picture', 'created_at', 'updated_at')
-    readonly_fields = ('created_at', 'updated_at')
-
-@admin.register(Student)
-class StudentAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'admission_number', 'campus', 'level', 'parent', 'admission_date')
-    search_fields = ('first_name', 'last_name', 'admission_number')
-    list_filter = ('campus', 'level', 'gender', 'admission_date')
-    raw_id_fields = ('user', 'campus', 'level', 'parent')
-    fields = (
-        'user', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth',
-        'admission_number', 'campus', 'level', 'admission_date', 'parent',
-        'profile_picture', 'created_at', 'updated_at'
-    )
-    readonly_fields = ('created_at', 'updated_at')
-
-    def full_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}"
-    full_name.short_description = 'Full Name'
-
-@admin.register(StaffMember)
-class StaffMemberAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'position', 'campus', 'email', 'joined_date')
-    search_fields = ('first_name', 'last_name', 'email', 'office_number')
-    list_filter = ('position', 'campus', 'joined_date')
-    raw_id_fields = ('user', 'campus')
-    fields = (
-        'user', 'first_name', 'middle_name', 'last_name', 'position', 'office_number',
-        'office_location', 'specialization', 'campus', 'phone', 'email', 'joined_date',
-        'image', 'created_at', 'updated_at'
-    )
-    readonly_fields = ('created_at', 'updated_at')
-
-    def full_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}"
-    full_name.short_description = 'Full Name'
-
-@admin.register(News)
-class NewsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'published_date', 'is_published')
-    search_fields = ('title', 'content')
-    list_filter = ('is_published', 'published_date')
-    raw_id_fields = ('author',)
-    fields = ('title', 'content', 'image', 'author', 'is_published', 'published_date', 'updated_date')
-    readonly_fields = ('published_date', 'updated_date')
-
-@admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('author_name', 'author_email', 'created_at', 'is_approved')
-    search_fields = ('author_name', 'author_email', 'content')
+    list_display = ('author_name', 'content_preview', 'created_at', 'is_approved')
     list_filter = ('is_approved', 'created_at')
-    fields = ('content', 'author_name', 'author_email', 'is_approved', 'created_at')
-    readonly_fields = ('created_at',)
+    search_fields = ('author_name', 'content')
+    
+    def content_preview(self, obj):
+        return obj.content[:50] + "..." if len(obj.content) > 50 else obj.content
+    content_preview.short_description = 'Content'
 
-@admin.register(Gallery)
-class GalleryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'media_type', 'author', 'published_date', 'is_published')
-    search_fields = ('title', 'description')
-    list_filter = ('media_type', 'is_published', 'published_date')
-    raw_id_fields = ('author',)
-    fields = ('title', 'description', 'media_type', 'image', 'video', 'author', 'is_published', 'published_date')
-    readonly_fields = ('published_date',)
-
-@admin.register(EmailVerification)
 class EmailVerificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'code', 'created_at')
-    search_fields = ('user__username', 'user__email', 'code')
-    raw_id_fields = ('user',)
-    fields = ('user', 'code', 'created_at', 'activation_code_expires')
-    readonly_fields = ('created_at', 'activation_code_expires')
+    list_display = ('user', 'code', 'created_at', 'activation_code_expires')
+    search_fields = ('user__username', 'code')
 
-@admin.register(Conversation)
 class ConversationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'participant_names', 'created_at', 'updated_at')
-    search_fields = ('participants__username',)
-    list_filter = ('created_at', 'updated_at')
-    raw_id_fields = ('participants',)
-    fields = ('participants', 'created_at', 'updated_at')
-    readonly_fields = ('created_at', 'updated_at')
-
-    def participant_names(self, obj):
+    list_display = ('id', 'participants_list', 'created_at', 'updated_at')
+    filter_horizontal = ('participants',)
+    
+    def participants_list(self, obj):
         return ", ".join([user.username for user in obj.participants.all()])
-    participant_names.short_description = 'Participants'
+    participants_list.short_description = 'Participants'
 
-@admin.register(Message)
-class MessageAdmin(admin.ModelAdmin):
-    list_display = ('sender', 'conversation', 'timestamp', 'is_read')
-    search_fields = ('content', 'sender__username')
-    list_filter = ('is_read', 'timestamp')
-    raw_id_fields = ('conversation', 'sender')
-    fields = ('conversation', 'sender', 'content', 'file', 'is_read', 'read_at', 'timestamp')
-    readonly_fields = ('timestamp', 'read_at')
-
-@admin.register(YouTubeVideo)
-class YouTubeVideoAdmin(admin.ModelAdmin):
-    list_display = ('title', 'video_id', 'published_at', 'is_featured')
-    search_fields = ('title', 'video_id')
-    list_filter = ('is_featured', 'published_at')
-    fields = ('title', 'description', 'video_id', 'published_at', 'thumbnail_url', 'duration', 'is_featured', 'created_at', 'updated_at')
-    readonly_fields = ('created_at', 'updated_at')
-
-@admin.register(SchoolClass)
-class SchoolClassAdmin(admin.ModelAdmin):
-    list_display = ('name', 'level', 'teacher', 'academic_year', 'student_count')
-    search_fields = ('name', 'academic_year')
-    list_filter = ('level', 'academic_year')
-    raw_id_fields = ('level', 'teacher', 'students')
-    fields = ('name', 'level', 'teacher', 'students', 'academic_year', 'created_at', 'updated_at')
-    readonly_fields = ('created_at', 'updated_at')
-
-@admin.register(CourseCatalog)
 class CourseCatalogAdmin(admin.ModelAdmin):
     list_display = ('title', 'academic_year', 'is_active')
+    list_filter = ('academic_year', 'is_active')
     search_fields = ('title', 'academic_year')
-    list_filter = ('is_active', 'academic_year')
-    fields = ('title', 'file', 'academic_year', 'is_active', 'created_at')
-    readonly_fields = ('created_at',)
 
-@admin.register(AcademicCalendar)
 class AcademicCalendarAdmin(admin.ModelAdmin):
     list_display = ('title', 'academic_year', 'is_active')
+    list_filter = ('academic_year', 'is_active')
     search_fields = ('title', 'academic_year')
-    list_filter = ('is_active', 'academic_year')
-    fields = ('title', 'file', 'academic_year', 'is_active', 'created_at')
-    readonly_fields = ('created_at',)
 
-@admin.register(AcademicAnnouncement)
 class AcademicAnnouncementAdmin(admin.ModelAdmin):
     list_display = ('title', 'date', 'is_published')
-    search_fields = ('title', 'content')
     list_filter = ('is_published', 'date')
-    fields = ('title', 'content', 'date', 'is_published', 'created_at')
-    readonly_fields = ('created_at',)
+    search_fields = ('title', 'content')
 
-@admin.register(Subject)
-class SubjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code', 'level')
-    search_fields = ('name', 'code')
-    list_filter = ('level',)
-    raw_id_fields = ('level',)
-    fields = ('name', 'code', 'description', 'level')
 
-@admin.register(Result)
-class ResultAdmin(admin.ModelAdmin):
-    list_display = ('student', 'subject', 'term', 'academic_year', 'total_score', 'grade', 'is_approved')
-    search_fields = ('student__first_name', 'student__last_name', 'subject__name', 'academic_year')
-    list_filter = ('term', 'academic_year', 'is_approved', 'grade')
-    raw_id_fields = ('student', 'subject', 'school_class', 'teacher', 'approved_by')
-    fields = (
-        'student', 'subject', 'school_class', 'term', 'academic_year',
-        'exam_score', 'test_score', 'assignment_score', 'total_score',
-        'grade', 'remark', 'teacher', 'is_approved', 'approved_by',
-        'date_approved', 'date_created'
-    )
-    readonly_fields = ('total_score', 'grade', 'remark', 'date_created', 'date_approved')
+# Register all models
+admin.site.register(User, CustomUserAdmin)
+admin.site.register(Campus, CampusAdmin)
+admin.site.register(Level, LevelAdmin)
+admin.site.register(Parent, ParentAdmin)
+admin.site.register(Student, StudentAdmin)
+admin.site.register(StaffMember, StaffMemberAdmin)
+admin.site.register(News, NewsAdmin)
+admin.site.register(Comment, CommentAdmin)
+admin.site.register(Gallery, GalleryAdmin)
+admin.site.register(EmailVerification, EmailVerificationAdmin)
+admin.site.register(Conversation, ConversationAdmin)
+admin.site.register(Message, MessageAdmin)
+admin.site.register(YouTubeVideo, YouTubeVideoAdmin)
+admin.site.register(SchoolClass, SchoolClassAdmin)
+admin.site.register(CourseCatalog, CourseCatalogAdmin)
+admin.site.register(AcademicCalendar, AcademicCalendarAdmin)
+admin.site.register(AcademicAnnouncement, AcademicAnnouncementAdmin)
+admin.site.register(Subject, SubjectAdmin)
+admin.site.register(Result, ResultAdmin)

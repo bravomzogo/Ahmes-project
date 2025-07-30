@@ -444,3 +444,42 @@ class ResultApprovalForm(forms.ModelForm):
     class Meta:
         model = Result
         fields = ['is_approved']
+
+
+# forms.py
+from django import forms
+import pandas as pd
+from io import BytesIO
+
+class StudentImportForm(forms.Form):
+    excel_file = forms.FileField(
+        label='Excel File',
+        help_text='Upload an Excel file with student data. The file should have columns matching the student fields.'
+    )
+
+    def clean_excel_file(self):
+        excel_file = self.cleaned_data['excel_file']
+        if not excel_file.name.endswith(('.xlsx', '.xls')):
+            raise forms.ValidationError("Only Excel files are allowed (.xlsx, .xls)")
+        
+        try:
+            # Read Excel file with explicit date format parsing
+            df = pd.read_excel(
+                BytesIO(excel_file.read()),
+                parse_dates=['date_of_birth', 'admission_date'],
+                date_format='%d/%m/%Y'  # Specify DD/MM/YYYY format
+            )
+            required_columns = [
+                'first_name', 'last_name', 'gender', 'date_of_birth',
+                'campus', 'level', 'admission_date',
+                'parent_name', 'parent_phone', 'parent_email'
+            ]
+            
+            # Check if required columns exist
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                raise forms.ValidationError(f"Missing required columns: {', '.join(missing_columns)}")
+            
+            return df
+        except Exception as e:
+            raise forms.ValidationError(f"Error reading Excel file: {str(e)}")

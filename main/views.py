@@ -292,30 +292,103 @@ def manage_students(request):
     students = Student.objects.all().order_by('-created_at')
     return render(request, 'main/manage_students.html', {'students': students})
 
+# views.py
+from .forms import StudentImportForm
+from django.db import transaction
+
 @login_required
 @user_passes_test(is_admin)
 def add_student(request):
+    excel_form = StudentImportForm()
+    single_form = StudentForm()
+    
     if request.method == 'POST':
-        form = StudentForm(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    student = form.save()
-                    logger.info(f"Student saved successfully: {student}")
-                    messages.success(request, 'Student and parent added successfully! Credentials sent to parent email.')
+        if 'excel_submit' in request.POST:
+            excel_form = StudentImportForm(request.POST, request.FILES)
+            if excel_form.is_valid():
+                try:
+                    df = excel_form.cleaned_data['excel_file']
+                    logger.debug(f"Excel file has {len(df)} rows")
+                    created_count = 0
+                    
+                    for index, row in df.iterrows():
+                        # Handle campus
+                        campus_name = str(row['campus']).strip()
+                        try:
+                            campus = Campus.objects.get(name=campus_name)
+                        except Campus.DoesNotExist:
+                            messages.error(request, f"Row {index + 2}: Campus '{campus_name}' not found.")
+                            logger.error(f"Campus '{campus_name}' not found for row {index + 2}")
+                            continue
+                        
+                        # Handle level
+                        level_name = str(row['level']).strip()
+                        try:
+                            level = Level.objects.get(name=level_name)
+                        except Level.DoesNotExist:
+                            messages.error(request, f"Row {index + 2}: Level '{level_name}' not found.")
+                            logger.error(f"Level '{level_name}' not found for row {index + 2}")
+                            continue
+                        
+                        # Prepare student data with IDs
+                        student_data = {
+                            'first_name': str(row['first_name']).strip(),
+                            'last_name': str(row['last_name']).strip(),
+                            'gender': str(row['gender']).strip().upper(),
+                            'date_of_birth': row['date_of_birth'],
+                            'campus': campus.id,
+                            'level': level.id,
+                            'admission_date': row['admission_date'],
+                            'parent_name': str(row['parent_name']).strip(),
+                            'parent_phone': str(row['parent_phone']).strip(),
+                            'parent_email': str(row['parent_email']).strip().lower(),
+                            'middle_name': str(row.get('middle_name', '')).strip(),
+                            'admission_number': str(row.get('admission_number', '')).strip(),
+                            'parent_address': str(row.get('parent_address', '')).strip(),
+                        }
+                        logger.debug(f"Row {index + 2}: Processing student data: {student_data}")
+                        
+                        form = StudentForm(student_data)
+                        if form.is_valid():
+                            try:
+                                with transaction.atomic():
+                                    form.save()
+                                created_count += 1
+                                logger.debug(f"Row {index + 2}: Student saved successfully")
+                            except Exception as e:
+                                messages.error(request, f"Row {index + 2}: Error saving student: {str(e)}")
+                                logger.error(f"Row {index + 2}: Error saving student: {str(e)}")
+                        else:
+                            messages.error(request, f"Row {index + 2}: Invalid data: {form.errors.as_text()}")
+                            logger.error(f"Row {index + 2}: Form invalid. Errors: {form.errors.as_text()}")
+                    
+                    if created_count > 0:
+                        messages.success(request, f"Successfully imported {created_count} students!")
+                    else:
+                        messages.warning(request, "No students were imported. Check the error messages above.")
                     return redirect('manage_students')
-            except Exception as e:
-                logger.error(f"Error saving student: {str(e)}")
-                messages.error(request, f"Error adding student: {str(e)}")
-        else:
-            logger.debug(f"Form validation failed: {form.errors.as_text()}")
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = StudentForm()
+                    
+                except Exception as e:
+                    messages.error(request, f"Error during import: {str(e)}")
+                    logger.error(f"Error during import: {str(e)}")
+        
+        elif 'single_submit' in request.POST:
+            single_form = StudentForm(request.POST, request.FILES)
+            if single_form.is_valid():
+                try:
+                    with transaction.atomic():
+                        student = single_form.save()
+                    messages.success(request, "Student and parent added successfully! Credentials sent to parent email.")
+                    return redirect('manage_students')
+                except Exception as e:
+                    messages.error(request, f"Error adding student: {str(e)}")
+    
     return render(request, 'main/add_student.html', {
-        'form': form,
+        'excel_form': excel_form,
+        'single_form': single_form,
         'title': 'Add New Student'
     })
+
 @login_required
 @user_passes_test(is_admin)
 def edit_student(request, pk):
