@@ -8,7 +8,7 @@
 {% block content %}
 <div class="wrapper">
   <!-- Sidebar -->
-  {% include 'main/sidebar2.html' %}
+  {% comment %} {% include 'main/sidebar2.html' %} {% endcomment %}
 
   <!-- Main Content -->
   <div class="main-content">
@@ -61,9 +61,17 @@
                     <div class="invalid-feedback d-block">{{ form.academic_year.errors.as_text }}</div>
                   {% endif %}
                 </div>
-                <div class="form-floating mt-3">
-                  {{ form.students|add_class:"form-control" }}
+                <div class="form-group mt-3">
                   <label>Students</label>
+                  <div class="d-flex mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary me-2" id="select-all">
+                      <i class="fas fa-check-circle me-1"></i>Select All
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-selection">
+                      <i class="fas fa-times-circle me-1"></i>Clear
+                    </button>
+                  </div>
+                  {{ form.students|add_class:"form-control" }}
                   {% if form.students.errors %}
                     <div class="invalid-feedback d-block">{{ form.students.errors.as_text }}</div>
                   {% endif %}
@@ -87,127 +95,45 @@
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-  :root {
-    --sidebar-width: 250px;
-    --topbar-height: 60px;
-    --primary-color: #1a5276;
-    --primary-dark: #154360;
-    --secondary-color: #f39c12;
-  }
-
-  body {
-    background-color: #f8f9fc;
-  }
-
-  .wrapper {
-    display: flex;
-    width: 100%;
-    align-items: stretch;
-  }
-
-  .sidebar {
-    min-width: var(--sidebar-width);
-    max-width: var(--sidebar-width);
-    background: var(--primary-dark);
-    color: #fff;
-    transition: all 0.3s;
-    min-height: 100vh;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-  }
-
-  .sidebar-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .sidebar .nav-link {
-    color: rgba(255, 255, 255, 0.8);
-    padding: 1rem;
-    margin: 0 0.5rem;
-    border-radius: 0.375rem;
-    font-weight: 500;
-  }
-
-  .sidebar .nav-link:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .sidebar .nav-link.active {
-    color: #fff;
-    background: var(--secondary-color);
-  }
-
-  .sidebar .nav-link i {
-    margin-right: 0.5rem;
-  }
-
-  .sidebar-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .main-content {
-    width: 100%;
-    min-height: 100vh;
-    padding: 1rem;
-    transition: all 0.3s;
-  }
-
-  .card {
-    border: none;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-  }
-
-  .card-header {
-    background-color: #f8f9fc;
-    border-bottom: 1px solid #e3e6f0;
-  }
-
-  .form-floating > label {
-    z-index: 2;
-  }
-
-  @media (max-width: 768px) {
-    .sidebar {
-      margin-left: -var(--sidebar-width);
-    }
-    .sidebar.active {
-      margin-left: 0;
-    }
-  }
-</style>
-{% endblock %}
-
 {% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.0"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Form validation
-    const form = document.querySelector('.needs-validation');
-    form.addEventListener('submit', function (event) {
-      if (!form.checkValidity()) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      form.classList.add('was-validated');
-    }, false);
+document.addEventListener("DOMContentLoaded", function() {
+  // Select all students button
+  document.getElementById('select-all').addEventListener('click', function() {
+    const selectElement = document.getElementById('id_students');
+    for (let i = 0; i < selectElement.options.length; i++) {
+      selectElement.options[i].selected = true;
+    }
+  });
 
-    // Sidebar toggle
-    const sidebarToggle = document.getElementById("sidebarToggleTop");
-    if (sidebarToggle) {
-      sidebarToggle.addEventListener("click", function () {
-        document.querySelector(".sidebar").classList.toggle("active");
+  // Clear selection button
+  document.getElementById('clear-selection').addEventListener('click', function() {
+    const selectElement = document.getElementById('id_students');
+    for (let i = 0; i < selectElement.options.length; i++) {
+      selectElement.options[i].selected = false;
+    }
+  });
+
+  // HTMX after swap handler to update the select element
+  document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target.id === 'id_students') {
+      const selectElement = document.getElementById('id_students');
+      // Keep any previously selected students that are still in the filtered list
+      const previouslySelected = Array.from(selectElement.selectedOptions).map(opt => opt.value);
+      
+      // Update the select element with new options
+      const data = JSON.parse(evt.detail.xhr.responseText);
+      selectElement.innerHTML = '';
+      data.students.forEach(student => {
+        const option = document.createElement('option');
+        option.value = student.id;
+        option.text = student.text;
+        option.selected = previouslySelected.includes(student.id.toString());
+        selectElement.add(option);
       });
     }
-
-    // Active menu item highlight
-    const currentUrl = window.location.pathname;
-    document.querySelectorAll(".sidebar .nav-link").forEach((link) => {
-      if (link.href.includes(currentUrl)) {
-        link.classList.add("active");
-      }
-    });
   });
+});
 </script>
 {% endblock %}

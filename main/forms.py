@@ -8,7 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 import secrets
 import logging
-from .models import AcademicAnnouncement, AcademicCalendar, CourseCatalog, Result, SchoolClass, Subject, User, Parent, Student, StaffMember, News, Comment, Gallery, Message, EmailVerification
+from .models import AcademicAnnouncement, AcademicCalendar, CourseCatalog, Level, Result, SchoolClass, Subject, User, Parent, Student, StaffMember, News, Comment, Gallery, Message, EmailVerification
 from cloudinary.forms import CloudinaryFileField
 from django.db import transaction
 from django.core.validators import FileExtensionValidator
@@ -376,15 +376,58 @@ class MessageForm(forms.ModelForm):
         return file
 
 class SchoolClassForm(forms.ModelForm):
+    level = forms.ModelChoiceField(
+        queryset=Level.objects.all(),
+        required=True,
+        widget=forms.Select(attrs={
+            'id': 'id_level_filter',
+            'hx-get': '/students/filter_by_level/',
+            'hx-target': '#id_students',
+            'hx-trigger': 'change'
+        })
+    )
+    
     class Meta:
         model = SchoolClass
         fields = ['name', 'level', 'teacher', 'students', 'academic_year']
         widgets = {
-            'level': forms.Select(),
             'teacher': forms.Select(),
-            'students': forms.SelectMultiple(),
+            'students': forms.SelectMultiple(attrs={
+                'id': 'id_students',
+                'size': 10,
+                'style': 'width: 100%'
+            }),
             'academic_year': forms.TextInput(attrs={'placeholder': 'e.g., 2025-2026'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # If we have a level in the initial data or POST data, filter students
+        if 'level' in self.data:
+            try:
+                level_id = int(self.data.get('level'))
+                self.fields['students'].queryset = Student.objects.filter(level_id=level_id)
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk and self.instance.level:
+            self.fields['students'].queryset = Student.objects.filter(level=self.instance.level)
+        else:
+            self.fields['students'].queryset = Student.objects.none()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        level = cleaned_data.get('level')
+        students = cleaned_data.get('students')
+        
+        if level and students:
+            # Verify all selected students belong to the selected level
+            invalid_students = students.exclude(level=level)
+            if invalid_students.exists():
+                raise forms.ValidationError(
+                    f"The following students don't belong to level {level}: "
+                    f"{', '.join(str(s) for s in invalid_students)}"
+                )
+        return cleaned_data
 
 class AcademicAnnouncementForm(forms.ModelForm):
     class Meta:
@@ -421,24 +464,57 @@ class SubjectForm(forms.ModelForm):
         fields = ['name', 'description', 'level']
 
 class ResultForm(forms.ModelForm):
+    school_class = forms.ModelChoiceField(
+        queryset=SchoolClass.objects.none(),
+        widget=forms.Select(attrs={
+            'id': 'id_school_class_filter',
+            'hx-get': '/students/filter_by_class/',
+            'hx-target': '#id_student',
+            'hx-trigger': 'change'
+        })
+    )
+    
     class Meta:
         model = Result
         fields = ['student', 'subject', 'school_class', 'term', 'academic_year', 
                  'exam_score', 'test_score', 'assignment_score']
-        
+        widgets = {
+            'student': forms.Select(attrs={'id': 'id_student'}),
+            'subject': forms.Select(),
+            'term': forms.Select(),
+            'academic_year': forms.TextInput(),
+        }
+
     def __init__(self, *args, **kwargs):
         teacher = kwargs.pop('teacher', None)
         super().__init__(*args, **kwargs)
         
         if teacher:
-            classes_taught = SchoolClass.objects.filter(teacher=teacher)
-            self.fields['school_class'].queryset = classes_taught
-            self.fields['student'].queryset = Student.objects.filter(
-                schoolclass__in=classes_taught
-            ).distinct()
-            self.fields['subject'].queryset = Subject.objects.filter(
-                level__in=classes_taught.values_list('level', flat=True)
-            ).distinct()
+            # Set initial queryset for school_class
+            self.fields['school_class'].queryset = SchoolClass.objects.filter(teacher=teacher)
+            
+            # If we have a school_class in POST data, filter students and subjects
+            if 'school_class' in self.data:
+                try:
+                    school_class_id = int(self.data.get('school_class'))
+                    school_class = SchoolClass.objects.get(id=school_class_id)
+                    
+                    # Filter students by class
+                    self.fields['student'].queryset = school_class.students.all()
+                    
+                    # Filter subjects by level
+                    self.fields['subject'].queryset = Subject.objects.filter(level=school_class.level)
+                except (ValueError, TypeError, SchoolClass.DoesNotExist):
+                    pass
+            elif self.instance.pk and self.instance.school_class:
+                # For editing existing result
+                school_class = self.instance.school_class
+                self.fields['student'].queryset = school_class.students.all()
+                self.fields['subject'].queryset = Subject.objects.filter(level=school_class.level)
+            else:
+                # Initial state - no students or subjects
+                self.fields['student'].queryset = Student.objects.none()
+                self.fields['subject'].queryset = Subject.objects.none()
 
 class ResultApprovalForm(forms.ModelForm):
     class Meta:

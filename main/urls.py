@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from . import views
 from .views import (
-    CustomLoginView, add_academic_announcement, add_academic_calendar, add_class, add_course_catalog, manage_academic_announcements, manage_academic_calendars, manage_classes, manage_course_catalogs, parent_view_results, register, verify_email, inbox, chat, logout_view, 
+    CustomLoginView, add_academic_announcement, add_academic_calendar, add_class, add_course_catalog, filter_students_by_class, filter_students_by_level, manage_academic_announcements, manage_academic_calendars, manage_classes, manage_course_catalogs, parent_view_results, register, verify_email, inbox, chat, logout_view, 
     get_conversations, mark_messages_read, get_new_messages, 
     StudentLoginView, TeacherLoginView, ParentLoginView, AcademicAdminLoginView,
     student_dashboard, teacher_dashboard, parent_dashboard, academic_admin_dashboard
@@ -70,6 +70,8 @@ path('ad/classes/', manage_classes, name='manage_classes'),
 path('ad/classes/add/', add_class, name='add_class'),
 path('ad/classes/edit/<int:pk>/', views.edit_class, name='edit_class'),
 path('ad/classes/delete/<int:pk>/', views.delete_class, name='delete_class'),
+path('students/filter_by_level/', filter_students_by_level, name='filter_students_by_level'),
+path('students/filter_by_class/', filter_students_by_class, name='filter_students_by_class'),
 
 path('ad/academic-announcements/', manage_academic_announcements, name='manage_academic_announcements'),
 path('ad/academic-announcements/add/', add_academic_announcement, name='add_academic_announcement'),

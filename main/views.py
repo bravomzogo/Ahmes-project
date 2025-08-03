@@ -4,7 +4,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views import View
-from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Parent, Result, SchoolClass, Student, StaffMember, News, Comment, User
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Parent, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
 from .forms import (GalleryForm, ResultApprovalForm, ResultForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm)
 from django.contrib import messages
@@ -981,6 +981,7 @@ def add_class(request):
             return redirect('manage_classes')
     else:
         form = SchoolClassForm()
+    
     return render(request, 'main/add_class.html', {'form': form})
 
 @login_required
@@ -1404,3 +1405,61 @@ def parent_view_results(request):
     return render(request, 'academics/parent_view_results.html', {
         'results_by_student': results_by_student
     })
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def filter_students_by_level(request):
+    level_id = request.GET.get('level')
+    if not level_id:
+        return JsonResponse({'error': 'Level ID is required'}, status=400)
+    
+    try:
+        # Get currently selected student IDs from the request
+        selected_ids = request.GET.getlist('selected[]', [])
+        selected_ids = [int(id) for id in selected_ids if id.isdigit()]
+        
+        students = Student.objects.filter(level_id=level_id).order_by('last_name', 'first_name')
+        student_options = [
+            {
+                'id': s.id, 
+                'text': f"{s.last_name}, {s.first_name} ({s.admission_number})",
+                'selected': s.id in selected_ids
+            }
+            for s in students
+        ]
+        return JsonResponse({'students': student_options})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+
+@require_GET
+def filter_students_by_class(request):
+    class_id = request.GET.get('school_class')
+    if not class_id:
+        return JsonResponse({'error': 'Class ID is required'}, status=400)
+    
+    try:
+        school_class = SchoolClass.objects.get(id=class_id)
+        students = school_class.students.all().order_by('last_name', 'first_name')
+        subjects = Subject.objects.filter(level=school_class.level)
+        
+        student_options = [{
+            'id': s.id, 
+            'text': f"{s.last_name}, {s.first_name} ({s.admission_number})"
+        } for s in students]
+        
+        subject_options = [{
+            'id': s.id,
+            'text': f"{s.name} ({s.code})"
+        } for s in subjects]
+        
+        return JsonResponse({
+            'students': student_options,
+            'subjects': subject_options
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
