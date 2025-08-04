@@ -101,6 +101,8 @@ path('ad/academic-calendars/delete/<int:pk>/', views.delete_academic_calendar, n
     # Admin URLs
     path('ad/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('ad/results/', views.admin_result_dashboard, name='admin_result_dashboard'),
+    path('get-class-students/', views.get_class_students, name='get_class_students'),
+    path('get-class-subjects/', views.get_class_subjects, name='get_class_subjects'),
     path('ad/results/review/<int:pk>/', views.review_result, name='review_result'),
     path('ad/results/bulk-approve/', views.bulk_approve_results, name='bulk_approve_results'),
 

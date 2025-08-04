@@ -1,14 +1,18 @@
 {% extends 'main/base.html' %}
 {% load static %}
-{% load widget_tweaks %}
 
-{% block loader %}{% endblock %}
-{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Result | AHMES{% endblock %}
+{% block title %}Add Weekly Result | AHMES{% endblock %}
+
+{% block extra_css %}
+<!-- Add Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid px-4 py-4">
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-4 border-bottom pb-2">
-    <h1 class="h2"><i class="fas fa-clipboard me-2"></i>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Result</h1>
+    <h1 class="h2"><i class="fas fa-clipboard me-2"></i>Add Weekly Result</h1>
     <a href="{% url 'teacher_result_dashboard' %}" class="btn btn-outline-secondary rounded-pill">
       <i class="fas fa-arrow-left me-2"></i>Back to Results
     </a>
@@ -16,120 +20,58 @@
 
   <div class="card shadow rounded-4">
     <div class="card-body p-4">
-      <form method="post" class="needs-validation" novalidate>
+      <form method="post" class="needs-validation" novalidate id="resultForm">
         {% csrf_token %}
-
-        <!-- Student & Subject -->
-        <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-user-graduate me-2"></i>Student & Subject</h5>
+        {% if form.errors %}
+<div class="alert alert-danger">
+    <strong>Error!</strong> Please correct the following errors:
+    <ul>
+    {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+            <li>{{ field|title }}: {{ error }}</li>
+        {% endfor %}
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
         <div class="row g-4 mb-4">
           <div class="col-md-4">
-            <div class="form-floating">
-              {{ form.school_class|add_class:"form-control" }}
-              <label>Class</label>
-              {% if form.school_class.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.school_class.errors }}
-                </div>
-              {% endif %}
-            </div>
+            <label class="form-label">Class</label>
+            {{ form.school_class }}
           </div>
           <div class="col-md-4">
-            <div class="form-floating">
-              {{ form.student|add_class:"form-control" }}
-              <label>Student</label>
-              {% if form.student.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.student.errors }}
-                </div>
-              {% endif %}
-            </div>
+            <label class="form-label">Student</label>
+            {{ form.student }}
           </div>
           <div class="col-md-4">
-            <div class="form-floating">
-              {{ form.subject|add_class:"form-control" }}
-              <label>Subject</label>
-              {% if form.subject.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.subject.errors }}
-                </div>
-              {% endif %}
-            </div>
+            <label class="form-label">Subject</label>
+            {{ form.subject }}
+          </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+          <div class="col-md-3">
+            <label class="form-label">Term</label>
+            {{ form.term }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Academic Year</label>
+            {{ form.academic_year }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Week Number</label>
+            {{ form.week_number }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Exam Score</label>
+            {{ form.exam_score }}
           </div>
         </div>
 
-        <!-- Term Info -->
-        <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-school me-2"></i>Term Info</h5>
-        <div class="row g-4 mb-4">
-          <div class="col-md-6">
-            <div class="form-floating">
-              {{ form.term|add_class:"form-control" }}
-              <label>Term</label>
-              {% if form.term.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.term.errors }}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-floating">
-              {{ form.academic_year|add_class:"form-control" }}
-              <label>Academic Year</label>
-              {% if form.academic_year.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.academic_year.errors }}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <!-- Scores -->
-        <h5 class="mb-4 border-bottom pb-2"><i class="fas fa-pen-alt me-2"></i>Scores</h5>
-        <div class="row g-4 mb-4">
-          <div class="col-md-4">
-            <div class="form-floating">
-              {{ form.exam_score|add_class:"form-control" }}
-              <label>Exam Score</label>
-              {% if form.exam_score.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.exam_score.errors }}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="form-floating">
-              {{ form.test_score|add_class:"form-control" }}
-              <label>Test Score</label>
-              {% if form.test_score.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.test_score.errors }}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="form-floating">
-              {{ form.assignment_score|add_class:"form-control" }}
-              <label>Assignment Score</label>
-              {% if form.assignment_score.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.assignment_score.errors }}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <!-- Submit -->
         <div class="text-end mt-4">
           <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4">
-            <i class="fas fa-save me-2"></i>Save Result
+            <i class="fas fa-save me-2"></i>Save Weekly Result
           </button>
-          <a href="{% url 'teacher_result_dashboard' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4 ms-2">
-            <i class="fas fa-times me-2"></i>Cancel
-          </a>
         </div>
       </form>
     </div>
@@ -138,35 +80,75 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/htmx.org@1.9.0"></script>
+<!-- Add jQuery and Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  // HTMX after swap handler to update the select elements
-  document.body.addEventListener('htmx:afterSwap', function(evt) {
-    const data = JSON.parse(evt.detail.xhr.responseText);
-    
-    if (data.students) {
-      const studentSelect = document.getElementById('id_student');
-      studentSelect.innerHTML = '';
-      data.students.forEach(student => {
-        const option = document.createElement('option');
-        option.value = student.id;
-        option.text = student.text;
-        studentSelect.add(option);
-      });
-    }
-    
-    if (data.subjects) {
-      const subjectSelect = document.getElementById('id_subject');
-      subjectSelect.innerHTML = '';
-      data.subjects.forEach(subject => {
-        const option = document.createElement('option');
-        option.value = subject.id;
-        option.text = subject.text;
-        subjectSelect.add(option);
-      });
-    }
-  });
+$(document).ready(function() {
+    // Initialize select2 for all select elements
+    $('select').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+
+    // When class changes, load students and subjects
+    $('#id_school_class').on('change', function() {
+        const classId = $(this).val();
+        const studentSelect = $('#id_student');
+        const subjectSelect = $('#id_subject');
+        
+        if (classId) {
+            // Clear existing options and show loading
+            studentSelect.empty().append('<option value="">Loading students...</option>');
+            subjectSelect.empty().append('<option value="">Loading subjects...</option>');
+            
+            // Get students for this class
+            $.ajax({
+                url: "{% url 'get_class_students' %}",
+                data: {class_id: classId},
+                success: function(data) {
+                    studentSelect.empty().append('<option value="">Select a student...</option>');
+                    $.each(data.students, function(i, student) {
+                        studentSelect.append($('<option>', {
+                            value: student.id,
+                            text: student.text
+                        }));
+                    });
+                },
+                error: function() {
+                    studentSelect.empty().append('<option value="">Error loading students</option>');
+                }
+            });
+
+            // Get subjects for this class's level
+            $.ajax({
+                url: "{% url 'get_class_subjects' %}",
+                data: {class_id: classId},
+                success: function(data) {
+                    subjectSelect.empty().append('<option value="">Select a subject...</option>');
+                    $.each(data.subjects, function(i, subject) {
+                        subjectSelect.append($('<option>', {
+                            value: subject.id,
+                            text: subject.text
+                        }));
+                    });
+                },
+                error: function() {
+                    subjectSelect.empty().append('<option value="">Error loading subjects</option>');
+                }
+            });
+        } else {
+            studentSelect.empty().append('<option value="">Select a class first</option>');
+            subjectSelect.empty().append('<option value="">Select a class first</option>');
+        }
+    });
+
+    // Handle form submission normally (not via AJAX)
+    $('#resultForm').on('submit', function(e) {
+        // Just let the normal form submission happen
+        return true;
+    });
 });
 </script>
 {% endblock %}

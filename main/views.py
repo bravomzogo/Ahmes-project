@@ -5,8 +5,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views import View
 from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Parent, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
-from .forms import (GalleryForm, ResultApprovalForm, ResultForm, UserRegistrationForm, AdminRegistrationForm, StaffRegistrationForm, 
-                   StudentForm, StaffMemberForm, NewsForm, CommentForm)
+from .forms import (GalleryForm, ResultApprovalForm, StaffRegistrationForm, 
+                   StudentForm, StaffMemberForm, NewsForm, CommentForm, WeeklyResultForm)
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
@@ -21,6 +21,8 @@ import json
 from django.utils import timezone
 from django.core.cache import cache
 from django.contrib.auth.forms import AuthenticationForm
+
+from main import models
 
 class CustomLoginView(LoginView):
     template_name = 'auth/login.html'
@@ -1151,47 +1153,21 @@ def is_teacher(user):
 @login_required
 @user_passes_test(is_teacher)
 def teacher_result_dashboard(request):
-    teacher = request.user.staff_profile
-    status_filter = request.GET.get('status', '')  # Get status from URL params
-    
-    # Base queryset - all results for this teacher
-    results = Result.objects.filter(teacher=teacher).select_related(
-        'student', 
-        'subject', 
-        'school_class'
-    ).order_by('-date_created')
-    
-    # Apply status filter if specified
-    if status_filter == 'pending':
-        results = results.filter(is_approved=False)
-    elif status_filter == 'approved':
-        results = results.filter(is_approved=True)
-    
-    # Counts for the tabs
-    total_count = Result.objects.filter(teacher=teacher).count()
-    pending_count = Result.objects.filter(teacher=teacher, is_approved=False).count()
-    approved_count = Result.objects.filter(teacher=teacher, is_approved=True).count()
-    
-    # Pagination
-    page = request.GET.get('page', 1)
-    paginator = Paginator(results, 25)  # Show 25 results per page
-    
-    try:
-        results_page = paginator.page(page)
-    except PageNotAnInteger:
-        results_page = paginator.page(1)
-    except EmptyPage:
-        results_page = paginator.page(paginator.num_pages)
-    
-    context = {
-        'teacher': teacher,
-        'results': results_page,
-        'total_count': total_count,
-        'pending_count': pending_count,
-        'approved_count': approved_count,
-        'current_status': status_filter,
-    }
-    
+    qs = Result.objects.filter(teacher=request.user.staff_profile)
+    status = request.GET.get('status')
+    if status == 'pending':
+        qs = qs.filter(is_approved=False)
+    elif status == 'approved':
+        qs = qs.filter(is_approved=True)
+    # monthly estimations: group weeks 1‑4, 5‑8, 9‑12, 13‑15
+    from django.db.models import Avg, Q  # Ensure Q is imported here
+    monthly = qs.values('student', 'term', 'academic_year').annotate(
+        month1=Avg('total_score', filter=Q(week_number__gte=1, week_number__lte=4)),
+        month2=Avg('total_score', filter=Q(week_number__gte=5, week_number__lte=8)),
+        month3=Avg('total_score', filter=Q(week_number__gte=9, week_number__lte=12)),
+        month4=Avg('total_score', filter=Q(week_number__gte=13, week_number__lte=15)),
+    )
+    context = {'results': qs.order_by('week_number'), 'monthly': monthly}
     return render(request, 'academics/teacher_result_dashboard.html', context)
 
     
@@ -1201,15 +1177,19 @@ def add_result(request):
     teacher = request.user.staff_profile
     
     if request.method == 'POST':
-        form = ResultForm(request.POST, teacher=teacher)
+        form = WeeklyResultForm(request.POST, teacher=teacher)
         if form.is_valid():
             result = form.save(commit=False)
             result.teacher = teacher
             result.save()
-            messages.success(request, 'Result added successfully! It will be visible after approval.')
+            messages.success(request, 'Weekly result saved - pending approval.')
             return redirect('teacher_result_dashboard')
+        else:
+            # Add debug logging for form errors
+            print("Form errors:", form.errors)
+            messages.error(request, 'Please correct the errors below.')
     else:
-        form = ResultForm(teacher=teacher)
+        form = WeeklyResultForm(teacher=teacher)
     
     return render(request, 'academics/add_result.html', {
         'form': form,
@@ -1223,10 +1203,10 @@ def edit_result(request, pk):
     result = get_object_or_404(Result, pk=pk, teacher=teacher)
     
     if request.method == 'POST':
-        form = ResultForm(request.POST, instance=result, teacher=teacher)
+        form = WeeklyResultForm(request.POST, instance=result)
         if form.is_valid():
-            # If editing an approved result, it needs to be re-approved
             if result.is_approved:
+                # Reset approval on edit
                 result.is_approved = False
                 result.approved_by = None
                 result.date_approved = None
@@ -1234,12 +1214,13 @@ def edit_result(request, pk):
             messages.success(request, 'Result updated successfully! It will need re-approval if previously approved.')
             return redirect('teacher_result_dashboard')
     else:
-        form = ResultForm(instance=result, teacher=teacher)
+        form = WeeklyResultForm(instance=result)
     
     return render(request, 'academics/edit_result.html', {
         'form': form,
         'result': result
     })
+
 
 @login_required
 @user_passes_test(is_teacher)
@@ -1258,19 +1239,36 @@ def delete_result(request, pk):
 @login_required
 @user_passes_test(is_academic_admin)
 def admin_result_dashboard(request):
-    # Get all pending results
-    pending_results = Result.objects.filter(
-        is_approved=False
-    ).order_by('-date_created')
+    status = request.GET.get('status', None)
     
-    # Get recently approved results
-    approved_results = Result.objects.filter(
-        is_approved=True
-    ).order_by('-date_approved')[:20]
+    # Base queryset
+    results = Result.objects.all()
+    
+    # Filter based on status
+    if status == 'pending':
+        results = results.filter(is_approved=False)
+        title = "Pending Approval Results"
+    elif status == 'approved':
+        results = results.filter(is_approved=True)
+        title = "Approved Results"
+    else:
+        title = "All Results"
+    
+    # Order by most recent first (using date_approved for approved, id for pending)
+    if status == 'approved':
+        results = results.order_by('-date_approved')
+    else:
+        results = results.order_by('-id')  # or another field you want to sort by
+    
+    # Pagination
+    paginator = Paginator(results, 25)  # Show 25 results per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     return render(request, 'academics/admin_result_dashboard.html', {
-        'pending_results': pending_results,
-        'approved_results': approved_results,
+        'results': page_obj,
+        'title': title,
+        'is_paginated': paginator.num_pages > 1,
     })
 
 @login_required
@@ -1463,3 +1461,50 @@ def filter_students_by_class(request):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+
+
+
+@require_GET
+@login_required
+def get_class_students(request):
+    class_id = request.GET.get('class_id')
+    if not class_id:
+        return JsonResponse({'error': 'Class ID is required'}, status=400)
+    
+    try:
+        school_class = SchoolClass.objects.get(id=class_id)
+        students = school_class.students.all().order_by('last_name', 'first_name')
+        
+        student_options = [{
+            'id': s.id, 
+            'text': f"{s.last_name}, {s.first_name} ({s.admission_number})"
+        } for s in students]
+        
+        return JsonResponse({'students': student_options})
+    except SchoolClass.DoesNotExist:
+        return JsonResponse({'error': 'Class not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@require_GET
+@login_required
+def get_class_subjects(request):
+    class_id = request.GET.get('class_id')
+    if not class_id:
+        return JsonResponse({'error': 'Class ID is required'}, status=400)
+    
+    try:
+        school_class = SchoolClass.objects.get(id=class_id)
+        subjects = Subject.objects.filter(level=school_class.level).order_by('name')
+        
+        subject_options = [{
+            'id': s.id,
+            'text': f"{s.name} ({s.code})"
+        } for s in subjects]
+        
+        return JsonResponse({'subjects': subject_options})
+    except SchoolClass.DoesNotExist:
+        return JsonResponse({'error': 'Class not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -463,58 +463,7 @@ class SubjectForm(forms.ModelForm):
         model = Subject
         fields = ['name', 'description', 'level']
 
-class ResultForm(forms.ModelForm):
-    school_class = forms.ModelChoiceField(
-        queryset=SchoolClass.objects.none(),
-        widget=forms.Select(attrs={
-            'id': 'id_school_class_filter',
-            'hx-get': '/students/filter_by_class/',
-            'hx-target': '#id_student',
-            'hx-trigger': 'change'
-        })
-    )
-    
-    class Meta:
-        model = Result
-        fields = ['student', 'subject', 'school_class', 'term', 'academic_year', 
-                 'exam_score', 'test_score', 'assignment_score']
-        widgets = {
-            'student': forms.Select(attrs={'id': 'id_student'}),
-            'subject': forms.Select(),
-            'term': forms.Select(),
-            'academic_year': forms.TextInput(),
-        }
 
-    def __init__(self, *args, **kwargs):
-        teacher = kwargs.pop('teacher', None)
-        super().__init__(*args, **kwargs)
-        
-        if teacher:
-            # Set initial queryset for school_class
-            self.fields['school_class'].queryset = SchoolClass.objects.filter(teacher=teacher)
-            
-            # If we have a school_class in POST data, filter students and subjects
-            if 'school_class' in self.data:
-                try:
-                    school_class_id = int(self.data.get('school_class'))
-                    school_class = SchoolClass.objects.get(id=school_class_id)
-                    
-                    # Filter students by class
-                    self.fields['student'].queryset = school_class.students.all()
-                    
-                    # Filter subjects by level
-                    self.fields['subject'].queryset = Subject.objects.filter(level=school_class.level)
-                except (ValueError, TypeError, SchoolClass.DoesNotExist):
-                    pass
-            elif self.instance.pk and self.instance.school_class:
-                # For editing existing result
-                school_class = self.instance.school_class
-                self.fields['student'].queryset = school_class.students.all()
-                self.fields['subject'].queryset = Subject.objects.filter(level=school_class.level)
-            else:
-                # Initial state - no students or subjects
-                self.fields['student'].queryset = Student.objects.none()
-                self.fields['subject'].queryset = Subject.objects.none()
 
 class ResultApprovalForm(forms.ModelForm):
     class Meta:
@@ -559,3 +508,36 @@ class StudentImportForm(forms.Form):
             return df
         except Exception as e:
             raise forms.ValidationError(f"Error reading Excel file: {str(e)}")
+
+
+class WeeklyResultForm(forms.ModelForm):
+    class Meta:
+        model = Result
+        fields = ['school_class', 'student', 'subject', 'term', 'academic_year', 'week_number', 'exam_score']
+        widgets = {
+            'academic_year': forms.TextInput(attrs={'placeholder': 'e.g., 2024-2025'}),
+            'week_number': forms.NumberInput(attrs={'min': 1, 'max': 15}),
+            'exam_score': forms.NumberInput(attrs={'min': 0, 'max': 100, 'step': 0.01}),
+        }
+    
+    def __init__(self, *args, teacher=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        if teacher:
+            # Filter classes to only those taught by this teacher
+            self.fields['school_class'].queryset = SchoolClass.objects.filter(teacher=teacher)
+            
+            # Set required fields
+            self.fields['school_class'].required = True
+            self.fields['student'].required = True
+            self.fields['subject'].required = True
+            self.fields['term'].required = True
+            self.fields['academic_year'].required = True
+            self.fields['week_number'].required = True
+            self.fields['exam_score'].required = True
+            
+            # Add class to enable select2
+            for field in self.fields.values():
+                field.widget.attrs['class'] = 'form-select'
+
+
