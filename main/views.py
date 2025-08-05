@@ -1175,26 +1175,31 @@ def teacher_result_dashboard(request):
 @user_passes_test(is_teacher)
 def add_result(request):
     teacher = request.user.staff_profile
-    
+
     if request.method == 'POST':
         form = WeeklyResultForm(request.POST, teacher=teacher)
         if form.is_valid():
             result = form.save(commit=False)
             result.teacher = teacher
             result.save()
-            messages.success(request, 'Weekly result saved - pending approval.')
-            return redirect('teacher_result_dashboard')
+
+            if 'save_add_another' in request.POST:
+                messages.success(request, 'Weekly result saved. You can add another one.')
+                return redirect('add_result')  # Redirect to the same form
+            else:
+                messages.success(request, 'Weekly result saved - pending approval.')
+                return redirect('teacher_result_dashboard')
         else:
-            # Add debug logging for form errors
             print("Form errors:", form.errors)
             messages.error(request, 'Please correct the errors below.')
     else:
         form = WeeklyResultForm(teacher=teacher)
-    
+
     return render(request, 'academics/add_result.html', {
         'form': form,
         'teacher': teacher
     })
+
 
 @login_required
 @user_passes_test(is_teacher)
@@ -1373,33 +1378,115 @@ def teacher_gradebook(request):
     })
 
 
-# main/views.py or academics/views.py
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import render
+from collections import defaultdict
+from .models import Student, Result
+
+def calculate_division(student, term_results):
+    """Calculate division based on Tanzanian system."""
+    level_name = student.level.name.lower()
+    is_a_level = 'form v' in level_name or 'form vi' in level_name
+
+    # Group results by subject and calculate average total_score
+    subject_averages = defaultdict(list)
+    for result in term_results:
+        subject_averages[result.subject].append(result.total_score)
+
+    # Calculate average per subject and map to points
+    subject_points = []
+    for subject, scores in subject_averages.items():
+        avg_score = sum(scores) / len(scores)
+        if avg_score >= 75:
+            points = 1  # A
+        elif avg_score >= 65:
+            points = 2  # B
+        elif avg_score >= 55:
+            points = 3  # C
+        elif avg_score >= 45:
+            points = 4  # D
+        else:
+            points = 9  # F
+        subject_points.append(points)
+
+    # Sort points and select best subjects
+    subject_points.sort()
+    if is_a_level:
+        # For Form V-VI, take best 3 subjects
+        relevant_points = subject_points[:3] if len(subject_points) >= 3 else subject_points
+        total_points = sum(relevant_points)
+        if len(subject_points) > 4:
+            return "Invalid: More than 4 subjects", total_points
+        if 3 <= total_points <= 9:
+            return "Division I", total_points
+        elif 10 <= total_points <= 12:
+            return "Division II", total_points
+        elif 13 <= total_points <= 15:
+            return "Division III", total_points
+        elif 16 <= total_points <= 18:
+            return "Division IV", total_points
+        else:
+            return "Division 0", total_points
+    else:
+        # For Form I-IV, take best 7 subjects
+        relevant_points = subject_points[:7] if len(subject_points) >= 7 else subject_points
+        total_points = sum(relevant_points)
+        if 7 <= total_points <= 17:
+            return "Division I", total_points
+        elif 18 <= total_points <= 24:
+            return "Division II", total_points
+        elif 25 <= total_points <= 31:
+            return "Division III", total_points
+        elif 32 <= total_points <= 38:
+            return "Division IV", total_points
+        else:
+            return "Division 0", total_points
+
 @login_required
 def parent_view_results(request):
-    # Get all students associated with this parent (by email)
-    parent = request.user.parent_profile
+    # Get the Parent object linked to the user
+    try:
+        parent = request.user.parent_profile
+    except Parent.DoesNotExist:
+        raise PermissionDenied("No parent profile found for this account.")
+
+    # Get all students associated with this parent
     students = Student.objects.filter(parent=parent)
-    
+    if not students.exists():
+        raise PermissionDenied("No students associated with this parent account.")
+
     # Get all approved results for these students
     results = Result.objects.filter(
         student__in=students,
         is_approved=True
-    ).order_by('-academic_year', 'term', 'subject')
-    
-    # Group results by student, then by academic year and term
+    ).order_by('-academic_year', 'term', 'week_number')
+
+    # Group results by student, then by year-term, and calculate division
     results_by_student = {}
     for student in students:
         student_results = results.filter(student=student)
-        results_by_year_term = {}
+        results_by_year_term = defaultdict(list)
         
+        # Group by year-term
         for result in student_results:
-            key = f"{result.academic_year} - {result.get_term_display()}"
-            if key not in results_by_year_term:
-                results_by_year_term[key] = []
-            results_by_year_term[key].append(result)
+            year_term = f"{result.academic_year} - {result.get_term_display()}"
+            results_by_year_term[year_term].append(result)
         
-        results_by_student[student] = results_by_year_term
-    
+        # Calculate division and structure results
+        structured_results = {}
+        for year_term, term_results in results_by_year_term.items():
+            division = calculate_division(student, term_results)
+            weeks = defaultdict(list)
+            for result in term_results:
+                weeks[result.week_number].append(result)
+            structured_results[year_term] = {
+                'weeks': dict(weeks),
+                'division': division
+            }
+        
+        results_by_student[student] = structured_results
+
     return render(request, 'academics/parent_view_results.html', {
         'results_by_student': results_by_student
     })
