@@ -15,7 +15,8 @@
   {% for student, year_terms in results_by_student.items %}
   <div class="card shadow mb-4">
     <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary">{{ student}}'s Results</h6>
+      <h6 class="m-0 font-weight-bold text-primary">{{ student}}'s Results</h6><br>
+       <a href="{% url 'download_result_pdf' student.id %}" class="btn btn-primary btn-sm">Download PDF</a>
     </div>
     <div class="card-body">
       {% for year_term, data in year_terms.items %}

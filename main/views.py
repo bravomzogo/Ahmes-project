@@ -10,7 +10,7 @@ from .forms import (GalleryForm, ResultApprovalForm, StaffRegistrationForm,
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Max, Count, Q
 from .models import Conversation, Message, EmailVerification
 from .forms import RegisterForm, MessageForm
@@ -21,6 +21,8 @@ import json
 from django.utils import timezone
 from django.core.cache import cache
 from django.contrib.auth.forms import AuthenticationForm
+from weasyprint import HTML
+from django.template.loader import render_to_string
 
 from main import models
 
@@ -1595,3 +1597,37 @@ def get_class_subjects(request):
         return JsonResponse({'error': 'Class not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
+def get_student_results(student):
+    results = Result.objects.filter(student=student, is_approved=True).order_by('-academic_year', 'term', 'week_number')
+    results_by_year_term = {}
+    for result in results:
+        year_term = f"{result.academic_year} - {result.get_term_display()}"
+        if year_term not in results_by_year_term:
+            # Assuming calculate_division is defined elsewhere in your code
+            division = calculate_division(student, results.filter(academic_year=result.academic_year, term=result.term))
+            results_by_year_term[year_term] = {'weeks': {}, 'division': division}
+        week_number = result.week_number
+        if week_number not in results_by_year_term[year_term]['weeks']:
+            results_by_year_term[year_term]['weeks'][week_number] = []
+        results_by_year_term[year_term]['weeks'][week_number].append(result)
+    return results_by_year_term
+
+@login_required
+def download_result_pdf(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    if student.parent != request.user.parent_profile:
+        raise PermissionDenied
+    results_by_year_term = get_student_results(student)
+    context = {
+        'student': student,
+        'results_by_year_term': results_by_year_term,
+    }
+    html_string = render_to_string('academics/result_pdf.html', context)
+    pdf = HTML(string=html_string).write_pdf()
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="result_{student.id}.pdf"'
+    return response

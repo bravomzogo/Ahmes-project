@@ -93,6 +93,7 @@ path('ad/academic-calendars/delete/<int:pk>/', views.delete_academic_calendar, n
     path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
     path('teacher/results/', views.teacher_result_dashboard, name='teacher_result_dashboard'),
     path('teacher/results/add/', views.add_result, name='add_result'),
+    path('download_result_pdf/<int:student_id>/', views.download_result_pdf, name='download_result_pdf'),
     path('teacher/results/edit/<int:pk>/', views.edit_result, name='edit_result'),
     path('teacher/results/delete/<int:pk>/', views.delete_result, name='delete_result'),
     path('teacher/classes/', views.teacher_classes, name='teacher_classes'),
