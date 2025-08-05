@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'humanize',
     'widget_tweaks',
+    'webpush',
     
     # Local apps
     'main',
@@ -213,3 +214,11 @@ CACHES = {
 
 # settings.py
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY', 'AIzaSyDJG6KsRQtU_RSZfun_nqEJRaWgDO1XQ6g')
+
+
+# Push Notifications
+VAPID_PUBLIC_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE4k59W7WWsDsqOo829T1DkLCaT+rwrQhtPVkIUhVM3yBvBtlhOXrcb18tnHYTMPjfiQ+ePnUoUSgi29bMSIW16w=="
+VAPID_PRIVATE_KEY = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQga5fmYXdQpV2GvWtTlNeL48NfYLEnDwe8eEjD1vfdo86hRANCAATiTn1btZawOyo6jzb1PUOQsJpP6vCtCG09WQhSFUzfIG8G2WE5etxvXy2cdhMw+N+JD54+dShRKCLb1sxIhbXr"
+VAPID_CLAIMS = {
+    "sub": "mailto:bravomzogo@gmail.com"
+}

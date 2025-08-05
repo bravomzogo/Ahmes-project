@@ -4,7 +4,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views import View
-from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Parent, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Parent, PushSubscription, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
 from .forms import (GalleryForm, ResultApprovalForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm, WeeklyResultForm)
 from django.contrib import messages
@@ -23,6 +23,7 @@ from django.core.cache import cache
 from django.contrib.auth.forms import AuthenticationForm
 from weasyprint import HTML
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 from main import models
 
@@ -1291,6 +1292,16 @@ def review_result(request, pk):
                 result.approved_by = request.user
                 result.date_approved = timezone.now()
                 result.save()
+                
+                # Send push notification to parent
+                if result.student.parent and result.student.parent.user:
+                    send_push_notification(
+                        user=result.student.parent.user,
+                        title="New Results Available",
+                        message=f"Results for {result.student} in {result.subject} are now available",
+                        url=reverse('parent_view_results')
+                    )
+                
                 messages.success(request, 'Result approved successfully!')
             else:
                 result.save()
@@ -1317,15 +1328,28 @@ def bulk_approve_results(request):
             date_approved=timezone.now()
         )
         
+        # Send push notifications for bulk approval
+        if results.exists():
+            first_result = results.first()
+            parents = User.objects.filter(
+                parent_profile__students__results__in=results
+            ).distinct()
+            
+            for parent in parents:
+                send_push_notification(
+                    user=parent,
+                    title="New Results Available",
+                    message=f"Results for {first_result.get_term_display()} term are now available",
+                    url=reverse('parent_view_results')
+                )
+        
         messages.success(request, f'Successfully approved {updated} results!')
         return redirect('admin_result_dashboard')
     
-    # Get all pending results for the checkbox form
     pending_results = Result.objects.filter(is_approved=False).order_by('teacher', 'student')
     return render(request, 'academics/bulk_approve_results.html', {
         'pending_results': pending_results
     })
-
 
 @login_required
 def parent_view_results(request):
@@ -1631,3 +1655,44 @@ def download_result_pdf(request, student_id):
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="result_{student.id}.pdf"'
     return response
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from pywebpush import webpush, WebPushException
+import json
+from django.conf import settings
+
+@csrf_exempt
+def save_subscription(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            PushSubscription.objects.create(
+                user=request.user,
+                subscription=data
+            )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error'}, status=400)
+
+def send_push_notification(user, title, message, url):
+    subscriptions = PushSubscription.objects.filter(user=user)
+    for sub in subscriptions:
+        try:
+            webpush(
+                subscription_info=sub.subscription,
+                data=json.dumps({
+                    'title': title,
+                    'body': message,
+                    'url': url
+                }),
+                vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                vapid_claims=settings.VAPID_CLAIMS
+            )
+        except WebPushException as e:
+            print("WebPush error:", e)
+            if e.response.status_code == 410:
+                sub.delete()

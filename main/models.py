@@ -491,3 +491,12 @@ class Result(models.Model):
         else:
             self.grade, self.remark = 'F','Fail'
         super().save(*args, **kwargs)
+
+
+class PushSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    subscription = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Subscription for {self.user.username}"

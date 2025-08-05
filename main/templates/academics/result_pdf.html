@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <h1>{{ student.get_full_name }}'s Results</hs>
+    <h1>{{ student}}'s Results</hs>
     {% if results_by_year_term %}
         {% for year_term, data in results_by_year_term.items %}
         <h2>{{ year_term }} - Division: {{ data.division }}</h2>

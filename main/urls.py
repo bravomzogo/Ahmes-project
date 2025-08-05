@@ -107,4 +107,7 @@ path('ad/academic-calendars/delete/<int:pk>/', views.delete_academic_calendar, n
     path('ad/results/review/<int:pk>/', views.review_result, name='review_result'),
     path('ad/results/bulk-approve/', views.bulk_approve_results, name='bulk_approve_results'),
 
+    # Push Notifications
+    path('save-subscription/', views.save_subscription, name='save_subscription'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
