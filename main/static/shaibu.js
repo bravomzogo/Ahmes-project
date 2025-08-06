@@ -15,7 +15,7 @@ self.addEventListener('push', function(event) {
 
   const options = {
     body: data.body,
-    icon: '/static/images/logo.png?v=1', // Cache-busting for icon
+    icon: '/static/images/Ahmes.PNG?v=1', // Cache-busting for icon
     badge: '/static/images/badge.png?v=1', // Cache-busting for badge
     data: {
       url: data.url,

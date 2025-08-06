@@ -3,116 +3,416 @@
 {% block loader %}{% endblock %} 
 {% block title %}Page Under Development | AHMES{% endblock %}
 {% block content %}
+
 <section class="section under-development-section">
+  <!-- Animated background elements -->
+  <div class="animation-bg">
+    <div class="circle-animation"></div>
+    <div class="circle-animation delay-1"></div>
+    <div class="circle-animation delay-2"></div>
+    <div class="circle-animation delay-3"></div>
+  </div>
+  
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8 text-center">
         <div class="development-card">
           <div class="development-icon">
-            <img src="{% static 'images/p.jpg' %}" alt="Under Construction" class="img-fluid" style='border-radius:200%'>
+            <div class="hexagon-wrapper">
+              <div class="hexagon">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <div class="hexagon-border"></div>
+            </div>
           </div>
-          <h1 class="development-title">Page Under Development</h1>
+          <h1 class="development-title">Innovation in Progress</h1>
           <p class="development-text">
-            We're working hard to bring you this feature soon! Our team is currently building 
-            something amazing for you. Please check back later.
+            We're crafting an exceptional experience for you. Our team is working tirelessly to bring you 
+            <span class="highlight">cutting-edge features</span> that will transform how you interact with our platform.
           </p>
           
-          <div class="progress mt-4">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                 role="progressbar" style="width: 75%"></div>
+          <div class="progress-container mt-4">
+            <div class="d-flex justify-content-between progress-labels">
+              <span>Development Status</span>
+              <span class="percentage">75%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" style="width: 75%"></div>
+            </div>
           </div>
-          <p class="text-muted mt-2">Development Progress: 75%</p>
           
           <div class="upcoming-features mt-5">
-            <h3 class="feature-heading">Coming Soon:</h3>
-            <ul class="feature-list">
-              <li><i class="fas fa-check-circle text-success me-2"></i> Enhanced Staff Management</li>
-              <li><i class="fas fa-check-circle text-success me-2"></i> Student Performance Analytics</li>
-              <li><i class="fas fa-spinner text-warning me-2"></i> Parent Communication Portal</li>
-              <li><i class="fas fa-spinner text-warning me-2"></i> Mobile Application</li>
-            </ul>
+            <h3 class="feature-heading">What to Expect:</h3>
+            <div class="feature-grid">
+              <div class="feature-item">
+                <div class="feature-icon completed">
+                  <i class="fas fa-user-tie"></i>
+                </div>
+                <h4>Staff Management</h4>
+                <p>Enhanced tools for managing faculty and staff</p>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon completed">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <h4>Analytics</h4>
+                <p>Comprehensive student performance insights</p>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon in-progress">
+                  <i class="fas fa-comments"></i>
+                </div>
+                <h4>Parent Portal</h4>
+                <p>Seamless communication with parents</p>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon in-progress">
+                  <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>Mobile App</h4>
+                <p>Access all features on the go</p>
+              </div>
+            </div>
           </div>
           
-          <div class="contact-support mt-4">
-            <p>Have suggestions or questions?</p>
-            <a href="{% url 'contact' %}" class="btn btn-outline-primary">
-              <i class="fas fa-envelope me-2"></i>Contact Us
-            </a>
+          <div class="cta-section mt-5">
+            <p class="cta-text">Want to be notified when we launch?</p>
+            <div class="input-group">
+              <input type="email" class="form-control" placeholder="Enter your email">
+              <button class="btn btn-primary" type="button">Notify Me</button>
+            </div>
+            <p class="small-text mt-2">We respect your privacy. Unsubscribe at any time.</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
 {% endblock %}
 
 {% block extra_css %}
 <style>
+  /* Base styles */
   .under-development-section {
     padding: 100px 0;
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
+    position: relative;
+    overflow: hidden;
   }
   
-  .development-card {
-    background: white;
-    border-radius: 15px;
-    padding: 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  /* Animated background elements */
+  .animation-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
   }
   
-  .development-icon {
+  .circle-animation {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(52, 152, 219, 0.1);
+    animation: pulse 8s infinite ease-in-out;
+  }
+  
+  .circle-animation:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    top: -100px;
+    left: -100px;
+  }
+  
+  .circle-animation:nth-child(2) {
+    width: 500px;
+    height: 500px;
+    bottom: -200px;
+    right: -100px;
+    animation-delay: 1s;
+  }
+  
+  .circle-animation:nth-child(3) {
     width: 200px;
     height: 200px;
+    top: 30%;
+    right: 10%;
+    animation-delay: 2s;
+  }
+  
+  .circle-animation:nth-child(4) {
+    width: 400px;
+    height: 400px;
+    bottom: 10%;
+    left: 20%;
+    animation-delay: 3s;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.2;
+    }
+  }
+  
+  /* Development card */
+  .development-card {
+    background: white;
+    border-radius: 20px;
+    padding: 50px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+  }
+  
+  /* Hexagon icon */
+  .hexagon-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
     margin: 0 auto 30px;
   }
   
-  .development-icon img {
-    width: 300%;
+  .hexagon {
+    position: absolute;
+    width: 100%;
     height: 100%;
-    object-fit: contain;
+    background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 40px;
+    animation: float 6s ease-in-out infinite;
   }
   
+  .hexagon-border {
+    position: absolute;
+    width: 110%;
+    height: 110%;
+    top: -5%;
+    left: -5%;
+    background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    filter: blur(5px);
+    opacity: 0.5;
+    z-index: -1;
+    animation: pulse-border 4s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  @keyframes pulse-border {
+    0%, 100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+  
+  /* Text styles */
   .development-title {
     color: #2c3e50;
     font-weight: 700;
     margin-bottom: 20px;
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   
   .development-text {
-    color: #7f8c8d;
-    font-size: 1.1rem;
+    color: #5a6a7a;
+    font-size: 1.15rem;
     margin-bottom: 30px;
+    line-height: 1.7;
   }
   
-  .feature-heading {
-    color: #2c3e50;
-    margin-bottom: 20px;
-    font-size: 1.3rem;
+  .highlight {
+    background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
   }
   
-  .feature-list {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    max-width: 400px;
+  /* Progress bar */
+  .progress-container {
+    width: 100%;
+    max-width: 500px;
     margin: 0 auto;
   }
   
-  .feature-list li {
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
+  .progress-labels {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+  }
+  
+  .percentage {
+    color: #3498db;
+    font-weight: 600;
   }
   
   .progress {
-    height: 10px;
-    border-radius: 5px;
+    height: 12px;
+    border-radius: 6px;
+    background-color: #e9ecef;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
   .progress-bar {
-    background-color: #3498db;
+    background: linear-gradient(90deg, #3498db 0%, #2ecc71 100%);
+    border-radius: 6px;
+    animation: progress-animation 2s ease-in-out;
+  }
+  
+  @keyframes progress-animation {
+    from {
+      width: 0;
+    }
+  }
+  
+  /* Features grid */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+  }
+  
+  .feature-item {
+    background: white;
+    padding: 25px 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .feature-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+  }
+  
+  .feature-icon.completed {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  }
+  
+  .feature-icon.in-progress {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  }
+  
+  .feature-item h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+  }
+  
+  .feature-item p {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  /* CTA section */
+  .cta-section {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .cta-text {
+    color: #5a6a7a;
+    margin-bottom: 20px;
+    font-size: 1rem;
+  }
+  
+  .input-group {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 50px;
+    overflow: hidden;
+  }
+  
+  .form-control {
+    border: none;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+  
+  .form-control:focus {
+    box-shadow: none;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border: none;
+    padding: 12px 25px;
+    font-weight: 500;
+  }
+  
+  .small-text {
+    font-size: 0.8rem;
+    color: #95a5a6;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .development-card {
+      padding: 30px;
+    }
+    
+    .development-title {
+      font-size: 1.8rem;
+    }
+    
+    .feature-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .hexagon-wrapper {
+      width: 100px;
+      height: 100px;
+    }
+    
+    .hexagon i {
+      font-size: 30px;
+    }
   }
 </style>
 {% endblock %}

@@ -238,6 +238,29 @@ class AcademicAnnouncementAdmin(admin.ModelAdmin):
     search_fields = ('title', 'content')
 
 
+from django.contrib import admin
+from .models import PushSubscription
+
+@admin.register(PushSubscription)
+class PushSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'created_at', 'subscription_summary')
+    list_filter = ('created_at', 'user')
+    search_fields = ('user__username', 'user__email')
+    readonly_fields = ('created_at', 'subscription')
+    date_hierarchy = 'created_at'
+
+    def subscription_summary(self, obj):
+        """Display a summary of the subscription JSON data."""
+        subscription = obj.subscription
+        try:
+            endpoint = subscription.get('endpoint', 'N/A')
+            return endpoint[:50] + '...' if len(endpoint) > 50 else endpoint
+        except (TypeError, AttributeError):
+            return 'Invalid subscription data'
+    
+    subscription_summary.short_description = 'Subscription Endpoint'
+
+
 # Register all models
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Campus, CampusAdmin)
