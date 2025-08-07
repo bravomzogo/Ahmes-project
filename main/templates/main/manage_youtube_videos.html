@@ -1,0 +1,81 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block loader %}{% endblock %} 
+
+{% block title %}Manage YouTube Videos | AHMES Secondary School{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold text-primary">Manage YouTube Videos</h1>
+            <p class="text-muted lead">Review and approve videos before they appear on <strong>AHMES TV</strong></p>
+        </div>
+
+        <div class="card shadow border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">Thumbnail</th>
+                                <th scope="col">Title</th>
+                                <th scope="col">Published</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for video in videos %}
+                            <tr class="bg-white">
+                                <td>
+                                    <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="img-fluid rounded shadow-sm" style="width: 120px;">
+                                </td>
+                                <td>
+                                    <strong>{{ video.title }}</strong>
+                                </td>
+                                <td>{{ video.published_at|date:"M j, Y" }}</td>
+                                <td>
+                                    {% if video.is_approved %}
+                                        <span class="badge bg-success px-3 py-2">Approved</span>
+                                        <div class="text-muted small mt-1">
+                                            By <strong>{{ video.approved_by }}</strong><br>
+                                            <span>{{ video.approved_at|date:"M j, Y" }}</span>
+                                        </div>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark px-3 py-2">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end flex-wrap gap-2">
+                                        {% if not video.is_approved %}
+                                        <a href="{% url 'approve_youtube_video' video.id %}" class="btn btn-success btn-sm">
+                                            <i class="fas fa-check me-1"></i> Approve
+                                        </a>
+                                        <a href="{% url 'reject_youtube_video' video.id %}" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times me-1"></i> Reject
+                                        </a>
+                                        {% endif %}
+                                        <a href="https://www.youtube.com/watch?v={{ video.video_id }}" target="_blank" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i> View
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-video-slash fa-2x mb-3"></i><br>
+                                    No videos found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

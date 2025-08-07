@@ -377,7 +377,6 @@ class Message(models.Model):
 
 
 
-# Add this to your models.py
 class YouTubeVideo(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -386,6 +385,9 @@ class YouTubeVideo(models.Model):
     thumbnail_url = models.URLField(max_length=500)
     duration = models.CharField(max_length=20, blank=True)
     is_featured = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    approved_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -396,7 +398,6 @@ class YouTubeVideo(models.Model):
         ordering = ['-published_at']
         verbose_name = 'YouTube Video'
         verbose_name_plural = 'YouTube Videos'
-
 
 class SchoolClass(models.Model):
     name = models.CharField(max_length=100)
@@ -480,13 +481,13 @@ class Result(models.Model):
     def save(self, *args, **kwargs):
         self.total_score = self.exam_score  # only exam counts
         # grade logic
-        if self.total_score >= Decimal('75'):
+        if self.total_score >= Decimal('81'):
             self.grade, self.remark = 'A','Excellent'
-        elif self.total_score >= Decimal('65'):
+        elif self.total_score >= Decimal('70'):
             self.grade, self.remark = 'B','Very Good'
-        elif self.total_score >= Decimal('55'):
+        elif self.total_score >= Decimal('69'):
             self.grade, self.remark = 'C','Good'
-        elif self.total_score >= Decimal('45'):
+        elif self.total_score >= Decimal('59'):
             self.grade, self.remark = 'D','Pass'
         else:
             self.grade, self.remark = 'F','Fail'

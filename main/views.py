@@ -736,26 +736,27 @@ from django.db.models import Q
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .models import YouTubeVideo
 
+def is_admin(user):
+    return user.is_authenticated and user.is_admin
+
 def ahmes_tv(request):
     page = request.GET.get('page', 1)
     search_query = request.GET.get('search', '')
     
-    # Base filter to ensure only AHMES-related videos
+    # Only show approved videos to regular users
     videos = YouTubeVideo.objects.filter(
-        Q(title__icontains='AHMES') | Q(description__icontains='AHMES')
+        (Q(title__icontains='AHMES') | Q(description__icontains='AHMES')),
+        is_approved=True
     )
     
-    # Additional search filtering if a query is provided
     if search_query:
         videos = videos.filter(
             Q(title__icontains=search_query) | 
             Q(description__icontains=search_query)
         )
     
-    # Order by published date (newest first)
     videos = videos.order_by('-published_at')
     
-    # Pagination: 9 videos per page
     paginator = Paginator(videos, 9)
     try:
         videos_page = paginator.page(page)
@@ -772,6 +773,36 @@ def ahmes_tv(request):
     }
     
     return render(request, 'main/ahmes_tv.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def manage_youtube_videos(request):
+    videos = YouTubeVideo.objects.all().order_by('-published_at')
+    return render(request, 'main/manage_youtube_videos.html', {'videos': videos})
+
+@login_required
+@user_passes_test(is_admin)
+def approve_youtube_video(request, video_id):
+    video = get_object_or_404(YouTubeVideo, id=video_id)
+    if not video.is_approved:
+        video.is_approved = True
+        video.approved_by = request.user
+        video.approved_at = timezone.now()
+        video.save()
+        messages.success(request, f'Video "{video.title}" has been approved!')
+    else:
+        messages.warning(request, f'Video "{video.title}" was already approved.')
+    return redirect('manage_youtube_videos')
+
+@login_required
+@user_passes_test(is_admin)
+def reject_youtube_video(request, video_id):
+    video = get_object_or_404(YouTubeVideo, id=video_id)
+    if request.method == 'POST':
+        video.delete()
+        messages.success(request, f'Video "{video.title}" has been rejected and deleted.')
+        return redirect('manage_youtube_videos')
+    return render(request, 'main/confirm_reject_video.html', {'video': video})
 
 
 
@@ -1424,13 +1455,13 @@ def calculate_division(student, term_results):
     subject_points = []
     for subject, scores in subject_averages.items():
         avg_score = sum(scores) / len(scores)
-        if avg_score >= 75:
+        if avg_score >= 81:
             points = 1  # A
-        elif avg_score >= 65:
+        elif avg_score >= 69:
             points = 2  # B
-        elif avg_score >= 55:
+        elif avg_score >= 59:
             points = 3  # C
-        elif avg_score >= 45:
+        elif avg_score >= 44:
             points = 4  # D
         else:
             points = 9  # F
