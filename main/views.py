@@ -1674,25 +1674,105 @@ def save_subscription(request):
                 subscription=data
             )
             return JsonResponse({'status': 'success'})
+            
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error'}, status=400)
 
+import logging
+from django.conf import settings
+from pywebpush import webpush, WebPushException
+import json
+
+logger = logging.getLogger(__name__)
+
 def send_push_notification(user, title, message, url):
+    """
+    Enhanced push notification sender with comprehensive logging
+    """
+    # Initial log
+    logger.info(f"Attempting to send push notification to user {user.id} ({user.username})")
+    logger.debug(f"Notification details - Title: '{title}', Message: '{message}', URL: '{url}'")
+
+    # Get all subscriptions for the user
     subscriptions = PushSubscription.objects.filter(user=user)
+    subscription_count = subscriptions.count()
+    logger.info(f"Found {subscription_count} push subscription(s) for user {user.id}")
+
+    if subscription_count == 0:
+        logger.warning("No push subscriptions found for this user")
+        return False
+
+    successful_sends = 0
+    failed_sends = 0
+
     for sub in subscriptions:
         try:
+            # Log subscription details (sensitive info redacted)
+            logger.debug(f"Processing subscription ID {sub.id}")
+            logger.debug(f"Subscription endpoint: {sub.subscription.get('endpoint', '')[0:50]}...")
+            logger.debug(f"Created at: {sub.created_at}")
+
+            # Prepare notification payload
+            payload = {
+                'title': title,
+                'body': message,
+                'url': url,
+                'icon': '/static/images/Ahmes.PNG',  # Ensure this matches your service worker
+                'vibrate': [200, 100, 200]
+            }
+            logger.debug("Notification payload prepared", extra={'payload': payload})
+
+            # Webpush configuration
+            vapid_config = {
+                'vapid_private_key': settings.VAPID_PRIVATE_KEY[:10] + '...' if settings.VAPID_PRIVATE_KEY else None,
+                'vapid_claims': settings.VAPID_CLAIMS
+            }
+            logger.debug("VAPID configuration", extra={'vapid_config': vapid_config})
+
+            # Attempt to send notification
+            logger.info(f"Sending push to subscription ID {sub.id}")
             webpush(
                 subscription_info=sub.subscription,
-                data=json.dumps({
-                    'title': title,
-                    'body': message,
-                    'url': url
-                }),
+                data=json.dumps(payload),
                 vapid_private_key=settings.VAPID_PRIVATE_KEY,
                 vapid_claims=settings.VAPID_CLAIMS
             )
+            successful_sends += 1
+            logger.info(f"Successfully sent push to subscription ID {sub.id}")
+
         except WebPushException as e:
-            print("WebPush error:", e)
-            if e.response.status_code == 410:
+            failed_sends += 1
+            error_details = {
+                'error': str(e),
+                'status_code': getattr(e, 'response', {}).status_code if hasattr(e, 'response') else None,
+                'subscription_id': sub.id,
+                'user_id': user.id
+            }
+            logger.error("WebPushException occurred", extra=error_details)
+
+            # Handle expired subscriptions
+            if hasattr(e, 'response') and e.response.status_code == 410:
+                logger.warning(f"Deleting expired subscription ID {sub.id}")
                 sub.delete()
+
+        except json.JSONEncodeError as e:
+            failed_sends += 1
+            logger.error(f"JSON encoding error: {str(e)}")
+            
+        except Exception as e:
+            failed_sends += 1
+            logger.exception(f"Unexpected error sending push notification: {str(e)}")
+
+    # Final summary
+    logger.info(
+        f"Notification dispatch complete - Successful: {successful_sends}, Failed: {failed_sends}",
+        extra={
+            'user_id': user.id,
+            'successful': successful_sends,
+            'failed': failed_sends,
+            'total_subscriptions': subscription_count
+        }
+    )
+
+    return successful_sends > 0

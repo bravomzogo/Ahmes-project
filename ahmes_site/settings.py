@@ -222,3 +222,19 @@ WEBPUSH_SETTINGS = {
     "VAPID_PRIVATE_KEY": "a5fmYXdQpV2GvWtTlNeL48NfYLEnDwe8eEjD1vfdo84=",
     "VAPID_ADMIN_EMAIL": "bravomzogo@gmail.com"
 }
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
