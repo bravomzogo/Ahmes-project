@@ -6,7 +6,7 @@
 {% block content %}
 <style>
   body {
-    background: linear-gradient(-45deg, #3e8e9b, #6dd5ed, #2193b0, #0f2027);
+    background: linear-gradient(-45deg, #e8f0f1ff, #edf2f3ff, #dae5e7ff, #0f2027);
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
     font-family: 'Segoe UI', sans-serif;
@@ -61,7 +61,7 @@
 
 <div class="container-fluid py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-white">Student Results</h1>
+    {% comment %} <h1 class="text-white">Student Results</h1> {% endcomment %}
     <a href="{% url 'parent_dashboard' %}" class="btn btn-secondary">
       <i class="fas fa-arrow-left"></i> Back
     </a>
