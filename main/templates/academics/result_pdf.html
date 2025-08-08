@@ -1,51 +1,157 @@
-<!-- templates/academics/result_pdf.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Student Result</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        h1 { text-align: center; }
-        h2 { margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
+  <meta charset="UTF-8">
+  <title>{{ student }}'s Results</title>
+  {% load static %}
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 40px;
+      color: #333;
+      font-size: 14px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+
+    .header img {
+      height: 80px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: #2c3e50;
+      margin: 0;
+      text-align: right;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-top: 40px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #3498db;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-top: 25px;
+      color: #34495e;
+    }
+
+    h4 {
+      font-size: 16px;
+      margin-top: 20px;
+      color: #444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      margin-bottom: 25px;
+    }
+
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .page-break {
+      page-break-after: always;
+    }
+
+    .center {
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <h1>{{ student}}'s Results</hs>
-    {% if results_by_year_term %}
-        {% for year_term, data in results_by_year_term.items %}
-        <h2>{{ year_term }} - Division: {{ data.division }}</h2>
-        {% for week_number, results in data.weeks.items %}
+
+  <!-- School Header -->
+  <div class="header">
+    <img src="{% static 'images/Ahmes.PNG' %}" alt="School Logo">
+    <h1>Academic Report - {{ student }}</h1>
+  </div>
+
+  {% if results_by_year_term %}
+    {% for year_term, data in results_by_year_term.items %}
+      <h2>{{ year_term }}</h2>
+
+      {% for week_number, results in data.weeks.items %}
         <h3>Week {{ week_number }}</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Subject</th>
-                    <th>Exam Score</th>
-                    <th>Total Score</th>
-                    <th>Grade</th>
-                    <th>Remark</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result in results %}
-                <tr>
-                    <td>{{ result.subject.name }}</td>
-                    <td>{{ result.exam_score|default:"N/A" }}</td>
-                    <td>{{ result.total_score|default:"N/A" }}</td>
-                    <td>{{ result.grade|default:"N/A" }}</td>
-                    <td>{{ result.remark|default:"N/A" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Exam Score</th>
+              <th>Total Score</th>
+              <th>Grade</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for result in results %}
+            <tr>
+              <td>{{ result.subject.name }}</td>
+              <td>{{ result.exam_score|default:"N/A" }}</td>
+              <td>{{ result.total_score|default:"N/A" }}</td>
+              <td>{{ result.grade|default:"N/A" }}</td>
+              <td>{{ result.remark|default:"N/A" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
         </table>
-        {% endfor %}
-        {% endfor %}
-    {% else %}
-        <p>No results available for this student.</p>
-    {% endif %}
+      {% endfor %}
+
+      {% if data.monthly_estimations %}
+        <h4>Monthly Estimations</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Average Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for month in data.monthly_estimations %}
+              <tr>
+                <td>{{ month.month }}</td>
+                <td>
+                  {% if month.average_score %}
+                    {{ month.average_score }}
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+
+      <div class="page-break"></div>
+    {% endfor %}
+  {% else %}
+    <p class="center">No results available for this student.</p>
+  {% endif %}
+
 </body>
 </html>

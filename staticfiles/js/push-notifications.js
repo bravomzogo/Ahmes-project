@@ -1,7 +1,7 @@
 if ('serviceWorker' in navigator) {
   // Prevent multiple registrations
   if (!navigator.serviceWorker.controller) {
-    const swUrl = `/shaibu.js?v=${Date.now()}`;
+    const swUrl = `/static/shaibu.js?v=${Date.now()}`;
     
     navigator.serviceWorker.register(swUrl)
       .then(registration => {

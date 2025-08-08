@@ -1,45 +1,77 @@
 {% extends 'main/base.html' %}
+{% load static %}
+{% block loader %}{% endblock %}
 {% block title %}Teacher Result Dashboard | AHMES{% endblock %}
 {% block content %}
 <div class="container-fluid">
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Weekly Results & Monthly Estimates</h1>
+    <h1 class="h3 mb-0 text-gray-800">Weekly Results</h1>
     <a href="{% url 'add_result' %}" class="btn btn-primary">Add Weekly</a>
   </div>
 
   <div class="card mb-4">
     <div class="card-body table-responsive">
-      <h5>Weekly Results</h5>
+      <h5>Filter Results</h5>
+
+      <!-- Filter Form -->
+      <form method="get" class="row g-3 mb-3">
+        <div class="col-md-3">
+          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Search by name, week, subject...">
+        </div>
+        <div class="col-md-2">
+          <select name="subject" class="form-select">
+            <option value="all">All Subjects</option>
+            {% for subj in subjects %}
+              <option value="{{ subj.id }}" {% if subj.id|stringformat:"s" == selected_subject %}selected{% endif %}>{{ subj.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="status" class="form-select">
+            <option value="all">All Statuses</option>
+            <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
+            <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="term" class="form-select">
+            <option value="all">All Terms</option>
+            {% for t in terms %}
+              <option value="{{ t }}" {% if t|stringformat:"s" == selected_term %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-outline-primary w-100">Apply</button>
+        </div>
+      </form>
+
+      <!-- Results Table -->
       <table class="table table-bordered">
-        <thead><tr><th>Week</th><th>Student</th><th>Subject</th><th>Exam</th><th>Total</th><th>Grade</th><th>Status</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Week</th>
+            <th>Student</th>
+            <th>Subject</th>
+            <th>Exam</th>
+            <th>Total</th>
+            <th>Grade</th>
+            <th>Status</th>
+          </tr>
+        </thead>
         <tbody>
           {% for r in results %}
-            <tr><td>{{ r.week_number }}</td><td>{{ r.student }}</td><td>{{ r.subject }}</td>
-              <td>{{ r.exam_score }}</td><td>{{ r.total_score }}</td><td>{{ r.grade }}</td>
-              <td>{% if r.is_approved %}Approved{% else %}Pending{% endif %}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card shadow mb-4">
-    <div class="card-body">
-      <h5>Monthly Averages (Estimation)</h5>
-      <table class="table table-bordered">
-        <thead><tr><th>Student</th><th>Term/Year</th><th>Month 1 (W1–4)</th><th>Month 2 (W5–8)</th>
-          <th>Month 3 (W9–12)</th><th>Month 4 (W13–15)</th></tr></thead>
-        <tbody>
-          {% for m in monthly %}
           <tr>
-            <td>{{ m.student }}</td>
-            <td>{{ m.term }}/{{ m.academic_year }}</td>
-            <td>{{ m.month1|default:'—'|floatformat:2 }}</td>
-            <td>{{ m.month2|default:'—'|floatformat:2 }}</td>
-            <td>{{ m.month3|default:'—'|floatformat:2 }}</td>
-            <td>{{ m.month4|default:'—'|floatformat:2 }}</td>
+            <td>{{ r.week_number }}</td>
+            <td>{{ r.student }}</td>
+            <td>{{ r.subject }}</td>
+            <td>{{ r.exam_score }}</td>
+            <td>{{ r.total_score }}</td>
+            <td>{{ r.grade }}</td>
+            <td>{% if r.is_approved %}Approved{% else %}Pending{% endif %}</td>
           </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center">No results found</td></tr>
           {% endfor %}
         </tbody>
       </table>

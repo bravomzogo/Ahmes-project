@@ -4,28 +4,89 @@
 {% block title %}View Result | AHMES{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-  <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Student Results</h1>
+<style>
+  body {
+    background: linear-gradient(-45deg, #3e8e9b, #6dd5ed, #2193b0, #0f2027);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  .card-header {
+    background: linear-gradient(90deg, #2193b0, #6dd5ed);
+    color: white;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    padding: 15px;
+  }
+
+  .table {
+    margin-bottom: 0;
+    font-size: 14px;
+  }
+
+  h1, h5, h6 {
+    font-weight: 600;
+  }
+
+  .btn-primary, .btn-secondary {
+    border-radius: 25px;
+  }
+
+  .btn-sm {
+    padding: 6px 16px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  canvas {
+    margin-top: 20px;
+  }
+</style>
+
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-white">Student Results</h1>
     <a href="{% url 'parent_dashboard' %}" class="btn btn-secondary">
       <i class="fas fa-arrow-left"></i> Back
     </a>
   </div>
 
   {% for student, year_terms in results_by_student.items %}
-  <div class="card shadow mb-4">
-    <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary">{{ student}}'s Results</h6><br>
-       <a href="{% url 'download_result_pdf' student.id %}" class="btn btn-primary btn-sm">Download PDF</a>
+  <div class="card shadow mb-5">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-0">{{ student }}'s Results</h5>
+      </div>
+      <a href="{% url 'download_result_pdf' student.id %}" class="btn btn-sm btn-light">
+        Download PDF
+      </a>
     </div>
     <div class="card-body">
       {% for year_term, data in year_terms.items %}
-      <h5>{{ year_term }} - Division: {{ data.division }}</h5>
-      {% for week_number, results in data.weeks.items %}
-      <h6>Week {{ week_number }}</h6>
-      <div class="table-responsive">
-        <table class="table table-bordered" width="100%" cellspacing="0">
-          <thead>
+      <h5 class="mb-3 text-primary">{{ year_term }}</h5>
+
+      {% for week_number, week_data in data.weeks.items %}
+      <h6 class="mt-4 text-dark">Week {{ week_number }}</h6>
+
+      <div class="table-responsive mb-3">
+        <table class="table table-bordered table-hover bg-white">
+          <thead class="thead-light">
             <tr>
               <th>Subject</th>
               <th>Exam Score</th>
@@ -35,7 +96,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for result in results %}
+            {% for result in week_data.results %}
             <tr>
               <td>{{ result.subject.name }}</td>
               <td>{{ result.exam_score|default:"N/A" }}</td>
@@ -45,22 +106,94 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="5">No results available for this week.</td>
+              <td colspan="5" class="text-center">No results available for this week.</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      {% empty %}
-      <p>No weeks available for this term.</p>
+
+      <p><strong>Week Division:</strong> {{ week_data.division|default:"N/A" }}</p>
       {% endfor %}
+
+      <!-- Monthly Estimation Section -->
+      <h5 class="mt-4 text-dark">Monthly Estimations</h5>
+      <div class="table-responsive mb-4">
+        <table class="table table-striped bg-white">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Average Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for month_data in data.monthly_estimations %}
+            <tr>
+              <td>{{ month_data.month }}</td>
+              <td>
+                {% if month_data.average_score %}
+                  {{ month_data.average_score }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Progress Chart -->
+      <canvas id="progressChart-{{ forloop.counter0 }}" height="100"></canvas>
+      <hr class="my-4">
+
       {% empty %}
-      <p>No terms available for this student.</p>
+      <p class="text-muted">No terms available for this student.</p>
       {% endfor %}
     </div>
   </div>
   {% empty %}
-  <p>No students associated with your account.</p>
+  <p class="text-white">No students associated with your account.</p>
   {% endfor %}
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  {% for student, year_terms in results_by_student.items %}
+    {% for year_term, data in year_terms.items %}
+      const ctx{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }} = document.getElementById('progressChart-{{ forloop.parentloop.counter0 }}').getContext('2d');
+      new Chart(ctx{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}, {
+        type: 'bar',
+        data: {
+          labels: [{% for m in data.monthly_estimations %}"{{ m.month }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+          datasets: [{
+            label: 'Average Score',
+            data: [{% for m in data.monthly_estimations %}{{ m.average_score|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            borderRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          animation: {
+            duration: 1200,
+            easing: 'easeInOutQuart'
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                stepSize: 10
+              }
+            }
+          }
+        }
+      });
+    {% endfor %}
+  {% endfor %}
+</script>
 {% endblock %}

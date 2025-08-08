@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'humanize',
     'widget_tweaks',
+    'mathfilters',
+
     'webpush',
     
     # Local apps

@@ -294,8 +294,22 @@ def admin_dashboard(request):
 @login_required
 @user_passes_test(is_admin)
 def manage_students(request):
-    students = Student.objects.all().order_by('-created_at')
-    return render(request, 'main/manage_students.html', {'students': students})
+    query = request.GET.get('q')
+    students = Student.objects.all()
+
+    if query:
+        students = students.filter(
+            first_name__icontains=query
+        ) | students.filter(
+            middle_name__icontains=query
+        ) | students.filter(
+            last_name__icontains=query
+        ) | students.filter(
+            admission_number__icontains=query
+        )
+
+    students = students.order_by('-created_at')
+    return render(request, 'main/manage_students.html', {'students': students, 'query': query})
 
 # views.py
 from .forms import StudentImportForm
@@ -1184,25 +1198,58 @@ def is_teacher(user):
         user.staff_profile.position == 'Teacher'
     )
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render
+from django.db.models import Q
+from main.models import Result  # Adjust as needed
+from main.models import Subject  # For subject dropdown
+from django.utils.datastructures import MultiValueDictKeyError
+
 @login_required
 @user_passes_test(is_teacher)
 def teacher_result_dashboard(request):
-    qs = Result.objects.filter(teacher=request.user.staff_profile)
+    teacher = request.user.staff_profile
+    qs = Result.objects.filter(teacher=teacher)
+
+    # Filters
+    query = request.GET.get('q', '')
+    subject_id = request.GET.get('subject')
     status = request.GET.get('status')
-    if status == 'pending':
-        qs = qs.filter(is_approved=False)
-    elif status == 'approved':
+    term = request.GET.get('term')
+
+    if query:
+        qs = qs.filter(
+            Q(student__first_name__icontains=query) |
+            Q(student__last_name__icontains=query) |
+            Q(subject__name__icontains=query) |
+            Q(week_number__icontains=query)
+        )
+
+    if subject_id and subject_id != 'all':
+        qs = qs.filter(subject_id=subject_id)
+
+    if status == 'approved':
         qs = qs.filter(is_approved=True)
-    # monthly estimations: group weeks 1‑4, 5‑8, 9‑12, 13‑15
-    from django.db.models import Avg, Q  # Ensure Q is imported here
-    monthly = qs.values('student', 'term', 'academic_year').annotate(
-        month1=Avg('total_score', filter=Q(week_number__gte=1, week_number__lte=4)),
-        month2=Avg('total_score', filter=Q(week_number__gte=5, week_number__lte=8)),
-        month3=Avg('total_score', filter=Q(week_number__gte=9, week_number__lte=12)),
-        month4=Avg('total_score', filter=Q(week_number__gte=13, week_number__lte=15)),
-    )
-    context = {'results': qs.order_by('week_number'), 'monthly': monthly}
+    elif status == 'pending':
+        qs = qs.filter(is_approved=False)
+
+    if term and term != 'all':
+        qs = qs.filter(term=term)
+
+    subjects = Subject.objects.filter(result__teacher=teacher).distinct()
+    terms = qs.values_list('term', flat=True).distinct()
+
+    context = {
+        'results': qs.order_by('week_number'),
+        'subjects': subjects,
+        'terms': terms,
+        'selected_subject': subject_id,
+        'selected_status': status,
+        'selected_term': term,
+        'query': query,
+    }
     return render(request, 'academics/teacher_result_dashboard.html', context)
+
 
     
 @login_required
@@ -1457,11 +1504,11 @@ def calculate_division(student, term_results):
         avg_score = sum(scores) / len(scores)
         if avg_score >= 81:
             points = 1  # A
-        elif avg_score >= 69:
+        elif avg_score >= 70:
             points = 2  # B
-        elif avg_score >= 59:
+        elif avg_score >= 69:
             points = 3  # C
-        elif avg_score >= 44:
+        elif avg_score >= 59:
             points = 4  # D
         else:
             points = 9  # F
@@ -1502,46 +1549,68 @@ def calculate_division(student, term_results):
 
 @login_required
 def parent_view_results(request):
-    # Get the Parent object linked to the user
     try:
         parent = request.user.parent_profile
     except Parent.DoesNotExist:
         raise PermissionDenied("No parent profile found for this account.")
 
-    # Get all students associated with this parent
     students = Student.objects.filter(parent=parent)
     if not students.exists():
         raise PermissionDenied("No students associated with this parent account.")
 
-    # Get all approved results for these students
     results = Result.objects.filter(
         student__in=students,
         is_approved=True
     ).order_by('-academic_year', 'term', 'week_number')
 
-    # Group results by student, then by year-term, and calculate division
     results_by_student = {}
     for student in students:
         student_results = results.filter(student=student)
         results_by_year_term = defaultdict(list)
-        
-        # Group by year-term
+
         for result in student_results:
             year_term = f"{result.academic_year} - {result.get_term_display()}"
             results_by_year_term[year_term].append(result)
-        
-        # Calculate division and structure results
+
         structured_results = {}
         for year_term, term_results in results_by_year_term.items():
-            division = calculate_division(student, term_results)
             weeks = defaultdict(list)
             for result in term_results:
                 weeks[result.week_number].append(result)
+
+            weekly_data = {}
+            for week_number, weekly_results in weeks.items():
+                week_division = calculate_division(student, weekly_results)
+                weekly_data[week_number] = {
+                    'results': weekly_results,
+                    'division': week_division
+                }
+
+            # --- Monthly Estimation ---
+            monthly_estimations = []
+            for i in range(0, 15, 4):  # every 4 weeks (0,4,8,12)
+                monthly_total_scores = []
+                for week in range(i + 1, min(i + 5, 16)):  # 1-4, 5-8, 9-12, 13-15
+                    if week in weekly_data:
+                        for r in weekly_data[week]['results']:
+                            if r.total_score is not None:
+                                monthly_total_scores.append(r.total_score)
+
+                if monthly_total_scores:
+                    avg = round(sum(monthly_total_scores) / len(monthly_total_scores), 2)
+                else:
+                    avg = None
+
+                monthly_estimations.append({
+                    'month': f"Month {(i // 4) + 1}",
+                    'average_score': avg
+                })
+
             structured_results[year_term] = {
-                'weeks': dict(weeks),
-                'division': division
+                'weeks': weekly_data,
+                'monthly_estimations': monthly_estimations
             }
-        
+
         results_by_student[student] = structured_results
 
     return render(request, 'academics/parent_view_results.html', {
