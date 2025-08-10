@@ -7,6 +7,8 @@
   .dashboard {
     position: relative;
     overflow: hidden;
+    min-height: calc(100vh - 120px);
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
   }
   
   .particles-js {
@@ -17,72 +19,216 @@
     height: 100%;
     z-index: 0;
     pointer-events: none;
+    opacity: 0.6;
   }
   
   .dashboard-content {
     position: relative;
     z-index: 1;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  
+  .dashboard-header h2 {
+    font-weight: 700;
+    color: #2c3e50;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dashboard-header h2:after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #4e73df, #224abe);
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 3px;
+  }
+  
+  .dashboard-header p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    max-width: 700px;
+    margin: 15px auto 0;
   }
   
   .dashboard-card {
     background: white;
-    border-radius: 10px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 25px;
     text-align: center;
     height: 100%;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     border-top: 4px solid #4e73df;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .dashboard-card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(78, 115, 223, 0.1) 0%, rgba(78, 115, 223, 0) 100%);
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
   
   .dashboard-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+  }
+  
+  .dashboard-card:hover:before {
+    opacity: 1;
   }
   
   .card-icon {
-    font-size: 2.5rem;
-    margin-bottom: 15px;
+    font-size: 2.8rem;
+    margin-bottom: 20px;
     color: #4e73df;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+  }
+  
+  .dashboard-card:hover .card-icon {
+    transform: scale(1.1);
+  }
+  
+  .dashboard-card h4 {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .dashboard-card p {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
   }
   
   .btn-main {
-    background: #4e73df;
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
     color: white;
-    border-radius: 4px;
-    padding: 8px 20px;
+    border-radius: 6px;
+    padding: 10px 25px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(78, 115, 223, 0.2);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+  
+  .btn-main:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #224abe 0%, #4e73df 100%);
+    transition: all 0.4s ease;
+    z-index: -1;
   }
   
   .btn-main:hover {
-    background: #3a5bbf;
     color: white;
+    box-shadow: 0 6px 12px rgba(78, 115, 223, 0.3);
+    transform: translateY(-2px);
+  }
+  
+  .btn-main:hover:before {
+    left: 0;
   }
   
   .resource-card {
     background: white;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
     border-left: 4px solid #4e73df;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .resource-card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(78, 115, 223, 0.05) 0%, rgba(78, 115, 223, 0) 100%);
+    z-index: 0;
+  }
+  
+  .resource-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+  
+  .resource-card h4 {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+  }
+  
+  .resource-card h4 i {
+    margin-right: 12px;
+    color: #4e73df;
+    font-size: 1.4rem;
   }
   
   .resource-list {
     list-style: none;
     padding-left: 0;
+    position: relative;
+    z-index: 1;
   }
   
   .resource-list li {
-    padding: 8px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #eee;
+    transition: all 0.2s ease;
+  }
+  
+  .resource-list li:hover {
+    background: rgba(78, 115, 223, 0.05);
+    padding-left: 8px;
   }
   
   .resource-list li:last-child {
@@ -91,6 +237,100 @@
   
   .resource-list a {
     color: #4e73df;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+  
+  .resource-list a:hover {
+    color: #224abe;
+    text-decoration: underline;
+  }
+  
+  .resource-list a i {
+    margin-right: 8px;
+    font-size: 0.9rem;
+  }
+  
+  .announcement-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .announcement-item:last-child {
+    border-bottom: none;
+  }
+  
+  .announcement-item strong {
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .announcement-item p {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+  
+  .announcement-date {
+    color: #95a5a6;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .announcement-date i {
+    margin-right: 6px;
+    font-size: 0.9rem;
+  }
+  
+  .section-divider {
+    margin: 40px 0;
+    position: relative;
+    text-align: center;
+  }
+  
+  .section-divider:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(78, 115, 223, 0) 0%, rgba(78, 115, 223, 0.3) 50%, rgba(78, 115, 223, 0) 100%);
+    z-index: 0;
+  }
+  
+  .section-divider span {
+    background: white;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+    color: #4e73df;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-content {
+      padding: 20px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .dashboard-header {
+      margin-bottom: 30px;
+    }
+    
+    .dashboard-header h2 {
+      font-size: 1.8rem;
+    }
+    
+    .resource-card, .dashboard-card {
+      padding: 20px;
+    }
   }
 </style>
 
@@ -98,21 +338,25 @@
   <div id="particles-js" class="particles-js"></div>
   
   <div class="container dashboard-content">
-    <div class="row">
-      <div class="col-md-12 text-center mb-4">
-        <h2 class="mb-3">Academic Services & Resources</h2>
-        <p class="text-muted">Access all your academic needs in one place</p>
-      </div>
+    <div class="dashboard-header">
+      <h2>Academic Services & Resources</h2>
+      <p>Comprehensive access to all your academic needs through our integrated platform</p>
     </div>
     
     <!-- Academic Resources Section -->
     <div class="row mb-5">
       <div class="col-md-4">
         <div class="resource-card">
-          <h4><i class="fas fa-book mr-2"></i> Course Catalogs</h4>
+          <h4><i class="fas fa-book-open"></i> Course Catalogs</h4>
           <ul class="resource-list">
             {% for catalog in catalogs %}
-              <li><a href="{{ catalog.file.url }}">{{ catalog.title }}</a></li>
+              <li>
+                <a href="{{ catalog.file.url }}" target="_blank">
+                  <i class="fas fa-file-pdf"></i> {{ catalog.title }}
+                </a>
+              </li>
+            {% empty %}
+              <li>No catalogs available</li>
             {% endfor %}
           </ul>
         </div>
@@ -120,10 +364,16 @@
       
       <div class="col-md-4">
         <div class="resource-card">
-          <h4><i class="fas fa-calendar-alt mr-2"></i> Academic Calendars</h4>
+          <h4><i class="fas fa-calendar-check"></i> Academic Calendars</h4>
           <ul class="resource-list">
             {% for calendar in calendars %}
-              <li><a href="{{ calendar.file.url }}">{{ calendar.title }}</a></li>
+              <li>
+                <a href="{{ calendar.file.url }}" target="_blank">
+                  <i class="fas fa-file-alt"></i> {{ calendar.title }}
+                </a>
+              </li>
+            {% empty %}
+              <li>No calendars available</li>
             {% endfor %}
           </ul>
         </div>
@@ -131,35 +381,43 @@
       
       <div class="col-md-4">
         <div class="resource-card">
-          <h4><i class="fas fa-bullhorn mr-2"></i> Announcements</h4>
-          <ul class="resource-list">
-            {% for announcement in announcements %}
-              <li>
+          <h4><i class="fas fa-bullhorn"></i> Announcements</h4>
+          <div class="resource-list">
+            {% for announcement in announcements|slice:":3" %}
+              <div class="announcement-item">
                 <strong>{{ announcement.title }}</strong>
-                <p>{{ announcement.content }}</p>
-                <div class="text-muted small">{{ announcement.date|date:"M d, Y" }}</div>
-              </li>
+                <p>{{ announcement.content|truncatewords:15 }}</p>
+                <div class="announcement-date">
+                  <i class="far fa-clock"></i> {{ announcement.date|date:"M d, Y" }}
+                </div>
+              </div>
+            {% empty %}
+              <div class="announcement-item">
+                <p>No current announcements</p>
+              </div>
             {% endfor %}
-          </ul>
+            {% if announcements|length > 3 %}
+              <a href="#" class="btn btn-sm btn-link mt-2">View all announcements</a>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
     
+    <div class="section-divider">
+      <span>Academic Portals</span>
+    </div>
+    
     <!-- Dashboard Portals Section -->
     <div class="row">
-      <div class="col-md-12 text-center mb-4">
-        <h3 class="mb-3">Academic Portals</h3>
-        <p class="text-muted">Select your portal to login</p>
-      </div>
-      
       <div class="col-md-3 col-sm-6">
         <div class="dashboard-card">
           <div class="card-icon">
             <i class="fas fa-user-graduate"></i>
           </div>
           <h4>Student Portal</h4>
-          <p class="text-muted small">Access your academic resources</p>
-          <a href="{% url 'student_login' %}" class="btn btn-main btn-sm">Login</a>
+          <p>Access grades, courses, and academic resources</p>
+          <a href="{% url 'student_login' %}" class="btn btn-main">Login</a>
         </div>
       </div>
       
@@ -168,9 +426,9 @@
           <div class="card-icon">
             <i class="fas fa-chalkboard-teacher"></i>
           </div>
-          <h4>Teacher Portal</h4>
-          <p class="text-muted small">Manage your classes</p>
-          <a href="{% url 'teacher_login' %}" class="btn btn-main btn-sm">Login</a>
+          <h4>Teachers Portal</h4>
+          <p>Manage results, and student progress</p>
+          <a href="{% url 'teacher_login' %}" class="btn btn-main">Login</a>
         </div>
       </div>
       
@@ -180,8 +438,8 @@
             <i class="fas fa-user-friends"></i>
           </div>
           <h4>Parent Portal</h4>
-          <p class="text-muted small">Monitor student progress</p>
-          <a href="{% url 'parent_login' %}" class="btn btn-main btn-sm">Login</a>
+          <p>Monitor your student's academic progress</p>
+          <a href="{% url 'parent_login' %}" class="btn btn-main">Login</a>
         </div>
       </div>
       
@@ -190,9 +448,9 @@
           <div class="card-icon">
             <i class="fas fa-tasks"></i>
           </div>
-          <h4>Academic Admin</h4>
-          <p class="text-muted small">Manage institutional data</p>
-          <a href="{% url 'academic_admin_login' %}" class="btn btn-main btn-sm">Login</a>
+          <h4>Admin Portal</h4>
+          <p>Manage classes and academic systems</p>
+          <a href="{% url 'academic_admin_login' %}" class="btn btn-main">Login</a>
         </div>
       </div>
     </div>
@@ -206,29 +464,44 @@
     particlesJS('particles-js', {
       "particles": {
         "number": {
-          "value": 60,
+          "value": 80,
           "density": {
             "enable": true,
-            "value_area": 800
+            "value_area": 1000
           }
         },
         "color": {
-          "value": "#4e73df"
+          "value": ["#4e73df", "#224abe", "#1e3a8a"]
         },
         "shape": {
           "type": "circle",
           "stroke": {
             "width": 0,
             "color": "#000000"
+          },
+          "polygon": {
+            "nb_sides": 5
           }
         },
         "opacity": {
           "value": 0.3,
-          "random": false
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 1,
+            "opacity_min": 0.1,
+            "sync": false
+          }
         },
         "size": {
           "value": 3,
-          "random": true
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 2,
+            "size_min": 0.1,
+            "sync": false
+          }
         },
         "line_linked": {
           "enable": true,
@@ -239,12 +512,17 @@
         },
         "move": {
           "enable": true,
-          "speed": 2,
+          "speed": 1.5,
           "direction": "none",
-          "random": false,
+          "random": true,
           "straight": false,
           "out_mode": "out",
-          "bounce": false
+          "bounce": false,
+          "attract": {
+            "enable": true,
+            "rotateX": 600,
+            "rotateY": 1200
+          }
         }
       },
       "interactivity": {
@@ -262,17 +540,45 @@
         },
         "modes": {
           "grab": {
-            "distance": 140,
+            "distance": 160,
             "line_linked": {
-              "opacity": 1
+              "opacity": 0.8
             }
           },
           "push": {
-            "particles_nb": 4
+            "particles_nb": 6
           }
         }
-      }
+      },
+      "retina_detect": true
     });
+    
+    // Add animation to cards on scroll
+    const animateOnScroll = function() {
+      const cards = document.querySelectorAll('.dashboard-card, .resource-card');
+      cards.forEach((card, index) => {
+        const cardPosition = card.getBoundingClientRect().top;
+        const screenPosition = window.innerHeight / 1.3;
+        
+        if(cardPosition < screenPosition) {
+          setTimeout(() => {
+            card.style.opacity = "1";
+            card.style.transform = "translateY(0)";
+          }, index * 100);
+        }
+      });
+    };
+    
+    // Set initial state
+    const cards = document.querySelectorAll('.dashboard-card, .resource-card');
+    cards.forEach(card => {
+      card.style.opacity = "0";
+      card.style.transform = "translateY(20px)";
+      card.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+    });
+    
+    window.addEventListener('load', animateOnScroll);
+    window.addEventListener('scroll', animateOnScroll);
   });
 </script>
 
