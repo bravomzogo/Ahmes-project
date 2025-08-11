@@ -4,7 +4,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views import View
-from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, Gallery, Level, Parent, PushSubscription, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, FeeStructure, Gallery, Level, Parent, Payment, PushSubscription, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
 from .forms import (GalleryForm, ResultApprovalForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm, WeeklyResultForm)
 from django.contrib import messages
@@ -931,24 +931,82 @@ def teacher_dashboard(request):
 
 @login_required
 def parent_dashboard(request):
-    # Check if the user is a parent
-    if not request.user.is_parent:
-        raise PermissionDenied("This page is for parent accounts only.")
-
-    # Get the Parent object linked to the user
     try:
-        parent = Parent.objects.get(user=request.user)
+        parent = request.user.parent_profile
     except Parent.DoesNotExist:
         raise PermissionDenied("No parent profile found for this account.")
 
-    # Get all students associated with this parent
     students = Student.objects.filter(parent=parent)
     if not students.exists():
         raise PermissionDenied("No students associated with this parent account.")
 
+    # Get fee structures for the students' levels
+    fee_structures = FeeStructure.objects.filter(
+        level__in=students.values_list('level', flat=True),
+        is_active=True
+    ).distinct()
+
+    # Get all payments for the students
+    payments = Payment.objects.filter(
+        student__in=students
+    ).order_by('-payment_date')
+
+    # Get announcements (your existing code)
+    announcements = AcademicAnnouncement.objects.filter(is_published=True).order_by('-date')[:5]
+
     return render(request, 'academics/parent_dashboard.html', {
-        'students': students
+        'students': students,
+        'fee_structures': fee_structures,
+        'payments': payments,
+        'announcements': announcements
     })
+
+
+@login_required
+@require_POST
+def initiate_payment(request):
+    try:
+        parent = request.user.parent_profile
+        student_id = request.POST.get('student')
+        fee_structure_id = request.POST.get('fee_structure')
+        amount = request.POST.get('amount')
+        payment_method = request.POST.get('payment_method')
+        reference = request.POST.get('transaction_reference', '')
+
+        # Validate the student belongs to the parent
+        student = get_object_or_404(Student, id=student_id, parent=parent)
+        fee_structure = get_object_or_404(FeeStructure, id=fee_structure_id, is_active=True)
+
+        # Create the payment record
+        payment = Payment.objects.create(
+            student=student,
+            fee_structure=fee_structure,
+            amount_paid=amount,
+            payment_method=payment_method,
+            payment_date=timezone.now().date(),
+            transaction_reference=reference,
+            status='PENDING'
+        )
+
+        # Here you would typically integrate with a payment gateway
+        # For now, we'll just return the control number
+        messages.success(request, f"Payment initiated successfully. Your control number is {payment.control_number}")
+        
+        # Send push notification
+        send_push_notification(
+            user=request.user,
+            title="Payment Initiated",
+            message=f"Payment of TZS {amount} initiated for {student.first_name}",
+            url=reverse('parent_dashboard')
+        )
+
+        return redirect('parent_dashboard')
+
+    except Exception as e:
+        messages.error(request, f"Error initiating payment: {str(e)}")
+        return redirect('parent_dashboard')
+
+
 
 @login_required
 def academic_admin_dashboard(request):

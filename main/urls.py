@@ -113,6 +113,11 @@ path('ad/academic-calendars/delete/<int:pk>/', views.delete_academic_calendar, n
     # Push Notifications
     path('save-subscription/', views.save_subscription, name='save_subscription'),
     path('send-notification/', views.send_push_notification, name='send_notification'),
+
+
+
+    #Payment URLs
+    path('initiate-payment/', views.initiate_payment, name='initiate_payment'),
     
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

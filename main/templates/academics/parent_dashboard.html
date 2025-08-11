@@ -304,11 +304,139 @@
                     </div>
                 </div>
 
+
+
+                <!-- Financial Information -->
+<div class="cosmic-card mb-4">
+    <div class="card-glow"></div>
+    <div class="card-header p-4 border-0 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-white">Financial Records</h5>
+        <span class="badge bg-dark text-light">{{ payments.count }} Payment{{ payments.count|pluralize }}</span>
+    </div>
+    <div class="card-body p-4">
+        {% if payments %}
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <th>Control #</th>
+                        <th>Student</th>
+                        <th>Fee</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Receipt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.control_number }}</td>
+                        <td>{{ payment.student.first_name }}</td>
+                        <td>{{ payment.fee_structure.description }}</td>
+                        <td>TZS {{ payment.amount_paid|floatformat:2 }}</td>
+                        <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if payment.status == 'COMPLETED' %}bg-success
+                                {% elif payment.status == 'PENDING' %}bg-warning
+                                {% elif payment.status == 'FAILED' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ payment.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if payment.receipt_number %}
+                            <a href="#" class="text-primary">#{{ payment.receipt_number }}</a>
+                            {% else %}--{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-dark text-light" role="alert">
+            <i class="fas fa-info-circle me-2"></i> No payment records found.
+        </div>
+        {% endif %}
+        
+        <!-- Payment Button -->
+        <div class="text-center mt-4">
+            <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#makePaymentModal">
+                <i class="fas fa-money-bill-wave me-2"></i> Make Payment
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Make Payment Modal -->
+<div class="modal fade" id="makePaymentModal" tabindex="-1" aria-labelledby="makePaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content cosmic-card">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="makePaymentModalLabel">Make Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm" method="post" action="{% url 'initiate_payment' %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="studentSelect" class="form-label text-light">Student</label>
+                            <select class="form-select cosmic-card text-light" id="studentSelect" name="student" required>
+                                <option value="" selected disabled>Select Student</option>
+                                {% for student in students %}
+                                <option value="{{ student.id }}">{{ student.first_name }} {{ student.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="feeSelect" class="form-label text-light">Fee Type</label>
+                            <select class="form-select cosmic-card text-light" id="feeSelect" name="fee_structure" required>
+                                <option value="" selected disabled>Select Fee Type</option>
+                                {% for fee in fee_structures %}
+                                <option value="{{ fee.id }}">{{ fee.description }} (TZS {{ fee.amount|floatformat:2 }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="amountInput" class="form-label text-light">Amount (TZS)</label>
+                            <input type="number" class="form-control cosmic-card text-light" id="amountInput" name="amount" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="paymentMethod" class="form-label text-light">Payment Method</label>
+                            <select class="form-select cosmic-card text-light" id="paymentMethod" name="payment_method" required>
+                                <option value="" selected disabled>Select Method</option>
+                                <option value="MPESA">M-Pesa</option>
+                                <option value="BANK">Bank Transfer</option>
+                                <option value="CASH">Cash</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="referenceInput" class="form-label text-light">Transaction Reference</label>
+                        <input type="text" class="form-control cosmic-card text-light" id="referenceInput" name="transaction_reference">
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="action-btn">
+                            <i class="fas fa-paper-plane me-2"></i> Submit Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
                 <!-- Announcements -->
                 <div class="cosmic-card">
                     <div class="card-glow"></div>
                     <div class="card-header p-4 border-0">
-                        <h5 class="mb-0 text-white">Cosmic Updates</h5>
+                        <h5 class="mb-0 text-white">Academics Updates</h5>
                     </div>
                     <div class="card-body p-4">
                         {% if announcements %}

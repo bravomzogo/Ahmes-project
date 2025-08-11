@@ -513,3 +513,57 @@ class PushSubscription(models.Model):
 
     def __str__(self):
         return f"Subscription for {self.user.username}"
+
+
+
+class FeeStructure(models.Model):
+    level = models.ForeignKey(Level, on_delete=models.CASCADE)
+    academic_year = models.CharField(max_length=20)
+    description = models.TextField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.level.name} - {self.academic_year} (TZS {self.amount})"
+
+class Payment(models.Model):
+    PAYMENT_METHODS = [
+        ('MPESA', 'M-Pesa'),
+        ('BANK', 'Bank Transfer'),
+        ('CASH', 'Cash'),
+        ('OTHER', 'Other'),
+    ]
+    
+    PAYMENT_STATUS = [
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+        ('REFUNDED', 'Refunded'),
+    ]
+    
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    fee_structure = models.ForeignKey(FeeStructure, on_delete=models.CASCADE)
+    control_number = models.CharField(max_length=50, unique=True)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
+    payment_date = models.DateField()
+    transaction_reference = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='PENDING')
+    receipt_number = models.CharField(max_length=50, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Payment #{self.control_number} - {self.student} (TZS {self.amount_paid})"
+
+    def save(self, *args, **kwargs):
+        if not self.control_number:
+            # Generate control number if not provided
+            prefix = "AHMES"
+            year = timezone.now().strftime('%y')
+            random_part = secrets.token_hex(3).upper()
+            self.control_number = f"{prefix}{year}{random_part}"
+        super().save(*args, **kwargs)
