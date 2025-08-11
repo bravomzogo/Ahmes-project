@@ -6,6 +6,19 @@
 
 {% block extra_css %}
 <style>
+  /* Animated gradient background - blue & yellow tones */
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(-45deg, #2a1b5f);
+    background-size: 400% 400%;
+    animation: gradientBG 12s ease infinite;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+
+
     @keyframes cosmicFlow {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
@@ -19,6 +32,7 @@
         min-height: 100vh;
         position: relative;
         overflow-x: hidden;
+        
     }
 
     .cosmic-particles {

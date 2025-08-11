@@ -1,254 +1,294 @@
 {% extends 'main/base.html' %}
 {% load static %}
-{% block loader %}{% endblock %} 
+{% block loader %}{% endblock %}
 {% block title %}Academic Admin Login | AHMES{% endblock %}
 {% block content %}
-
 <style>
-  .admin-login-wrapper {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  /* Animated gradient background */
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(-45deg, #1E3C72, #2A5298, #b89d07ff, #c2ac33ff);
+    background-size: 400% 400%;
+    animation: gradientBG 12s ease infinite;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-  }
-  
-  .admin-breadcrumb {
-    background: transparent;
-    padding: 1rem 0;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-  
-  .admin-breadcrumb ol {
-    list-style: none;
-    display: inline-flex;
-    gap: 0.5rem;
     margin: 0;
-    padding: 0;
-    font-size: 0.9rem;
+    overflow-x: hidden;
   }
-  
-  .admin-breadcrumb li a {
-    color: #667eea;
-    text-decoration: none;
-    transition: color 0.3s;
+  @keyframes gradientBG {
+    0% { background-position: 0% 50% }
+    50% { background-position: 100% 50% }
+    100% { background-position: 0% 50% }
   }
-  
-  .admin-breadcrumb li a:hover {
-    color: #764ba2;
-    text-decoration: underline;
+
+  /* Floating theme shapes */
+  .shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.15;
+    animation: float 6s ease-in-out infinite;
   }
-  
-  .admin-breadcrumb li.active {
-    color: #555;
+  .shape:nth-child(1) {
+    width: 120px; height: 120px;
+    background: #FFD700;
+    top: 10%; left: 10%;
   }
-  
-  .admin-breadcrumb li + li:before {
-    content: '>';
-    margin-right: 0.5rem;
-    color: #555;
+  .shape:nth-child(2) {
+    width: 90px; height: 90px;
+    background: #1E3C72;
+    bottom: 20%; right: 15%;
   }
-  
-  .admin-login-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+  @keyframes float {
+    0%, 100% { transform: translateY(0) }
+    50% { transform: translateY(-20px) }
+  }
+
+  /* Login container */
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Glassmorphism card */
+  .login-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(14px);
+    border-radius: 20px;
+    padding: 2.5rem;
     width: 100%;
-    max-width: 500px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 0 auto;
-  }
-  
-  .admin-login-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-  }
-  
-  .admin-login-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 2rem;
-    text-align: center;
+    max-width: 400px;
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    animation: fadeInUp 0.8s ease;
     position: relative;
   }
-  
-  .admin-login-header h2 {
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px) }
+    to { opacity: 1; transform: translateY(0) }
+  }
+
+  /* Title */
+  .login-card h2 {
+    text-align: center;
+    margin-bottom: 0.25rem;
+    font-size: 2rem;
     font-weight: 600;
-    margin: 0;
-    font-size: 1.75rem;
-    margin-top: 1.5rem; /* Space for logo */
+    color: #FFD700;
   }
-  
-  .admin-login-header p {
-    opacity: 0.9;
-    margin: 0.5rem 0 0;
-    font-size: 1rem;
+  .login-card p {
+    text-align: center;
+    opacity: 0.85;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
   }
-  
-  .admin-logo {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-  }
-  
-  .admin-login-body {
-    padding: 2rem;
-  }
-  
+
+  /* Input fields */
   .form-group {
+    position: relative;
     margin-bottom: 1.5rem;
   }
-  
   .form-control {
-    height: 3rem;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    padding-left: 3rem;
-    font-size: 1rem;
-    transition: all 0.3s;
     width: 100%;
-  }
-  
-  .form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    padding: 0.9rem 3rem 0.9rem 2.8rem;
+    border: none;
+    border-radius: 10px;
     outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 1rem;
+    transition: 0.3s;
   }
-  
+  .form-control::placeholder {
+    color: rgba(255,255,255,0.75);
+  }
+  .form-control:focus {
+    background: rgba(255,255,255,0.3);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.5);
+  }
+
+  /* Input icons */
+  .input-icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.85);
+    font-size: 1rem;
+  }
+  .toggle-password {
+    position: absolute;
+    right: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.3s;
+  }
+  .toggle-password:hover {
+    color: #FFD700;
+  }
+
+  /* Button */
   .btn-login {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1E3C72, #2A5298);
     border: none;
     color: white;
-    height: 3rem;
+    padding: 0.9rem;
+    width: 100%;
+    border-radius: 10px;
     font-weight: 600;
     font-size: 1rem;
-    border-radius: 8px;
-    width: 100%;
-    transition: all 0.3s;
     cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
   }
-  
   .btn-login:hover {
-    background: linear-gradient(135deg, #5a6fd1 0%, #6a4295 100%);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #FFD700, #FFEA70);
+    color: #1E3C72;
+    transform: scale(1.02);
   }
-  
-  .login-footer {
-    text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #f0f0f0;
-    font-size: 0.9rem;
-  }
-  
-  .login-footer a {
-    color: #667eea;
-    text-decoration: none;
-    transition: color 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    margin: 0 1rem;
-  }
-  
-  .login-footer a:hover {
-    color: #764ba2;
-    text-decoration: underline;
-  }
-  
-  .input-icon {
-    position: relative;
-  }
-  
-  .input-icon i {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #667eea;
-    font-size: 1.1rem;
-  }
-  
+
+  /* Checkbox */
   .checkbox label {
     display: flex;
     align-items: center;
     cursor: pointer;
     font-size: 0.9rem;
-    color: #555;
+    color: #fff;
   }
-  
   .checkbox input {
     margin-right: 0.5rem;
   }
-  
-  .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    border: 1px solid #f5c6cb;
+
+  /* Footer */
+  .login-footer {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+  .login-footer a {
+    color: #FFD700;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* Modal - Glass style */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    padding-top: 100px;
+  }
+  .modal-content {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    margin: auto;
+    padding: 2rem;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 350px;
+    color: #fff;
+    animation: zoomIn 0.3s ease;
+  }
+  @keyframes zoomIn {
+    from { transform: scale(0.7); opacity: 0 }
+    to { transform: scale(1); opacity: 1 }
+  }
+  .modal-close {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: rgba(255,255,255,0.8);
+  }
+  .modal-close:hover {
+    color: #FFD700;
   }
 </style>
 
-<div class="admin-login-wrapper">
-  <div class="admin-breadcrumb">
-    <ol>
-      <li><a href="{% url 'academics_service' %}">Academics</a></li>
-      <li class="active">Admin Login</li>
-    </ol>
-  </div>
-  
-  <div class="admin-login-card">
-    <div class="admin-login-header">
-      <h2>Academic Administration</h2>
-      <p>Secure access to the academic management system</p>
-    </div>
-    
-    <div class="admin-login-body">
+<!-- Floating shapes -->
+<div class="shape"></div>
+<div class="shape"></div>
 
-      
-      <form method="post" action="{% url 'academic_admin_login' %}">
-        {% csrf_token %}
-        
-        <div class="form-group input-icon">
-          <i class="fas fa-user"></i>
-          <input type="text" class="form-control" name="username" placeholder="Username" required>
-        </div>
-        
-        <div class="form-group input-icon">
-          <i class="fas fa-lock"></i>
-          <input type="password" class="form-control" name="password" placeholder="Password" required>
-        </div>
-        
-        <div class="form-group">
-          <button type="submit" class="btn-login">
-            <i class="fas fa-sign-in-alt"></i> Login
-          </button>
-        </div>
-        
-        <div class="form-group checkbox">
-          <label>
-            <input type="checkbox"> Remember my credentials
-          </label>
-        </div>
-      </form>
-      
-      <div class="login-footer">
-        <a href="#"><i class="fas fa-headset"></i> Contact support</a>
+<div class="login-container">
+  <div class="login-card">
+    <h2>Academic Administration</h2>
+    <p>Secure access to the academic management system</p>
+
+    <form method="post" action="{% url 'academic_admin_login' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <i class="fas fa-user input-icon"></i>
+        <input type="text"
+               class="form-control"
+               name="username"
+               placeholder="Username"
+               required>
       </div>
+      <div class="form-group">
+        <i class="fas fa-lock input-icon"></i>
+        <input type="password"
+               id="password"
+               class="form-control"
+               name="password"
+               placeholder="Password"
+               required>
+        <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+      </div>
+
+      <div class="form-group checkbox">
+        <label>
+          <input type="checkbox" name="remember"> Remember my credentials
+        </label>
+      </div>
+
+      <button type="submit" class="btn-login">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <a id="contactSupport"><i class="fas fa-headset"></i> Contact support</a>
     </div>
   </div>
 </div>
 
+<!-- Contact Modal -->
+<div id="supportModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeModal">&times;</span>
+    <h3>Contact Support</h3>
+    <p><i class="fas fa-phone"></i> +255 712 345 678</p>
+    <p><i class="fas fa-envelope"></i> support@ahmes.ac.tz</p>
+  </div>
+</div>
+
 <script>
-  // Add subtle focus animation
+  // Show/hide password toggle
+  document.getElementById("togglePassword").addEventListener("click", function() {
+    const passwordInput = document.getElementById("password");
+    const type = passwordInput.type === "password" ? "text" : "password";
+    passwordInput.type = type;
+    this.classList.toggle("fa-eye-slash");
+  });
+
+  // Modal control
+  const modal = document.getElementById("supportModal");
+  document.getElementById("contactSupport").onclick = () => modal.style.display = "block";
+  document.getElementById("closeModal").onclick = () => modal.style.display = "none";
+  window.onclick = e => { if (e.target === modal) modal.style.display = "none"; }
+
+  // Input focus scale effect
   document.querySelectorAll('.form-control').forEach(input => {
     input.addEventListener('focus', function() {
       this.parentNode.style.transform = 'scale(1.02)';
