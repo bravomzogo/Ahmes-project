@@ -417,9 +417,15 @@ class SchoolClass(models.Model):
     
 
 
-class CourseCatalog(models.Model):
+class AcademicCalendar(models.Model):
     title = models.CharField(max_length=200)
-    file = models.FileField(upload_to='academic/catalogs/')
+    file = CloudinaryField(
+        'academic_calendars',
+        folder="academic/calendars",
+        resource_type="raw",  # Important for PDFs
+        blank=True,
+        null=True
+    )
     academic_year = models.CharField(max_length=20)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -427,9 +433,15 @@ class CourseCatalog(models.Model):
     def __str__(self):
         return f"{self.title} ({self.academic_year})"
 
-class AcademicCalendar(models.Model):
+class CourseCatalog(models.Model):
     title = models.CharField(max_length=200)
-    file = models.FileField(upload_to='academic/calendars/')
+    file = CloudinaryField(
+        'course_catalogs',
+        folder="academic/catalogs",
+        resource_type="raw",  # Important for PDFs
+        blank=True,
+        null=True
+    )
     academic_year = models.CharField(max_length=20)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

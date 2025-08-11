@@ -8,6 +8,8 @@ from django.utils import timezone
 from datetime import timedelta
 import secrets
 import logging
+
+from main.validators import validate_pdf_extension
 from .models import AcademicAnnouncement, AcademicCalendar, CourseCatalog, Level, Result, SchoolClass, Subject, User, Parent, Student, StaffMember, News, Comment, Gallery, Message, EmailVerification
 from cloudinary.forms import CloudinaryFileField
 from django.db import transaction
@@ -438,25 +440,35 @@ class AcademicAnnouncementForm(forms.ModelForm):
             'is_published': forms.CheckboxInput(),
         }
 
-class CourseCatalogForm(forms.ModelForm):
-    class Meta:
-        model = CourseCatalog
-        fields = ['title', 'file', 'academic_year', 'is_active']
-        widgets = {
-            'academic_year': forms.TextInput(attrs={'placeholder': 'e.g., 2025-2026'}),
-            'is_active': forms.CheckboxInput(),
-            'file': forms.FileInput(),
-        }
-
 class AcademicCalendarForm(forms.ModelForm):
+    file = CloudinaryFileField(
+        options={
+            'folder': 'academic/calendars',
+            'resource_type': 'raw',
+            'overwrite': True,
+        },
+        required=True,
+        validators=[validate_pdf_extension]  # Use our custom validator
+    )
+    
     class Meta:
         model = AcademicCalendar
         fields = ['title', 'file', 'academic_year', 'is_active']
-        widgets = {
-            'academic_year': forms.TextInput(attrs={'placeholder': 'e.g., 2025-2026'}),
-            'is_active': forms.CheckboxInput(),
-            'file': forms.FileInput(),
-        }
+
+class CourseCatalogForm(forms.ModelForm):
+    file = CloudinaryFileField(
+        options={
+            'folder': 'academic/catalogs',
+            'resource_type': 'raw',
+            'overwrite': True,
+        },
+        required=True,
+        validators=[validate_pdf_extension]  # Use our custom validator
+    )
+    
+    class Meta:
+        model = CourseCatalog
+        fields = ['title', 'file', 'academic_year', 'is_active']
 
 class SubjectForm(forms.ModelForm):
     class Meta:
