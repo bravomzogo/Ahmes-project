@@ -1,0 +1,4 @@
+LOAD DATABASE
+     FROM sqlite:///home/leila/Documents/projects/test/ahmes_site/db.sqlite3
+     INTO postgresql://database_g7ug_user:PCxw1e2HrbAB6RgbsNhpaU0adSSI0XM9@dpg-d2co25h5pdvs73drpjm0-a.frankfurt-postgres.render.com/database_g7ug?sslmode=require
+;
