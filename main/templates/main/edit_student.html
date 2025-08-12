@@ -6,25 +6,22 @@
 
 {% block content %}
 <div class="wrapper">
-  <!-- Sidebar -->
   {% include 'main/sidebar.html' %}
 
-  <!-- Main Content -->
   <div class="main-content">
     <div class="container-fluid py-4">
-      <!-- Page Header -->
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-4 border-bottom pb-2">
         <h1 class="h3 mb-0 text-gray-800">
           <i class="fas fa-user-graduate me-2"></i>Edit Student: {{ form.instance.first_name }} {{ form.instance.last_name }}
         </h1>
       </div>
 
-      <!-- Student Form -->
       <div class="card shadow rounded-4">
         <div class="card-body p-4">
           <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             {% csrf_token %}
             
+            <!-- Student Info -->
             <h5 class="mb-4 border-bottom pb-2">
               <i class="fas fa-id-card me-2"></i>Student Information
             </h5>
@@ -56,34 +53,22 @@
                       <i class="fas fa-trash me-2"></i>Remove
                     </button>
                     {% endif %}
-                    {% if form.profile_picture.errors %}
-                      <div class="invalid-feedback d-block">{{ form.profile_picture.errors.as_text }}</div>
-                    {% endif %}
                   </div>
                 </div>
                 
                 <div class="form-floating">
                   {{ form.first_name|add_class:"form-control"|attr:"placeholder: " }}
                   <label for="{{ form.first_name.id_for_label }}">First Name</label>
-                  {% if form.first_name.errors %}
-                    <div class="invalid-feedback d-block">{{ form.first_name.errors.as_text }}</div>
-                  {% endif %}
                 </div>
 
                 <div class="form-floating mt-3">
                   {{ form.middle_name|add_class:"form-control"|attr:"placeholder: " }}
                   <label for="{{ form.middle_name.id_for_label }}">Middle Name</label>
-                  {% if form.middle_name.errors %}
-                    <div class="invalid-feedback d-block">{{ form.middle_name.errors.as_text }}</div>
-                  {% endif %}
                 </div>
 
                 <div class="form-floating mt-3">
                   {{ form.last_name|add_class:"form-control"|attr:"placeholder: " }}
                   <label for="{{ form.last_name.id_for_label }}">Last Name</label>
-                  {% if form.last_name.errors %}
-                    <div class="invalid-feedback d-block">{{ form.last_name.errors.as_text }}</div>
-                  {% endif %}
                 </div>
               </div>
 
@@ -91,93 +76,31 @@
                 <div class="form-floating">
                   {{ form.gender|add_class:"form-select" }}
                   <label for="{{ form.gender.id_for_label }}">Gender</label>
-                  {% if form.gender.errors %}
-                    <div class="invalid-feedback d-block">{{ form.gender.errors.as_text }}</div>
-                  {% endif %}
                 </div>
 
                 <div class="form-floating mt-3">
                   {{ form.date_of_birth|add_class:"form-control" }}
                   <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
-                  {% if form.date_of_birth.errors %}
-                    <div class="invalid-feedback d-block">{{ form.date_of_birth.errors.as_text }}</div>
-                  {% endif %}
                 </div>
 
                 <div class="form-floating mt-3">
                   {{ form.admission_number|add_class:"form-control"|attr:"placeholder: " }}
                   <label for="{{ form.admission_number.id_for_label }}">Admission Number</label>
-                  {% if form.admission_number.errors %}
-                    <div class="invalid-feedback d-block">{{ form.admission_number.errors.as_text }}</div>
-                  {% endif %}
                 </div>
 
                 <div class="form-floating mt-3">
                   {{ form.campus|add_class:"form-select" }}
                   <label for="{{ form.campus.id_for_label }}">Campus</label>
-                  {% if form.campus.errors %}
-                    <div class="invalid-feedback d-block">{{ form.campus.errors.as_text }}</div>
-                  {% endif %}
                 </div>
 
                 <div class="form-floating mt-3">
                   {{ form.level|add_class:"form-select" }}
                   <label for="{{ form.level.id_for_label }}">Level</label>
-                  {% if form.level.errors %}
-                    <div class="invalid-feedback d-block">{{ form.level.errors.as_text }}</div>
-                  {% endif %}
                 </div>
 
                 <div class="form-floating mt-3">
                   {{ form.admission_date|add_class:"form-control" }}
                   <label for="{{ form.admission_date.id_for_label }}">Admission Date</label>
-                  {% if form.admission_date.errors %}
-                    <div class="invalid-feedback d-block">{{ form.admission_date.errors.as_text }}</div>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-
-            <hr class="my-4">
-
-            <h5 class="mb-4 border-bottom pb-2">
-              <i class="fas fa-user-friends me-2"></i>Parent/Guardian Information
-            </h5>
-
-            <div class="row g-4">
-              <div class="col-md-6">
-                <div class="form-floating">
-                  {{ form.parent_name|add_class:"form-control"|attr:"placeholder: " }}
-                  <label for="{{ form.parent_name.id_for_label }}">Parent/Guardian Name</label>
-                  {% if form.parent_name.errors %}
-                    <div class="invalid-feedback d-block">{{ form.parent_name.errors.as_text }}</div>
-                  {% endif %}
-                </div>
-
-                <div class="form-floating mt-3">
-                  {{ form.parent_phone|add_class:"form-control"|attr:"placeholder: " }}
-                  <label for="{{ form.parent_phone.id_for_label }}">Parent Phone</label>
-                  {% if form.parent_phone.errors %}
-                    <div class="invalid-feedback d-block">{{ form.parent_phone.errors.as_text }}</div>
-                  {% endif %}
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="form-floating">
-                  {{ form.parent_email|add_class:"form-control"|attr:"placeholder: " }}
-                  <label for="{{ form.parent_email.id_for_label }}">Parent Email</label>
-                  {% if form.parent_email.errors %}
-                    <div class="invalid-feedback d-block">{{ form.parent_email.errors.as_text }}</div>
-                  {% endif %}
-                </div>
-
-                <div class="form-floating mt-3">
-                  {{ form.address|add_class:"form-control"|attr:"placeholder: "|attr:"style:height:auto" }}
-                  <label for="{{ form.address.id_for_label }}">Address</label>
-                  {% if form.address.errors %}
-                    <div class="invalid-feedback d-block">{{ form.address.errors.as_text }}</div>
-                  {% endif %}
                 </div>
               </div>
             </div>
@@ -236,8 +159,8 @@
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
   }
 
-  .form-floating > .form-control {
-    height: calc(3.5rem + 2px);
+  textarea.form-control {
+    min-height: 120px !important;
   }
 
   .form-check-input {
@@ -249,11 +172,6 @@
     font-size: 0.9rem;
   }
 
-  .form-text {
-    font-size: 0.85rem;
-    color: #6c757d;
-  }
-
   #profile-picture-preview {
     object-fit: cover;
   }
@@ -262,7 +180,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Profile picture preview
     const profilePictureInput = document.querySelector('#{{ form.profile_picture.id_for_label }}');
     const profilePicturePreview = document.querySelector('#profile-picture-preview');
     const removePhotoBtn = document.querySelector('#remove-photo');
@@ -271,22 +188,17 @@ document.addEventListener('DOMContentLoaded', function() {
     profilePictureInput.addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
             const reader = new FileReader();
-            
             reader.onload = function(event) {
                 profilePicturePreview.src = event.target.result;
             }
-            
             reader.readAsDataURL(e.target.files[0]);
         }
     });
 
-    // Remove photo functionality
     if (removePhotoBtn) {
         removePhotoBtn.addEventListener('click', function() {
             profilePicturePreview.src = defaultImage;
             profilePictureInput.value = '';
-            
-            // Add a hidden input to indicate photo removal
             const existingRemoveInput = document.querySelector('input[name="profile_picture-clear"]');
             if (!existingRemoveInput) {
                 const removeInput = document.createElement('input');

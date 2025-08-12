@@ -327,36 +327,16 @@ def add_student(request):
             if excel_form.is_valid():
                 try:
                     df = excel_form.cleaned_data['excel_file']
-                    logger.debug(f"Excel file has {len(df)} rows")
                     created_count = 0
                     
                     for index, row in df.iterrows():
-                        # Handle campus
-                        campus_name = str(row['campus']).strip()
-                        try:
-                            campus = Campus.objects.get(name=campus_name)
-                        except Campus.DoesNotExist:
-                            messages.error(request, f"Row {index + 2}: Campus '{campus_name}' not found.")
-                            logger.error(f"Campus '{campus_name}' not found for row {index + 2}")
-                            continue
-                        
-                        # Handle level
-                        level_name = str(row['level']).strip()
-                        try:
-                            level = Level.objects.get(name=level_name)
-                        except Level.DoesNotExist:
-                            messages.error(request, f"Row {index + 2}: Level '{level_name}' not found.")
-                            logger.error(f"Level '{level_name}' not found for row {index + 2}")
-                            continue
-                        
-                        # Prepare student data with IDs
                         student_data = {
                             'first_name': str(row['first_name']).strip(),
                             'last_name': str(row['last_name']).strip(),
                             'gender': str(row['gender']).strip().upper(),
                             'date_of_birth': row['date_of_birth'],
-                            'campus': campus.id,
-                            'level': level.id,
+                            'campus': row['campus'],
+                            'level': row['level'],
                             'admission_date': row['admission_date'],
                             'parent_name': str(row['parent_name']).strip(),
                             'parent_phone': str(row['parent_phone']).strip(),
@@ -365,7 +345,6 @@ def add_student(request):
                             'admission_number': str(row.get('admission_number', '')).strip(),
                             'parent_address': str(row.get('parent_address', '')).strip(),
                         }
-                        logger.debug(f"Row {index + 2}: Processing student data: {student_data}")
                         
                         form = StudentForm(student_data)
                         if form.is_valid():
@@ -373,23 +352,17 @@ def add_student(request):
                                 with transaction.atomic():
                                     form.save()
                                 created_count += 1
-                                logger.debug(f"Row {index + 2}: Student saved successfully")
                             except Exception as e:
                                 messages.error(request, f"Row {index + 2}: Error saving student: {str(e)}")
-                                logger.error(f"Row {index + 2}: Error saving student: {str(e)}")
                         else:
                             messages.error(request, f"Row {index + 2}: Invalid data: {form.errors.as_text()}")
-                            logger.error(f"Row {index + 2}: Form invalid. Errors: {form.errors.as_text()}")
                     
                     if created_count > 0:
                         messages.success(request, f"Successfully imported {created_count} students!")
-                    else:
-                        messages.warning(request, "No students were imported. Check the error messages above.")
                     return redirect('manage_students')
                     
                 except Exception as e:
                     messages.error(request, f"Error during import: {str(e)}")
-                    logger.error(f"Error during import: {str(e)}")
         
         elif 'single_submit' in request.POST:
             single_form = StudentForm(request.POST, request.FILES)
@@ -412,6 +385,7 @@ def add_student(request):
 @user_passes_test(is_admin)
 def edit_student(request, pk):
     student = get_object_or_404(Student, pk=pk)
+    
     if request.method == 'POST':
         form = StudentForm(request.POST, request.FILES, instance=student)
         if form.is_valid():
@@ -420,7 +394,11 @@ def edit_student(request, pk):
             return redirect('manage_students')
     else:
         form = StudentForm(instance=student)
-    return render(request, 'main/edit_student.html', {'form': form, 'student': student})
+    
+    return render(request, 'main/edit_student.html', {
+        'form': form,
+        'student': student
+    })
 
 @login_required
 @user_passes_test(is_admin)

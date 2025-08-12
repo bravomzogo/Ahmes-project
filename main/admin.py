@@ -281,3 +281,22 @@ admin.site.register(AcademicCalendar, AcademicCalendarAdmin)
 admin.site.register(AcademicAnnouncement, AcademicAnnouncementAdmin)
 admin.site.register(Subject, SubjectAdmin)
 admin.site.register(Result, ResultAdmin)
+
+
+
+from django.contrib import admin
+from .models import FeeStructure, Payment
+
+@admin.register(FeeStructure)
+class FeeStructureAdmin(admin.ModelAdmin):
+    list_display = ('level', 'academic_year', 'amount', 'is_active', 'created_at')
+    list_filter = ('level', 'academic_year', 'is_active')
+    search_fields = ('level__name', 'academic_year', 'description')
+    ordering = ('-created_at',)
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('control_number', 'student', 'fee_structure', 'amount_paid', 'payment_method', 'payment_date', 'status', 'created_at')
+    list_filter = ('payment_method', 'status', 'payment_date', 'created_at')
+    search_fields = ('control_number', 'student__first_name', 'student__last_name', 'transaction_reference', 'receipt_number')
+    ordering = ('-payment_date',)
