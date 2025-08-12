@@ -47,6 +47,20 @@ class StaffRegistrationForm(UserCreationForm):
         return user
 
 class StudentForm(forms.ModelForm):
+    parent_name = forms.CharField(max_length=200, required=True)
+    parent_phone = forms.CharField(max_length=20, required=True)
+    parent_email = forms.EmailField(required=True)
+    parent_address = forms.CharField(widget=forms.Textarea, required=True)
+    parent_profile_picture = CloudinaryFileField(
+        options={
+            'folder': 'school/parents/profile_pictures',
+            'transformation': {'quality': 'auto:good', 'width': 300, 'height': 300, 'crop': 'fill'},
+            'overwrite': True,
+            'resource_type': 'image',
+        },
+        required=False,
+        widget=forms.ClearableFileInput
+    )
     profile_picture = CloudinaryFileField(
         options={
             'folder': 'school/students/profile_pictures',
@@ -62,41 +76,22 @@ class StudentForm(forms.ModelForm):
         model = Student
         fields = [
             'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth',
-            'admission_number', 'campus', 'level', 'admission_date', 'profile_picture'
+            'admission_number', 'campus', 'level', 'admission_date',
+            'profile_picture', 'parent_name', 'parent_phone',
+            'parent_email', 'parent_address', 'parent_profile_picture'
         ]
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'admission_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        # Only show parent fields when creating new student
-        if not self.instance.pk:
-            self.fields['parent_name'] = forms.CharField(max_length=200, required=True)
-            self.fields['parent_phone'] = forms.CharField(max_length=20, required=True)
-            self.fields['parent_email'] = forms.EmailField(required=True)
-            self.fields['parent_address'] = forms.CharField(widget=forms.Textarea, required=True)
-            self.fields['parent_profile_picture'] = CloudinaryFileField(
-                options={
-                    'folder': 'school/parents/profile_pictures',
-                    'transformation': {'quality': 'auto:good', 'width': 300, 'height': 300, 'crop': 'fill'},
-                    'overwrite': True,
-                    'resource_type': 'image',
-                },
-                required=False,
-                widget=forms.ClearableFileInput
-            )
-
     def clean_parent_email(self):
-        if 'parent_email' in self.cleaned_data:
-            email = self.cleaned_data.get('parent_email').lower()
-            if Parent.objects.filter(email=email).exclude(id=self.instance.parent_id if self.instance else None).exists():
-                raise forms.ValidationError("A parent with this email already exists.")
-            if User.objects.filter(email=email).exclude(id=self.instance.user_id if self.instance else None).exists():
-                raise forms.ValidationError("A user with this email already exists.")
-            return email
+        email = self.cleaned_data.get('parent_email').lower()
+        if Parent.objects.filter(email=email).exclude(id=self.instance.parent_id if self.instance else None).exists():
+            raise forms.ValidationError("A parent with this email already exists.")
+        if User.objects.filter(email=email).exclude(id=self.instance.user_id if self.instance else None).exists():
+            raise forms.ValidationError("A user with this email already exists.")
+        return email
 
     def clean_admission_number(self):
         admission_number = self.cleaned_data.get('admission_number')
@@ -105,12 +100,8 @@ class StudentForm(forms.ModelForm):
         return admission_number
 
     def save(self, commit=True):
-        # For existing students (editing)
-        if self.instance.pk:
-            return super().save(commit)
-        
-        # For new students (creation)
         with transaction.atomic():
+            logger.debug(f"Starting save for StudentForm with data: {self.cleaned_data}")
             # Create or update Parent instance
             parent_data = {
                 'name': self.cleaned_data['parent_name'],
@@ -119,31 +110,29 @@ class StudentForm(forms.ModelForm):
                 'address': self.cleaned_data['parent_address'],
                 'profile_picture': self.cleaned_data['parent_profile_picture'],
             }
-            
+            logger.debug(f"Parent data: {parent_data}")
             parent, created = Parent.objects.get_or_create(
                 email=parent_data['email'],
                 defaults=parent_data
             )
-            
             if not created:
                 for key, value in parent_data.items():
                     if key != 'profile_picture' or value:
                         setattr(parent, key, value)
                 parent.save()
+            logger.debug(f"Parent {'created' if created else 'updated'}: {parent}")
 
-            # Create Parent User if doesn't exist
+            # Create or update Parent User
             parent_user = parent.user
             parent_username = None
             parent_password = None
-            
             if not parent_user:
                 parent_username = parent.name.replace(' ', '').lower()
                 counter = 1
                 while User.objects.filter(username=parent_username).exists():
                     parent_username = f"{parent.name.replace(' ', '').lower()}{counter}"
                     counter += 1
-                
-                parent_password = secrets.token_urlsafe(3)
+                parent_password = secrets.token_urlsafe(3)  # Generate a secure random password
                 parent_user = User.objects.create_user(
                     username=parent_username,
                     email=parent.email,
@@ -154,37 +143,44 @@ class StudentForm(forms.ModelForm):
                 )
                 parent.user = parent_user
                 parent.save()
+                logger.debug(f"Parent user created: {parent_username}")
 
-            # Create Student instance
+            # Create or update Student instance
             student = super().save(commit=False)
             student.parent = parent
+            logger.debug(f"Student instance prepared: {student}")
 
-            # Create Student User
+            # Create or update Student User
             student_user = student.user
             student_username = None
             student_password = None
-            
             if not student_user:
                 student_username = student.last_name.lower()
                 counter = 1
                 while User.objects.filter(username=student_username).exists():
                     student_username = f"{student.last_name.lower()}{counter}"
                     counter += 1
-                
-                student_password = secrets.token_urlsafe(3)
+                student_password = secrets.token_urlsafe(3)  # Generate a secure random password
                 student_user = User.objects.create_user(
                     username=student_username,
                     email=parent.email,
                     password=student_username+student_password,
                     first_name=student.first_name,
                     last_name=student.last_name
+                    
                 )
                 student.user = student_user
+                logger.debug(f"Student user created: {student_username}")
 
             if commit:
-                student.save()
-                
-                # Send credentials email
+                try:
+                    student.save()
+                    logger.debug(f"Student saved: {student}")
+                except Exception as e:
+                    logger.error(f"Failed to save student: {str(e)}")
+                    raise
+
+                # Send credentials for both parent and student to parent email
                 try:
                     send_mail(
                         subject='School Account Credentials for You and Your Child',
@@ -210,8 +206,10 @@ class StudentForm(forms.ModelForm):
                         }),
                         fail_silently=False,
                     )
+                    logger.info(f"Credentials email sent to {parent.email}")
                 except Exception as e:
-                    logger.error(f"Failed to send credentials email: {str(e)}")
+                    logger.error(f"Failed to send credentials email to {parent.email}: {str(e)}")
+                    messages.warning(None, f"Student saved, but failed to send credentials email: {str(e)}")
 
             return student
 
