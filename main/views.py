@@ -412,6 +412,7 @@ def add_student(request):
 @user_passes_test(is_admin)
 def edit_student(request, pk):
     student = get_object_or_404(Student, pk=pk)
+    
     if request.method == 'POST':
         form = StudentForm(request.POST, request.FILES, instance=student)
         if form.is_valid():
@@ -420,8 +421,12 @@ def edit_student(request, pk):
             return redirect('manage_students')
     else:
         form = StudentForm(instance=student)
-    return render(request, 'main/edit_student.html', {'form': form, 'student': student})
-
+    
+    return render(request, 'main/edit_student.html', {
+        'form': form,
+        'student': student,
+        'title': f'Edit Student: {student.first_name} {student.last_name}'
+    })
 @login_required
 @user_passes_test(is_admin)
 def delete_student(request, pk):
