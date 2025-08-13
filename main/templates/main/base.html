@@ -1130,7 +1130,9 @@
     </style>
     {% block extra_css %}{% endblock %}
   </head>
-  <body>
+ {% comment %} This br tag will only show if not overridden {% endcomment %}
+    {% block extra_br %}<br>{% endblock %}
+      <body>
     {% block loader %}
     <!-- Professional Loader -->
     <div class="loader-container">
