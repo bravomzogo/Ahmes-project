@@ -1939,3 +1939,7 @@ def send_push_notification(user, title, message, url):
     )
 
     return successful_sends > 0
+
+
+
+

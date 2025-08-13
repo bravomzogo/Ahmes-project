@@ -1,3 +1,4 @@
+
 {% extends 'main/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
@@ -57,9 +58,44 @@
             class="d-block w-100"
             alt="School Building"
           />
-          <div class="carousel-caption d-none d-md-block">
+          <div class="carousel-caption d-block">
             <h2 data-aos="fade-up">Welcome to AHMES Secondary School</h2>
             <p data-aos="fade-up" data-aos-delay="300">Center of Academic Excellence</p>
+          </div>
+          <!-- Admission Banner -->
+          <div class="admission-banner" data-aos="fade-left" data-aos-delay="500">
+            <div class="admission-content">
+              <div class="ribbon">ENROLL NOW</div>
+              <h3>Admissions Open!</h3>
+              <p class="academic-year">2024/2025 Academic Year</p>
+              <div class="admission-countdown">
+                <div class="countdown-item">
+                  <span class="countdown-number" id="days">00</span>
+                  <span class="countdown-label">Days</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-number" id="hours">00</span>
+                  <span class="countdown-label">Hours</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-number" id="minutes">00</span>
+                  <span class="countdown-label">Minutes</span>
+                </div>
+              </div>
+              <div class="banner-features">
+                <div class="feature-item">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Limited Seats Available</span>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Scholarships Offered</span>
+                </div>
+              </div>
+              <a href="{% url 'under_development' %}" class="btn btn-enroll pulse">
+                <i class="fas fa-edit me-2"></i>Apply Now
+              </a>
+            </div>
           </div>
         </div>
         <div class="carousel-item">
@@ -68,9 +104,37 @@
             class="d-block w-100"
             alt="Students in Class"
           />
-          <div class="carousel-caption d-none d-md-block">
+          <div class="carousel-caption d-block">
             <h2 data-aos="fade-up">Quality Education</h2>
             <p data-aos="fade-up" data-aos-delay="300">Preparing future leaders</p>
+          </div>
+          <!-- Admission Banner -->
+          <div class="admission-banner" data-aos="fade-left" data-aos-delay="500">
+            <div class="admission-content">
+              <div class="ribbon">HURRY!</div>
+              <h3>Limited Spaces!</h3>
+              <p class="academic-year">Register before deadline</p>
+              <div class="admission-progress">
+                <div class="progress-text">Seats Filling Fast</div>
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress-percent">75% filled</div>
+              </div>
+              <div class="banner-features">
+                <div class="feature-item">
+                  <i class="fas fa-star"></i>
+                  <span>Top Performing School</span>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-users"></i>
+                  <span>30 Students per Class</span>
+                </div>
+              </div>
+              <a href="{% url 'under_development' %}" class="btn btn-enroll pulse">
+                <i class="fas fa-user-graduate me-2"></i>Enroll Today
+              </a>
+            </div>
           </div>
         </div>
         <div class="carousel-item">
@@ -79,9 +143,26 @@
             class="d-block w-100"
             alt="Sports Day"
           />
-          <div class="carousel-caption d-none d-md-block">
+          <div class="carousel-caption d-block">
             <h2 data-aos="fade-up">Holistic Development</h2>
             <p data-aos="fade-up" data-aos-delay="300">Academic, Sports, and Cultural activities</p>
+          </div>
+          <!-- Admission Banner -->
+          <div class="admission-banner" data-aos="fade-left" data-aos-delay="500">
+            <div class="admission-content">
+              <div class="ribbon">SCHOLARSHIPS</div>
+              <h3>Talent Scholarships</h3>
+              <p class="academic-year">For outstanding students</p>
+              <ul class="scholarship-list">
+                <li><i class="fas fa-medal"></i> Academic Excellence</li>
+                <li><i class="fas fa-running"></i> Sports Talent</li>
+                <li><i class="fas fa-music"></i> Arts & Culture</li>
+                <li><i class="fas fa-chess"></i> Chess & STEM</li>
+              </ul>
+              <a href="{% url 'under_development' %}" class="btn btn-enroll pulse">
+                <i class="fas fa-award me-2"></i>Apply Now
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -293,6 +374,7 @@
           Discover what makes us the preferred choice for quality education
         </p>
         <div class="row">
+          
           <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
             <div class="feature-box">
               <div class="feature-icon">
@@ -383,8 +465,6 @@
         </p>
         <div class="row justify-content-center">
           <div class="col-md-8" data-aos="fade-up" data-aos-delay="300">
-            
-            
             <form method="post" novalidate>
               {% csrf_token %}
               <div class="form-floating mb-3">
@@ -504,13 +584,214 @@
         }
       }
 
+      /* Admission Banner Styles */
+      .admission-banner {
+        position: absolute;
+        right: 5%;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
+        width: 320px;
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .admission-content {
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(26, 82, 118, 0.2);
+      }
+      
+      .ribbon {
+        position: absolute;
+        top: 10px;
+        right: -30px;
+        width: 120px;
+        background: #e74c3c;
+        color: white;
+        text-align: center;
+        padding: 5px 0;
+        font-weight: bold;
+        font-size: 0.8rem;
+        transform: rotate(45deg);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      }
+      
+      .admission-content h3 {
+        color: #1a5276;
+        font-weight: 700;
+        margin-bottom: 5px;
+        font-size: 1.5rem;
+        text-align: center;
+      }
+      
+      .academic-year {
+        color: #e74c3c;
+        text-align: center;
+        font-weight: 600;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+      }
+      
+      .btn-enroll {
+        background: linear-gradient(135deg, #1a5276, #3498db);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 20px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(26, 82, 118, 0.3);
+        margin-top: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      
+      .btn-enroll:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(26, 82, 118, 0.4);
+        color: white;
+        background: linear-gradient(135deg, #154360, #2980b9);
+      }
+      
+      .admission-countdown {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+      }
+      
+      .countdown-item {
+        text-align: center;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        width: 30%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      
+      .countdown-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a5276;
+        display: block;
+      }
+      
+      .countdown-label {
+        font-size: 0.7rem;
+        color: #7f8c8d;
+        text-transform: uppercase;
+      }
+      
+      .admission-progress {
+        margin: 20px 0;
+      }
+      
+      .progress-text {
+        font-size: 0.9rem;
+        color: #1a5276;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+      
+      .progress-percent {
+        text-align: right;
+        font-size: 0.8rem;
+        color: #e74c3c;
+        font-weight: bold;
+        margin-top: 5px;
+      }
+      
+      .banner-features {
+        margin: 15px 0;
+      }
+      
+      .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      
+      .feature-item i {
+        color: #27ae60;
+        margin-right: 10px;
+        font-size: 0.9rem;
+      }
+      
+      .feature-item span {
+        font-size: 0.85rem;
+        color: #555;
+      }
+      
+      .scholarship-list {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+      }
+      
+      .scholarship-list li {
+        padding: 8px 0;
+        border-bottom: 1px dashed #eee;
+        display: flex;
+        align-items: center;
+      }
+      
+      .scholarship-list li i {
+        margin-right: 10px;
+        color: #3498db;
+        font-size: 0.9rem;
+      }
+      
+      .pulse {
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(26, 82, 118, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(26, 82, 118, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(26, 82, 118, 0);
+        }
+      }
+      
+      @keyframes float {
+        0% {
+          transform: translateY(-50%) translateX(0);
+        }
+        50% {
+          transform: translateY(-50%) translateX(-10px);
+        }
+        100% {
+          transform: translateY(-50%) translateX(0);
+        }
+      }
+
       /* Adjust carousel item to accommodate ticker */
       .carousel-item {
-        height: calc(80vh - 50px); /* Reduced by ticker height */
-        min-height: calc(585px - 50px);
+        height: 80vh;
+        min-height: 571px;
+      }
+
+      .carousel-item img {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
       }
 
       /* Responsive adjustments */
+      @media (max-width: 1199.98px) {
+        .admission-banner {
+          width: 280px;
+        }
+      }
+      
       @media (max-width: 991.98px) {
         .news-ticker-container {
           flex-direction: column;
@@ -532,23 +813,145 @@
         }
       
         .carousel-item {
-          height: calc(60vh - 70px);
-          min-height: calc(400px - 70px);
+          height: 60vh;
+          min-height: 400px;
+        }
+        
+        .admission-banner {
+          width: 280px;
+          right: 3%;
         }
       }
-
+      
       @media (max-width: 767.98px) {
+        .news-ticker-container {
+          padding: 8px 10px;
+        }
+        
         .news-ticker li {
-          margin-right: 25px;
+          margin-right: 20px;
         }
         
         .news-ticker li:after {
-          right: -15px;
+          right: -10px;
         }
         
         .carousel-item {
-          height: calc(50vh - 80px);
-          min-height: calc(350px - 80px);
+          height: auto;
+          min-height: auto;
+          padding-bottom: 60px; /* Space for news ticker */
+        }
+        
+        .carousel-item img {
+          height: 50vh;
+          min-height: 300px;
+        }
+        
+        .carousel-caption {
+          position: static;
+          padding: 15px;
+          color: #333;
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 8px;
+          margin: 10px auto;
+          max-width: 90%;
+        }
+        
+        .carousel-caption h2 {
+          font-size: 1.5rem;
+          color: #1a5276;
+        }
+        
+        .carousel-caption p {
+          font-size: 0.9rem;
+        }
+        
+        .admission-banner {
+          position: absolute;
+          right: 5%;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 280px;
+          animation: float 6s ease-in-out infinite;
+        }
+        
+        .admission-content {
+          background: rgba(255, 255, 255, 0);
+          padding: 20px;
+        }
+        
+        .admission-content h3 {
+          font-size: 1.4rem;
+        }
+        
+        .academic-year {
+          font-size: 0.9rem;
+        }
+        
+        .countdown-item {
+          padding: 8px;
+        }
+        
+        .countdown-number {
+          font-size: 1.3rem;
+        }
+        
+        .countdown-label {
+          font-size: 0.65rem;
+        }
+        
+        .btn-enroll {
+          padding: 10px 15px;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 575.98px) {
+        .news-ticker-label {
+          font-size: 0.8rem;
+          padding: 5px 10px;
+        }
+        
+        .news-ticker a {
+          font-size: 0.85rem;
+        }
+        
+        .carousel-caption h2 {
+          font-size: 1.2rem;
+        }
+        
+        .carousel-caption p {
+          font-size: 0.8rem;
+        }
+        
+        .admission-banner {
+          width: 260px;
+          right: 15%;
+          top: 35%;
+        }
+        
+        .admission-content {
+          background: rgba(255, 255, 255, 0.42);
+          padding: 15px;
+        }
+        
+        .admission-content h3 {
+          font-size: 1.2rem;
+        }
+        
+        .countdown-item {
+          width: 28%;
+        }
+        
+        .countdown-number {
+          font-size: 1.1rem;
+        }
+        
+        .ribbon {
+          font-size: 0.7rem;
+          width: 100px;
+          top: 10px;
+          right: -25px;
         }
       }
 
@@ -561,4 +964,63 @@
         }
       }
     </style>
+    
+    <script>
+      // Countdown Timer for Admission Deadline
+      function updateCountdown() {
+        const deadline = new Date(2025, 7, 14); // August 14, 2025
+        const now = new Date();
+        const diff = deadline - now;
+        
+        if (diff <= 0) {
+          document.getElementById('days').textContent = '00';
+          document.getElementById('hours').textContent = '00';
+          document.getElementById('minutes').textContent = '00';
+          return;
+        }
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        document.getElementById('days').textContent = days.toString().padStart(2, '0');
+        document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+        document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+      }
+      
+      updateCountdown();
+      setInterval(updateCountdown, 60000);
+      
+      // Animate progress bar on scroll
+      document.addEventListener('DOMContentLoaded', function() {
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+          progressBar.style.width = '0%';
+          
+          const animateProgress = () => {
+            let width = 0;
+            const targetWidth = progressBar.getAttribute('aria-valuenow') + '%';
+            const interval = setInterval(() => {
+              if (width >= parseInt(targetWidth)) {
+                clearInterval(interval);
+              } else {
+                width++;
+                progressBar.style.width = width + '%';
+              }
+            }, 20);
+          };
+          
+          const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+              animateProgress();
+              observer.unobserve(progressBar);
+            }
+          }, {
+            threshold: 0.1
+          });
+          
+          observer.observe(progressBar);
+        }
+      });
+    </script>
 {% endblock %}
