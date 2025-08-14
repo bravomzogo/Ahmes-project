@@ -567,3 +567,37 @@ class Payment(models.Model):
             random_part = secrets.token_hex(3).upper()
             self.control_number = f"{prefix}{year}{random_part}"
         super().save(*args, **kwargs)
+
+
+
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+
+class ActivityLog(models.Model):
+    ACTION_CHOICES = [
+        ('CREATE', 'Create'),
+        ('UPDATE', 'Update'),
+        ('DELETE', 'Delete'),
+        ('LOGIN', 'Login'),
+        ('LOGOUT', 'Logout'),
+        ('LOGIN_FAILED', 'Login Failed'),
+        ('PASSWORD_CHANGE', 'Password Change'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, blank=True)
+    object_id = models.CharField(max_length=50, null=True, blank=True)  # Changed to CharField
+    content_object = GenericForeignKey('content_type', 'object_id')
+    details = models.TextField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=255, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Activity Log'
+        verbose_name_plural = 'Activity Logs'
+
+    def __str__(self):
+        return f"{self.get_action_display()} by {self.user} at {self.timestamp}"

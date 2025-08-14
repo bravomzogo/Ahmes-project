@@ -1,0 +1,256 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">System Activity Log</h6>
+        <div>
+            <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#filterModal">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Active Filters Display -->
+        {% if selected_action or selected_user or date_from or date_to %}
+        <div class="alert alert-info mb-4">
+            <strong>Active Filters:</strong>
+            {% if selected_action %}
+            <span class="badge bg-primary me-2">
+                Action: {{ selected_action|upper }}
+            </span>
+            {% endif %}
+            {% if selected_user %}
+            <span class="badge bg-primary me-2">
+                User: {{ filtered_user.username }}
+            </span>
+            {% endif %}
+            {% if date_from %}
+            <span class="badge bg-primary me-2">
+                From: {{ date_from }}
+            </span>
+            {% endif %}
+            {% if date_to %}
+            <span class="badge bg-primary me-2">
+                To: {{ date_to }}
+            </span>
+            {% endif %}
+            <a href="{% url 'activity_log' %}" class="btn btn-sm btn-danger float-end">Clear All</a>
+        </div>
+        {% endif %}
+        
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Details</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in page_obj %}
+                    <tr>
+                        <td>{{ activity.timestamp|date:"Y-m-d H:i:s" }}</td>
+                        <td>
+                            {% if activity.user %}
+                                {{ activity.user.username }}
+                            {% else %}
+                                System
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if activity.action == 'CREATE' %}bg-success
+                                {% elif activity.action == 'UPDATE' %}bg-primary
+                                {% elif activity.action == 'DELETE' %}bg-danger
+                                {% else %}bg-secondary{% endif %} text-white">
+                                {{ activity.get_action_display }}
+                            </span>
+                        </td>
+                        <td>{{ activity.details }}</td>
+                        <td>{{ activity.ip_address|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No activities found matching your filters</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if page_obj.paginator.num_pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if selected_action %}&action={{ selected_action }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="filterModalLabel">Filter Activities</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="get" id="filterForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="action">Action Type</label>
+                                <select class="form-control select2" id="action" name="action">
+                                    <option value="">All Actions</option>
+                                    {% for action in actions %}
+                                    <option value="{{ action.0 }}" {% if selected_action == action.0 %}selected{% endif %}>{{ action.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="user">User</label>
+                                <select class="form-control select2" id="user" name="user">
+                                    <option value="">All Users</option>
+                                    {% for user in users %}
+                                    <option value="{{ user.id }}" {% if selected_user == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="date_from">From Date</label>
+                                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="date_to">To Date</label>
+                                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Badge colors */
+    .bg-success { background-color: #28a745 !important; }
+    .bg-primary { background-color: #007bff !important; }
+    .bg-danger { background-color: #dc3545 !important; }
+    .bg-secondary { background-color: #6c757d !important; }
+    .bg-info { background-color: #17a2b8 !important; }
+    .text-white { color: white !important; }
+    
+    /* Pagination styling */
+    .pagination { margin-top: 20px; }
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .page-link { color: #007bff; }
+    
+    /* Filter modal styling */
+    .select2-container--default .select2-selection--single {
+        height: calc(1.5em + 0.75rem + 2px);
+        padding: 0.375rem 0.75rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    /* Active filters display */
+    .filter-badge {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize select2
+        $('.select2').select2({
+            width: '100%',
+            placeholder: "Select an option",
+            allowClear: true
+        });
+        
+        // Set today as default for date_to if empty
+        if (!$('#date_to').val()) {
+            let today = new Date();
+            let dd = String(today.getDate()).padStart(2, '0');
+            let mm = String(today.getMonth() + 1).padStart(2, '0');
+            let yyyy = today.getFullYear();
+            $('#date_to').val(yyyy + '-' + mm + '-' + dd);
+        }
+        
+        // Validate date range
+        $('#filterForm').submit(function(e) {
+            let dateFrom = $('#date_from').val();
+            let dateTo = $('#date_to').val();
+            
+            if (dateFrom && dateTo && dateFrom > dateTo) {
+                alert('"From Date" cannot be after "To Date"');
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

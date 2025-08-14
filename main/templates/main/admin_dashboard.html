@@ -166,6 +166,30 @@
             </div>
           </div>
         </div>
+
+        <!-- Activity Log Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                    System Activities
+                  </div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ activities_count }}
+                  </div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                </div>
+              </div>
+              <a href="{% url 'activity_log' %}" class="small-box-footer mt-2">
+                View logs <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Content Row -->
@@ -193,6 +217,61 @@
                 <a href="{% url 'manage_youtube_videos' %}" class="btn btn-dark btn-block">
                   <i class="fas fa-video mr-2"></i> Manage YouTube Videos
                 </a>
+                <a href="{% url 'activity_log' %}" class="btn btn-danger btn-block">
+                  <i class="fas fa-clipboard-list mr-2"></i> View Activity Log
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-lg-8 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+              <h6 class="m-0 font-weight-bold text-primary">Recent Activities</h6>
+              <a href="{% url 'activity_log' %}" class="btn btn-sm btn-link">View All</a>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>Time</th>
+                      <th>User</th>
+                      <th>Action</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for activity in recent_activities %}
+                    <tr>
+                      <td>{{ activity.timestamp|timesince }} ago</td>
+                      <td>
+                        {% if activity.user %}
+                          {{ activity.user.username }}
+                        {% else %}
+                          System
+                        {% endif %}
+                      </td>
+                      <td>
+                        <span class="badge 
+                          {% if activity.action == 'CREATE' %}badge-success
+                          {% elif activity.action == 'UPDATE' %}badge-primary
+                          {% elif activity.action == 'DELETE' %}badge-danger
+                          {% else %}badge-secondary{% endif %}">
+                          {{ activity.get_action_display }}
+                        </span>
+                      </td>
+                      <td>{{ activity.details|truncatechars:50 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="4" class="text-center">No recent activities</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -304,6 +383,10 @@
   .border-left-dark {
     border-left: 0.25rem solid #343a40 !important;
   }
+  
+  .border-left-danger {
+    border-left: 0.25rem solid #e74a3b !important;
+  }
 
   .small-box-footer {
     display: block;
@@ -314,6 +397,22 @@
 
   .small-box-footer:hover {
     color: var(--primary-color);
+  }
+
+  .badge-success {
+    background-color: #1cc88a;
+  }
+  
+  .badge-primary {
+    background-color: #4e73df;
+  }
+  
+  .badge-danger {
+    background-color: #e74a3b;
+  }
+  
+  .badge-secondary {
+    background-color: #858796;
   }
 
   @media (max-width: 768px) {

@@ -283,11 +283,17 @@ def admin_dashboard(request):
     news_count = News.objects.count()
     pending_comments = Comment.objects.filter(is_approved=False).count()
     gallery_count = Gallery.objects.count()
+    # Fetch recent activities (last 10)
+    from .models import ActivityLog
+    recent_activities = ActivityLog.objects.all().order_by('-timestamp')[:10]
+    activities_count = ActivityLog.objects.count()
     return render(request, 'main/admin_dashboard.html', {
         'students_count': students_count,
         'staff_count': staff_count,
         'news_count': news_count,
         'pending_comments': pending_comments,
+        'activities_count': activities_count,
+        'recent_activities': recent_activities,
         'gallery_count': gallery_count,
     })
 
@@ -1943,3 +1949,68 @@ def send_push_notification(user, title, message, url):
 
 
 
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from django.db.models import Q
+from .models import ActivityLog, User
+from datetime import datetime
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def activity_log(request):
+    # Get filter parameters from request
+    action = request.GET.get('action', '')
+    user_id = request.GET.get('user', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    # Start with base queryset
+    activities = ActivityLog.objects.all().select_related('user').order_by('-timestamp')
+    
+    # Apply filters
+    if action:
+        activities = activities.filter(action=action)
+    if user_id:
+        activities = activities.filter(user_id=user_id)
+    if date_from:
+        try:
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d').date()
+            activities = activities.filter(timestamp__date__gte=date_from_obj)
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d').date()
+            activities = activities.filter(timestamp__date__lte=date_to_obj)
+        except ValueError:
+            pass
+    
+    # Pagination
+    paginator = Paginator(activities, 50)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get all available users who have activities
+    users = User.objects.filter(activitylog__isnull=False).distinct()
+    
+    # Get the filtered user for display
+    filtered_user = None
+    if user_id:
+        try:
+            filtered_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            pass
+    
+    context = {
+        'page_obj': page_obj,
+        'actions': ActivityLog.ACTION_CHOICES,
+        'users': users,
+        'selected_action': action,
+        'selected_user': user_id,
+        'filtered_user': filtered_user,  # Add this
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+    
+    return render(request, 'main/activity_log.html', context)
