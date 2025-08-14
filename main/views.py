@@ -1565,17 +1565,22 @@ def calculate_division(student, term_results):
     subject_points = []
     for subject, scores in subject_averages.items():
         avg_score = sum(scores) / len(scores)
-        if avg_score >= 81:
+        if avg_score >= 80:
             points = 1  # A
         elif avg_score >= 70:
             points = 2  # B
-        elif avg_score >= 69:
+        elif avg_score >= 60:
             points = 3  # C
-        elif avg_score >= 59:
+        elif avg_score >= 50:
             points = 4  # D
+        elif avg_score >= 40:
+            points = 5  # E
+        elif avg_score >= 35:
+            points = 6  # S
+        elif avg_score >= 30:
+            points = 7  # F
         else:
-            points = 9  # F
-        subject_points.append(points)
+         subject_points.append(points)
 
     # Sort points and select best subjects
     subject_points.sort()
