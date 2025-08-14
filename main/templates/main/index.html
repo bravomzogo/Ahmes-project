@@ -87,10 +87,10 @@
                   <i class="fas fa-check-circle"></i>
                   <span>Limited Seats Available</span>
                 </div>
-                <div class="feature-item">
+                {% comment %} <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
                   <span>Scholarships Offered</span>
-                </div>
+                </div> {% endcomment %}
               </div>
               <a href="{% url 'under_development' %}" class="btn btn-enroll pulse">
                 <i class="fas fa-edit me-2"></i>Apply Now
@@ -109,7 +109,20 @@
             <p data-aos="fade-up" data-aos-delay="300">Preparing future leaders</p>
           </div>
           <!-- Admission Banner -->
-          <div class="admission-banner" data-aos="fade-left" data-aos-delay="500">
+          
+        </div>
+        <div class="carousel-item">
+          <img
+            src="{% static 'images/holly2.jpg' %}"
+            class="d-block w-100"
+            alt="Sports Day"
+          />
+          <div class="carousel-caption d-block">
+            <h2 data-aos="fade-up">Holistic Development</h2>
+            <p data-aos="fade-up" data-aos-delay="300">Academic, Sports, and Cultural activities</p>
+          </div>
+          <!-- Admission Banner -->
+         <div class="admission-banner" data-aos="fade-left" data-aos-delay="500">
             <div class="admission-content">
               <div class="ribbon">HURRY!</div>
               <h3>Limited Spaces!</h3>
@@ -136,35 +149,7 @@
               </a>
             </div>
           </div>
-        </div>
-        <div class="carousel-item">
-          <img
-            src="{% static 'images/holly2.jpg' %}"
-            class="d-block w-100"
-            alt="Sports Day"
-          />
-          <div class="carousel-caption d-block">
-            <h2 data-aos="fade-up">Holistic Development</h2>
-            <p data-aos="fade-up" data-aos-delay="300">Academic, Sports, and Cultural activities</p>
-          </div>
-          <!-- Admission Banner -->
-          <div class="admission-banner" data-aos="fade-left" data-aos-delay="500">
-            <div class="admission-content">
-              <div class="ribbon">SCHOLARSHIPS</div>
-              <h3>Talent Scholarships</h3>
-              <p class="academic-year">For outstanding students</p>
-              <ul class="scholarship-list">
-                <li><i class="fas fa-medal"></i> Academic Excellence</li>
-                <li><i class="fas fa-running"></i> Sports Talent</li>
-                <li><i class="fas fa-music"></i> Arts & Culture</li>
-                <li><i class="fas fa-chess"></i> Chess & STEM</li>
-              </ul>
-              <a href="{% url 'under_development' %}" class="btn btn-enroll pulse">
-                <i class="fas fa-award me-2"></i>Apply Now
-              </a>
-            </div>
-          </div>
-        </div>
+        <!-- End Admission Banner -->  
       </div>
       <button
         class="carousel-control-prev"
@@ -968,7 +953,7 @@
     <script>
       // Countdown Timer for Admission Deadline
       function updateCountdown() {
-        const deadline = new Date(2025, 7, 14); // August 14, 2025
+        const deadline = new Date(2025, 8, 14); // August 14, 2025
         const now = new Date();
         const diff = deadline - now;
         
