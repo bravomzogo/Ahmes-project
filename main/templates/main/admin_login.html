@@ -78,10 +78,20 @@
     color: var(--primary-color);
     text-decoration: none;
   }
+  .toggle-password {
+    cursor: pointer;
+    color: #6c757d;
+    transition: color 0.2s ease;
+  }
+  .toggle-password:hover {
+    color: var(--primary-color);
+  }
 </style>
 {% endblock %}
+
 {% block loader %}{% endblock %} 
 {% block title %}Admin Login | AHMES{% endblock %}
+
 {% block content %}
 <div class="login-container">
   <div class="container">
@@ -89,7 +99,7 @@
       <div class="col-xl-5 col-lg-6 col-md-8">
         <div class="login-card" data-aos="zoom-in">
           <div class="login-header">
-            {% comment %} <img src="{% static 'images/Ahmes.PNG' %}" alt="AHMES Logo" style="height: 80px;" class="mb-3"> {% endcomment %}
+            {% comment %}<img src="{% static 'images/Ahmes.PNG' %}" alt="AHMES Logo" style="height: 80px;" class="mb-3">{% endcomment %}
             <h3 class="text-white mb-0">Admin Portal</h3>
             <p class="text-white-50 mb-0">Enter your credentials to continue</p>
           </div>
@@ -115,6 +125,9 @@
                 <div class="input-group">
                   <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
                   <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Enter your password" required>
+                  <span class="input-group-text bg-light toggle-password">
+                    <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                  </span>
                 </div>
               </div>
               <div class="d-grid mb-3">
@@ -123,9 +136,11 @@
                 </button>
               </div>
               <div class="text-center">
-                {% comment %} <a href="#" class="forgot-link">
+                {% comment %}
+                <a href="#" class="forgot-link">
                   <i class="fas fa-question-circle me-1"></i> Forgot Password?
-                </a> {% endcomment %}
+                </a>
+                {% endcomment %}
               </div>
             </form>
           </div>
@@ -144,7 +159,7 @@
   'use strict';
   window.addEventListener('load', function() {
     var forms = document.getElementsByClassName('needs-validation');
-    var validation = Array.prototype.filter.call(forms, function(form) {
+    Array.prototype.filter.call(forms, function(form) {
       form.addEventListener('submit', function(event) {
         if (form.checkValidity() === false) {
           event.preventDefault();
@@ -155,5 +170,19 @@
     });
   }, false);
 })();
+
+// Password toggle
+document.addEventListener("DOMContentLoaded", function () {
+  const togglePassword = document.querySelector(".toggle-password");
+  const passwordInput = document.querySelector("#password");
+  const toggleIcon = document.querySelector("#togglePasswordIcon");
+
+  togglePassword.addEventListener("click", function () {
+    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+    passwordInput.setAttribute("type", type);
+    toggleIcon.classList.toggle("fa-eye");
+    toggleIcon.classList.toggle("fa-eye-slash");
+  });
+});
 </script>
 {% endblock %}
