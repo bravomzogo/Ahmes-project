@@ -5,188 +5,173 @@
 
 {% block extra_css %}
 <style>
-    /* Search Bar Styles */
+    /* General */
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f4f6f9;
+    }
+    h1, h3 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+    }
+
+    /* Search Bar */
     .search-container {
-        margin-bottom: 30px;
-        max-width: 800px;
+        margin-bottom: 40px;
+        max-width: 700px;
         margin-left: auto;
         margin-right: auto;
     }
     .search-form {
-        display: flex;
         position: relative;
     }
     .search-input {
-        flex: 1;
-        padding: 12px 20px;
+        width: 100%;
+        padding: 14px 55px 14px 20px;
         border: 2px solid #1a5276;
-        border-radius: 30px;
+        border-radius: 50px;
         font-size: 16px;
         outline: none;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 10px rgba(26, 82, 118, 0.1);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(6px);
+        box-shadow: 0 8px 20px rgba(26, 82, 118, 0.08);
+        transition: 0.3s ease;
     }
     .search-input:focus {
         border-color: #f39c12;
-        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);
+        box-shadow: 0 10px 25px rgba(243, 156, 18, 0.25);
     }
     .search-button {
         position: absolute;
-        right: 5px;
-        top: 5px;
-        background: #1a5276;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #1a5276, #154360);
         color: white;
         border: none;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         cursor: pointer;
         transition: all 0.3s ease;
-    }
-    .search-button:hover {
-        background: #f39c12;
-        transform: scale(1.05);
-    }
-
-    /* Video Card Styles */
-    .video-card {
-        position: relative;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        cursor: pointer;
-        margin-bottom: 30px;
-        background: linear-gradient(135deg, #1a5276 0%, #154360 100%);
-        color: white;
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    .video-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    }
-    .video-thumbnail {
-        position: relative;
-        padding-bottom: 56.25%; /* 16:9 aspect ratio */
-        background-color: #000;
-        overflow: hidden;
-    }
-    .video-thumbnail img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
-    }
-    .video-card:hover .video-thumbnail img {
-        transform: scale(1.05);
-        opacity: 0.8;
-    }
-    .play-button {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 70px;
-        height: 70px;
-        background: rgba(243, 156, 18, 0.9);
-        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
-        font-size: 28px;
+        box-shadow: 0 4px 15px rgba(26,82,118,0.3);
+    }
+    .search-button:hover {
+        background: #f39c12;
+        transform: translateY(-50%) scale(1.05);
+    }
+
+    /* Video Cards */
+    .video-card {
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        cursor: pointer;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+    .video-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    .video-thumbnail {
+        position: relative;
+        padding-bottom: 56.25%;
+        background: #000;
+    }
+    .video-thumbnail img {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    .video-card:hover .video-thumbnail img {
+        transform: scale(1.07);
+        opacity: 0.85;
+    }
+    .play-button {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 68px; height: 68px;
+        background: rgba(243, 156, 18, 0.9);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 26px;
+        color: #fff;
         transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
         z-index: 2;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
     .video-card:hover .play-button {
+        transform: translate(-50%, -50%) scale(1.15);
         background: #f39c12;
-        transform: translate(-50%, -50%) scale(1.1);
     }
     .duration-badge {
         position: absolute;
-        bottom: 15px;
-        right: 15px;
+        bottom: 10px; right: 10px;
         background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 12px;
+        padding: 4px 10px;
+        font-size: 13px;
+        border-radius: 12px;
+        color: #fff;
         font-weight: 600;
-        z-index: 2;
     }
+
     .video-info {
-        padding: 20px;
+        padding: 18px;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
     }
     .video-title {
+        font-size: 1.1rem;
         font-weight: 700;
-        font-size: 1.2rem;
-        margin-bottom: 10px;
-        color: white;
-        line-height: 1.3;
+        margin-bottom: 8px;
+        color: #1a5276;
+        line-height: 1.4;
     }
     .video-description {
-        color: rgba(255,255,255,0.8);
         font-size: 14px;
-        margin-bottom: 15px;
+        color: #555;
+        flex-grow: 1;
+        margin-bottom: 12px;
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        flex-grow: 1;
     }
     .video-meta {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: auto;
-    }
-    .video-date {
-        color: rgba(255,255,255,0.7);
         font-size: 13px;
-    }
-    .video-views {
-        color: rgba(255,255,255,0.7);
-        font-size: 13px;
-        display: flex;
-        align-items: center;
+        color: #777;
     }
     .video-views i {
-        margin-right: 5px;
         color: #f39c12;
-    }
-    .video-card::before {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 50%;
-        background: linear-gradient(to top, rgba(26,82,118,0.9) 0%, transparent 100%);
-        z-index: 1;
+        margin-right: 5px;
     }
 
-    /* Modal Styles */
+    /* Modal */
     .modal-backdrop {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.95);
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.92);
         z-index: 1050;
         overflow-y: auto;
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.35s ease;
     }
     .modal-backdrop.show {
         display: block;
@@ -194,119 +179,80 @@
     }
     .modal-content {
         position: relative;
-        margin: 5% auto;
+        margin: 4% auto;
         width: 90%;
-        max-width: 1000px;
+        max-width: 960px;
         background: transparent;
-        border: none;
-        transform: translateY(20px);
-        transition: transform 0.3s ease;
-    }
-    .modal-backdrop.show .modal-content {
-        transform: translateY(0);
     }
     .modal-video-container {
         position: relative;
-        padding-bottom: 56.25%; /* 16:9 aspect ratio */
-        height: 0;
+        padding-bottom: 56.25%;
+        border-radius: 12px;
         overflow: hidden;
-        border-radius: 12px 12px 0 0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.5);
     }
     .modal-video-container iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border: none;
+        position: absolute; top: 0; left: 0;
+        width: 100%; height: 100%;
     }
     .close-modal {
         position: absolute;
-        top: -50px;
-        right: 0;
-        color: white;
-        font-size: 36px;
-        font-weight: bold;
+        top: -45px; right: 0;
+        font-size: 38px;
+        color: #fff;
         cursor: pointer;
-        z-index: 1060;
-        transition: transform 0.3s ease;
+        transition: 0.3s;
     }
     .close-modal:hover {
-        transform: rotate(90deg);
         color: #f39c12;
+        transform: rotate(90deg);
     }
     .video-details {
-        background: white;
-        padding: 25px;
+        background: #fff;
+        padding: 22px;
         border-radius: 0 0 12px 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
     .video-details h3 {
+        font-size: 1.4rem;
         color: #1a5276;
-        font-size: 1.5rem;
-        margin-bottom: 15px;
-    }
-    .video-details p {
-        color: #555;
-        line-height: 1.6;
+        margin-bottom: 10px;
     }
 
-    /* Pagination Styles */
+    /* Pagination */
     .pagination-container {
+        margin-top: 35px;
         text-align: center;
-        margin-top: 30px;
     }
     .pagination {
         display: inline-flex;
-        list-style: none;
         padding: 0;
-        margin: 0;
-    }
-    .pagination li {
-        margin: 0 5px;
+        list-style: none;
+        gap: 8px;
     }
     .pagination a, .pagination span {
-        display: inline-block;
-        padding: 10px 15px;
+        padding: 9px 16px;
         border-radius: 25px;
-        text-decoration: none;
-        color: #1a5276;
-        background: #f8f9fa;
-        transition: all 0.3s ease;
+        background: #fff;
+        border: 1px solid #ddd;
         font-weight: 600;
+        color: #1a5276;
+        transition: 0.3s;
     }
     .pagination a:hover {
         background: #f39c12;
-        color: white;
+        color: #fff;
     }
     .pagination .active span {
         background: #1a5276;
-        color: white;
-    }
-    .pagination .disabled span {
-        color: #ccc;
-        cursor: not-allowed;
+        color: #fff;
     }
 
+    /* Responsive */
     @media (max-width: 768px) {
-        .modal-content {
-            width: 95%;
-            margin: 20% auto;
-        }
-        .close-modal {
-            top: -60px;
-            right: -10px;
-        }
-        .video-card {
-            margin-bottom: 20px;
-        }
-        .video-info {
-            padding: 15px;
-        }
-        .video-title {
-            font-size: 1.1rem;
-        }
+        .search-input { font-size: 14px; }
+        .video-title { font-size: 1rem; }
+        .modal-content { width: 95%; margin: 20% auto; }
+        .close-modal { top: -40px; right: -8px; font-size: 32px; }
     }
 </style>
 {% endblock %}
@@ -418,80 +364,47 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Get modal elements
     const modal = document.getElementById('videoModal');
     const player = document.getElementById('youtubePlayer');
     const modalTitle = document.getElementById('modalTitle');
     const modalDescription = document.getElementById('modalDescription');
     const closeBtn = document.getElementById('closeModal');
-    const searchForm = document.getElementById('searchForm');
-    const searchInput = document.getElementById('searchInput');
 
-    // Add click event to each video card
+    // Open video modal
     document.querySelectorAll('.video-card').forEach(card => {
         card.addEventListener('click', function() {
             const videoId = this.getAttribute('data-video-id');
             const title = this.getAttribute('data-title');
             const description = this.getAttribute('data-description');
             
-            // Set iframe source with autoplay
             player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
-            
-            // Set modal content
             modalTitle.textContent = title;
             modalDescription.textContent = description;
             
-            // Show modal with animation
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
         });
     });
     
-    // Close modal when X is clicked
-    closeBtn.addEventListener('click', function() {
+    // Close modal
+    function closeModal() {
         modal.classList.remove('show');
-        player.src = ''; // Stop video
+        player.src = '';
         document.body.style.overflow = 'auto';
-    });
-    
-    // Close modal when clicking outside
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.classList.remove('show');
-            player.src = ''; // Stop video
-            document.body.style.overflow = 'auto';
-        }
-    });
-    
-    // Close modal with ESC key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.classList.contains('show')) {
-            modal.classList.remove('show');
-            player.src = ''; // Stop video
-            document.body.style.overflow = 'auto';
-        }
-    });
-    
+    }
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('show')) closeModal(); });
+
     // Format duration badges
     document.querySelectorAll('.duration-badge').forEach(badge => {
-        const duration = badge.textContent.trim();
-        badge.textContent = formatDuration(duration);
+        badge.textContent = formatDuration(badge.textContent.trim());
     });
-    
-    // Helper function to format duration
     function formatDuration(duration) {
         const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
         if (!match) return '0:00';
-        
-        const hours = parseInt(match[1]) || 0;
-        const minutes = parseInt(match[2]) || 0;
-        const seconds = parseInt(match[3]) || 0;
-        
-        if (hours > 0) {
-            return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        } else {
-            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
+        const h = parseInt(match[1]) || 0, m = parseInt(match[2]) || 0, s = parseInt(match[3]) || 0;
+        return h > 0 ? `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}` : `${m}:${s.toString().padStart(2,'0')}`;
     }
 });
 </script>
