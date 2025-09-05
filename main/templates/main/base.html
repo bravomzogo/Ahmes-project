@@ -1281,6 +1281,16 @@
                 <span class="nav-underline"></span>
               </a>
             </li>
+            <li class="nav-item">
+              <a
+                class="nav-link {% if 'ahmes-tv' in request.path %}active{% endif %}"
+                href="https://necta-ranking.onrender.com" target="_blank"
+              >
+                <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+                <span class="nav-text">Rankings</span>
+                <span class="nav-underline"></span>
+              </a>
+            </li>
             {% if user.is_authenticated %}
             <li class="nav-item">
               <a
