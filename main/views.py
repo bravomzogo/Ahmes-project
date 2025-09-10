@@ -926,15 +926,24 @@ class ParentPasswordResetRequestView(View):
             parent = Parent.objects.get(phone=phone)
             otp_obj = ParentOTP.generate_otp(parent)
             
-            # Send OTP via SMS (implement this function)
-            send_otp_via_sms(parent.phone, otp_obj.otp)
+            # Send OTP via SMS with proper error handling
+            sms_sent = send_otp_via_sms(parent.phone, otp_obj.otp)
             
-            request.session['reset_parent_id'] = parent.id
-            messages.success(request, 'OTP has been sent to your registered phone number.')
+            if sms_sent:
+                request.session['reset_parent_id'] = parent.id
+                messages.success(request, 'OTP has been sent to your registered phone number.')
+                logger.info(f"OTP sent to parent {parent.name} ({parent.phone})")
+            else:
+                # Still continue the process but show a warning
+                request.session['reset_parent_id'] = parent.id
+                messages.warning(request, 'OTP generated but there was an issue sending SMS. Please check the console for your OTP.')
+                logger.warning(f"OTP generated but SMS failed for {parent.phone}: {otp_obj.otp}")
+            
             return redirect('parent_verify_otp')
             
         except Parent.DoesNotExist:
             messages.error(request, 'No account found with this phone number.')
+            logger.warning(f"Password reset attempt for unknown phone: {phone}")
             return render(request, self.template_name)
 
 class ParentVerifyOTPView(View):
