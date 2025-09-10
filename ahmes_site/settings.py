@@ -254,3 +254,11 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+
+
+
+# settings.py
+AFRICASTALKING_USERNAME = 'sandbox'
+AFRICASTALKING_API_KEY = 'atsk_a9eb32c87d13c2789e2e0a054a938fa2e3b45a9785be2e471d9120b2bb3845eb174a6d90'
+USE_SANDBOX = False  # Set to False for production

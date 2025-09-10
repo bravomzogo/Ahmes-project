@@ -8,6 +8,9 @@ import secrets
 from cloudinary.models import CloudinaryField
 from django.core.validators import FileExtensionValidator
 from django.templatetags.static import static
+import random
+from django.utils import timezone
+from datetime import timedelta
 
 class User(AbstractUser):
     is_parent = models.BooleanField(default=False)
@@ -104,6 +107,33 @@ class Parent(models.Model):
     class Meta:
         verbose_name = 'Parent'
         verbose_name_plural = 'Parents'
+
+
+
+
+class ParentOTP(models.Model):
+    parent = models.ForeignKey('Parent', on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.parent.name} - {self.otp}"
+    
+    def is_valid(self):
+        # OTP valid for 10 minutes
+        return not self.is_used and (timezone.now() - self.created_at) < timedelta(minutes=10)
+    
+    @classmethod
+    def generate_otp(cls, parent):
+        # Delete any existing OTPs for this parent
+        cls.objects.filter(parent=parent).delete()
+        
+        # Generate a 6-digit OTP
+        otp = str(random.randint(100000, 999999))
+        
+        # Create and return the OTP object
+        return cls.objects.create(parent=parent, otp=otp)
 
 class Student(models.Model):
     GENDER_CHOICES = [

@@ -122,6 +122,11 @@ path('ad/academic-calendars/delete/<int:pk>/', views.delete_academic_calendar, n
 
     #Logs URLs
     path('ad/activity-log/', activity_log, name='activity_log'),
+
+    # Parent Password Reset URLs
+    path('parent/password-reset/', views.ParentPasswordResetRequestView.as_view(), name='parent_password_reset_request'),
+    path('parent/verify-otp/', views.ParentVerifyOTPView.as_view(), name='parent_verify_otp'),
+    path('parent/reset-password/', views.ParentPasswordResetView.as_view(), name='parent_reset_password'),
     
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

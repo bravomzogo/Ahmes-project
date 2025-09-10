@@ -4,7 +4,10 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views import View
-from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, FeeStructure, Gallery, Level, Parent, Payment, PushSubscription, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
+
+from main.utils import send_otp_via_sms
+
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, FeeStructure, Gallery, Level, Parent, ParentOTP, Payment, PushSubscription, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
 from .forms import (GalleryForm, ResultApprovalForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm, WeeklyResultForm)
 from django.contrib import messages
@@ -857,6 +860,9 @@ class TeacherLoginView(LoginView):
         login(self.request, user)
         return redirect('teacher_dashboard')
 
+
+
+# Parent Login View (updated with forgot password link)
 class ParentLoginView(View):
     template_name = 'academics/parent_login.html'
 
@@ -864,11 +870,11 @@ class ParentLoginView(View):
         if request.user.is_authenticated:
             if request.user.is_parent:
                 logger.debug(f"Authenticated parent {request.user.username} redirected to dashboard")
-                return redirect('parent_dashboard')  # Replace with your parent dashboard URL
+                return redirect('parent_dashboard')
             else:
                 messages.error(request, 'This page is for parent accounts only.')
                 logger.warning(f"Non-parent user {request.user.username} attempted parent login")
-                return redirect('home')  # Replace with your home URL
+                return redirect('home')
         form = AuthenticationForm()
         return render(request, self.template_name, {
             'form': form,
@@ -884,12 +890,10 @@ class ParentLoginView(View):
             if user is not None:
                 if user.is_parent:
                     login(request, user)
-                    # Handle "remember me" checkbox
-                       # Handle "remember me" checkbox
                     if not request.POST.get('remember'):
-                        request.session.set_expiry(0)  # Session expires on browser close
+                        request.session.set_expiry(0)
                     else:
-                        request.session.set_expiry(1209600)  # 2 weeks
+                        request.session.set_expiry(1209600)
                     logger.info(f"Parent {username} logged in successfully")
                     next_url = request.POST.get('next', 'parent_dashboard')
                     return redirect(next_url)
@@ -907,6 +911,96 @@ class ParentLoginView(View):
             'form': form,
             'title': 'Parent Login'
         })
+
+# Password Reset Views
+class ParentPasswordResetRequestView(View):
+    template_name = 'academics/parent_password_reset_request.html'
+    
+    def get(self, request):
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        phone = request.POST.get('phone')
+        
+        try:
+            parent = Parent.objects.get(phone=phone)
+            otp_obj = ParentOTP.generate_otp(parent)
+            
+            # Send OTP via SMS (implement this function)
+            send_otp_via_sms(parent.phone, otp_obj.otp)
+            
+            request.session['reset_parent_id'] = parent.id
+            messages.success(request, 'OTP has been sent to your registered phone number.')
+            return redirect('parent_verify_otp')
+            
+        except Parent.DoesNotExist:
+            messages.error(request, 'No account found with this phone number.')
+            return render(request, self.template_name)
+
+class ParentVerifyOTPView(View):
+    template_name = 'academics/parent_verify_otp.html'
+    
+    def get(self, request):
+        if 'reset_parent_id' not in request.session:
+            messages.error(request, 'Please request OTP first.')
+            return redirect('parent_password_reset_request')
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        otp = request.POST.get('otp')
+        parent_id = request.session.get('reset_parent_id')
+        
+        try:
+            parent = Parent.objects.get(id=parent_id)
+            otp_obj = ParentOTP.objects.filter(parent=parent, otp=otp, is_used=False).latest('created_at')
+            
+            if otp_obj.is_valid():
+                otp_obj.is_used = True
+                otp_obj.save()
+                request.session['otp_verified'] = True
+                return redirect('parent_reset_password')
+            else:
+                messages.error(request, 'Invalid or expired OTP.')
+                return render(request, self.template_name)
+                
+        except ParentOTP.DoesNotExist:
+            messages.error(request, 'Invalid OTP.')
+            return render(request, self.template_name)
+
+class ParentPasswordResetView(View):
+    template_name = 'academics/parent_reset_password.html'
+    
+    def get(self, request):
+        if not request.session.get('otp_verified'):
+            messages.error(request, 'Please verify OTP first.')
+            return redirect('parent_password_reset_request')
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, self.template_name)
+        
+        if len(password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+            return render(request, self.template_name)
+        
+        parent_id = request.session.get('reset_parent_id')
+        parent = Parent.objects.get(id=parent_id)
+        user = parent.user
+        
+        user.set_password(password)
+        user.save()
+        
+        # Clear session data
+        request.session.pop('reset_parent_id', None)
+        request.session.pop('otp_verified', None)
+        
+        messages.success(request, 'Password reset successfully. You can now login with your new password.')
+        return redirect('parent_login')
 
 class AcademicAdminLoginView(LoginView):
     template_name = 'academics/academic_admin_login.html'

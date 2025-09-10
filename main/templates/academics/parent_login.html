@@ -272,9 +272,13 @@
       </button>
     </form>
 
-    <div class="login-footer">
-      <a id="contactSupport">Contact Support</a>
-    </div>
+    <!-- Add this after the login button in your parent_login.html -->
+<div class="login-footer">
+    <a href="{% url 'parent_password_reset_request' %}" style="display: block; text-align: center; margin-top: 15px;">
+        Forgot Password?
+    </a>
+    <a id="contactSupport">Contact Support</a>
+</div>
   </div>
 </div>
 
