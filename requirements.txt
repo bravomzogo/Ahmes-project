@@ -1,3 +1,4 @@
+africastalking==2.0
 aiohappyeyeballs==2.6.1
 aiohttp==3.12.15
 aiosignal==1.4.0
@@ -55,8 +56,11 @@ pyphen==0.17.2
 python-dateutil==2.9.0.post0
 pytz==2025.2
 pywebpush==2.0.3
+PyYAML==6.0.2
 requests==2.32.4
+responses==0.25.8
 rsa==4.9.1
+schema==0.7.7
 six==1.17.0
 sqlparse==0.5.3
 tinycss2==1.4.0
