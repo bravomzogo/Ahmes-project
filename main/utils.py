@@ -1,4 +1,4 @@
-# utils.py
+# utils.py (updated with correct sender ID)
 import logging
 import requests
 from django.conf import settings
@@ -22,15 +22,11 @@ def send_otp_via_sms(phone_number, otp):
         # Always log the OTP for debugging
         logger.info(f"Attempting to send OTP to {phone_number}: {otp}")
         
-        # Get Africa's Talking credentials from settings
-        username = getattr(settings, 'AFRICASTALKING_USERNAME', 'sandbox')
-        api_key = getattr(settings, 'AFRICASTALKING_API_KEY', 'atsk_cab59d0e52963c0fa8fd02f2b1f0855a0b344175ad19a47ad7a4fc25c981b01aa8320f47')
+        # Get Africa's Talking credentials
+        username = getattr(settings, 'AFRICASTALKING_USERNAME', 'shaibu')
+        api_key = getattr(settings, 'AFRICASTALKING_API_KEY', 'atsk_fe8fac6e9b297438cd3b231e9fd0582a48737d47d8b21365e11bbfcb468178acaf8a5213')
         
-        if not username or not api_key:
-            logger.error("Africa's Talking credentials not configured")
-            return False
-        
-        # Use Africa's Talking API directly (more reliable than SDK)
+        # Send SMS - REMOVE the 'from' parameter or use an approved sender ID
         url = "https://api.africastalking.com/version1/messaging"
         headers = {
             "ApiKey": api_key,
@@ -41,19 +37,53 @@ def send_otp_via_sms(phone_number, otp):
             "username": username,
             "to": phone_number,
             "message": message,
-            "from": "AHMES"  # Your approved sender ID
+            # REMOVE the 'from' parameter to use Africa's Talking default shortcode
+            # OR use an approved sender ID from your dashboard
         }
         
         response = requests.post(url, headers=headers, data=data)
         
+        logger.info(f"SMS API Response: {response.status_code} - {response.text}")
+        
         if response.status_code == 201:
             result = response.json()
-            if result['SMSMessageData']['Recipients'][0]['status'] == 'Success':
-                logger.info(f"SMS sent successfully to {phone_number}")
-                return True
+            
+            # Handle response
+            if ('SMSMessageData' in result and 
+                'Recipients' in result['SMSMessageData'] and 
+                len(result['SMSMessageData']['Recipients']) > 0):
+                
+                recipient = result['SMSMessageData']['Recipients'][0]
+                if recipient['status'] == 'Success':
+                    logger.info(f"SMS sent successfully to {phone_number}")
+                    return True
+                else:
+                    error_message = recipient.get('message', 'Unknown error')
+                    logger.error(f"SMS failed for {phone_number}: {error_message}")
+                    return False
             else:
-                logger.error(f"SMS failed: {result}")
-                return False
+                # Check for specific error messages
+                if ('SMSMessageData' in result and 
+                    'Message' in result['SMSMessageData']):
+                    error_msg = result['SMSMessageData']['Message']
+                    logger.error(f"SMS failed: {error_msg}")
+                    
+                    # If it's a sender ID issue, try without sender ID
+                    if 'InvalidSenderId' in error_msg:
+                        logger.info("Retrying without sender ID...")
+                        # Remove 'from' parameter and retry
+                        if 'from' in data:
+                            del data['from']
+                            retry_response = requests.post(url, headers=headers, data=data)
+                            logger.info(f"Retry response: {retry_response.status_code} - {retry_response.text}")
+                            return retry_response.status_code == 201
+                    
+                    return False
+                else:
+                    # Unexpected but successful response
+                    logger.warning(f"Unexpected API response: {result}")
+                    return True
+                    
         else:
             logger.error(f"Africa's Talking API error: {response.status_code} - {response.text}")
             return False
