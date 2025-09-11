@@ -12,16 +12,16 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #f9f9f9;
         }
         .container {
             background-color: #ffffff;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #6A0DAD, #8A2BE2);
+            background: linear-gradient(135deg, #b33db3ff, #6e0872ff);
             color: white;
             padding: 25px;
             text-align: center;
@@ -42,39 +42,11 @@
             font-size: 28px;
             font-weight: bold;
             padding: 15px 25px;
-            background-color: #f8f5ff;
-            border: 2px solid #6A0DAD;
+            background-color: #f0f8ff;
+            border: 2px dashed #4CAF50;
             border-radius: 8px;
             letter-spacing: 8px;
-            color: #6A0DAD;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .otp-code:hover {
-            background-color: #f0eaff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(106, 13, 173, 0.2);
-        }
-        .otp-code:active {
-            transform: translateY(0);
-        }
-        .copy-tooltip {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        .otp-code:hover .copy-tooltip {
-            opacity: 1;
+            color: #2c3e50;
         }
         .info-text {
             color: #666;
@@ -83,31 +55,20 @@
             margin-bottom: 20px;
         }
         .footer {
-            background-color: #f0f0f0;
+            background-color: #f5f5f5;
             padding: 20px;
             text-align: center;
             font-size: 12px;
-            color: #777;
-            border-top: 1px solid #e0e0e0;
+            color: #696565ff;
+            border-top: 1px solid #eee;
         }
         .warning {
-            background-color: #f9f0ff;
-            border: 1px solid #e6d4ff;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
             border-radius: 5px;
             padding: 15px;
             margin: 20px 0;
             font-size: 14px;
-            color: #5a4a6f;
-        }
-        .copy-success {
-            color: #4CAF50;
-            font-size: 14px;
-            margin-top: 10px;
-            display: none;
-        }
-        h3 {
-            color: #6A0DAD;
-            margin-top: 0;
         }
     </style>
 </head>
@@ -119,16 +80,12 @@
         
         <div class="content">
             <h3>Password Reset Verification</h3>
-            <p>Dear,{{parent.name}}</p>
+            <p>Hello,</p>
             <p>You requested a password reset for your AHMES Parent Portal account.</p>
             
             <div class="otp-container">
                 <p>Your verification code is:</p>
-                <div class="otp-code" id="otp-code" onclick="copyToClipboard()">
-                    {{ otp }}
-                    <span class="copy-tooltip">Click to copy</span>
-                </div>
-                <div id="copy-success" class="copy-success">✓ Code copied to clipboard!</div>
+                <div class="otp-code">{{ otp }}</div>
                 <p class="info-text">This code will expire in 10 minutes</p>
             </div>
             
@@ -146,42 +103,5 @@
             <p>If you need assistance, please contact our support team.</p>
         </div>
     </div>
-
-    <script>
-        function copyToClipboard() {
-            const otpText = "{{ otp }}";
-            
-            // Create a temporary textarea element
-            const textarea = document.createElement('textarea');
-            textarea.value = otpText;
-            textarea.setAttribute('readonly', '');
-            textarea.style.position = 'absolute';
-            textarea.style.left = '-9999px';
-            document.body.appendChild(textarea);
-            
-            // Select and copy the text
-            textarea.select();
-            document.execCommand('copy');
-            
-            // Remove the textarea
-            document.body.removeChild(textarea);
-            
-            // Show success message
-            const successMessage = document.getElementById('copy-success');
-            successMessage.style.display = 'block';
-            
-            // Hide success message after 3 seconds
-            setTimeout(() => {
-                successMessage.style.display = 'none';
-            }, 3000);
-        }
-        
-        // Add event listener for better accessibility
-        document.getElementById('otp-code').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                copyToClipboard();
-            }
-        });
-    </script>
 </body>
 </html>
