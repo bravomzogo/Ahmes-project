@@ -166,7 +166,7 @@ else:
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'bravomzogo@gmail.com')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-    DEFAULT_FROM_EMAIL = 'Ahmes School <bravomzogo@gmail.com>'
+DEFAULT_FROM_EMAIL = 'Ahmes School <bravomzogo@gmail.com>'
 
 # Security settings
 if not DEBUG:
