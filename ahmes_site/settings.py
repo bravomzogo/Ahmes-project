@@ -12,9 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'cobra1981@LLL2000sss@LLL')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-DEBUG ='False'
 
 # Allow all hosts for Render
 ALLOWED_HOSTS = ['*']
@@ -156,17 +155,26 @@ LOGIN_URL = 'admin_login'
 LOGIN_REDIRECT_URL = 'admin_dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
-# Email Configuration
+
+# For development - use console backend to test without sending real emails
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    print("Using console email backend (emails will only show in logs)")
+
 else:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'bravomzogo@gmail.com')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = 'Ahmes School <bravomzogo@gmail.com>'
+
+   EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+   EMAIL_HOST = 'smtp.gmail.com'
+   EMAIL_PORT = 587
+   EMAIL_USE_TLS = True
+   EMAIL_HOST_USER = 'bravomzogo@gmail.com'  # Your Gmail address
+   EMAIL_HOST_PASSWORD = 'lhzv ktto mrsw ebxg'  # The 16-char app password
+   DEFAULT_FROM_EMAIL = 'Ahmes secondary schools <bravomzogo@gmail.com>'
+# settings.py
+
+
+
+
 
 # Security settings
 if not DEBUG:
@@ -260,6 +268,6 @@ LOGGING = {
 
 
 
-# settings.py
+# Africa's Talking credentials
 AFRICASTALKING_USERNAME = 'shaibu'
 AFRICASTALKING_API_KEY = 'atsk_fe8fac6e9b297438cd3b231e9fd0582a48737d47d8b21365e11bbfcb468178acaf8a5213'
