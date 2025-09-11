@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views import View
 
-from main.utils import send_otp_via_sms
+from main.utils import send_otp_via_email
 
 from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, FeeStructure, Gallery, Level, Parent, ParentOTP, Payment, PushSubscription, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
 from .forms import (GalleryForm, ResultApprovalForm, StaffRegistrationForm, 
@@ -912,7 +912,19 @@ class ParentLoginView(View):
             'title': 'Parent Login'
         })
 
-# Password Reset Views
+# views.py
+from django.shortcuts import render, redirect
+from django.views import View
+from django.contrib import messages
+from django.db.models import Q
+import logging
+
+from .models import Parent, ParentOTP
+from .utils import send_otp_via_email  # make sure you have this utility
+
+logger = logging.getLogger(__name__)
+
+
 class ParentPasswordResetRequestView(View):
     template_name = 'academics/parent_password_reset_request.html'
     
@@ -920,31 +932,60 @@ class ParentPasswordResetRequestView(View):
         return render(request, self.template_name)
     
     def post(self, request):
-        phone = request.POST.get('phone')
+        email = request.POST.get('email')
         
         try:
-            parent = Parent.objects.get(phone=phone)
-            otp_obj = ParentOTP.generate_otp(parent)
+            # Find parent by email (check both user email and parent email)
+            parent = Parent.objects.get(
+                Q(email=email) | 
+                Q(user__email=email)
+            )
             
-            # Send OTP via SMS with proper error handling
-            sms_sent = send_otp_via_sms(parent.phone, otp_obj.otp)
+            # Get the actual email to use (prefer user email if available)
+            send_to_email = parent.user.email if parent.user and parent.user.email else parent.email
             
-            if sms_sent:
+            otp_obj = ParentOTP.generate_otp(parent, send_to_email)
+            
+            # Send OTP via Email
+            email_sent = send_otp_via_email(send_to_email, otp_obj.otp)
+            
+            if email_sent:
                 request.session['reset_parent_id'] = parent.id
-                messages.success(request, 'OTP has been sent to your registered phone number.')
-                logger.info(f"OTP sent to parent {parent.name} ({parent.phone})")
+                messages.success(request, f'OTP has been sent to your email address: {send_to_email}')
+                logger.info(f"OTP sent to parent {parent.name} ({send_to_email})")
             else:
                 # Still continue the process but show a warning
                 request.session['reset_parent_id'] = parent.id
-                messages.warning(request, 'OTP generated but there was an issue sending SMS. Please check the console for your OTP.')
-                logger.warning(f"OTP generated but SMS failed for {parent.phone}: {otp_obj.otp}")
+                messages.warning(request, 'OTP generated but there was an issue sending email. Please check the console for your OTP.')
+                logger.warning(f"OTP generated but email failed for {send_to_email}: {otp_obj.otp}")
             
             return redirect('parent_verify_otp')
             
         except Parent.DoesNotExist:
-            messages.error(request, 'No account found with this phone number.')
-            logger.warning(f"Password reset attempt for unknown phone: {phone}")
+            messages.error(request, 'No account found with this email address.')
+            logger.warning(f"Password reset attempt for unknown email: {email}")
             return render(request, self.template_name)
+        except Parent.MultipleObjectsReturned:
+            # Handle case where email exists in both parent and user
+            parents = Parent.objects.filter(
+                Q(email=email) | 
+                Q(user__email=email)
+            )
+            parent = parents.first()  # Use the first one
+            send_to_email = parent.user.email if parent.user and parent.user.email else parent.email
+            
+            otp_obj = ParentOTP.generate_otp(parent, send_to_email)
+            email_sent = send_otp_via_email(send_to_email, otp_obj.otp)
+            
+            if email_sent:
+                request.session['reset_parent_id'] = parent.id
+                messages.success(request, f'OTP has been sent to your email address: {send_to_email}')
+            else:
+                request.session['reset_parent_id'] = parent.id
+                messages.warning(request, 'OTP generated but email sending failed. Check console for OTP.')
+            
+            return redirect('parent_verify_otp')
+
 
 class ParentVerifyOTPView(View):
     template_name = 'academics/parent_verify_otp.html'
@@ -961,9 +1002,14 @@ class ParentVerifyOTPView(View):
         
         try:
             parent = Parent.objects.get(id=parent_id)
-            otp_obj = ParentOTP.objects.filter(parent=parent, otp=otp, is_used=False).latest('created_at')
+            # Get the latest unused OTP for this parent
+            otp_obj = ParentOTP.objects.filter(
+                parent=parent, 
+                is_used=False
+            ).latest('created_at')
             
-            if otp_obj.is_valid():
+            # Check if OTP matches and is valid
+            if otp_obj.otp == otp and otp_obj.is_valid():
                 otp_obj.is_used = True
                 otp_obj.save()
                 request.session['otp_verified'] = True
@@ -975,6 +1021,7 @@ class ParentVerifyOTPView(View):
         except ParentOTP.DoesNotExist:
             messages.error(request, 'Invalid OTP.')
             return render(request, self.template_name)
+
 
 class ParentPasswordResetView(View):
     template_name = 'academics/parent_reset_password.html'
@@ -1010,6 +1057,7 @@ class ParentPasswordResetView(View):
         
         messages.success(request, 'Password reset successfully. You can now login with your new password.')
         return redirect('parent_login')
+
 
 class AcademicAdminLoginView(LoginView):
     template_name = 'academics/academic_admin_login.html'

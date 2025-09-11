@@ -74,6 +74,7 @@ class Level(models.Model):
 
 
 
+
 class Parent(models.Model):
     user = models.OneToOneField(
         User,
@@ -83,9 +84,9 @@ class Parent(models.Model):
         blank=True
     )
     name = models.CharField(max_length=200)
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20, blank=True, null=True)  # Made optional
     email = models.EmailField(unique=True)
-    address = models.TextField()
+    address = models.TextField(blank=True, null=True)  # Made optional
     profile_picture = CloudinaryField(
         'parents/profile_pictures',
         folder="school/parents/profile_pictures",
@@ -103,12 +104,16 @@ class Parent(models.Model):
         if self.profile_picture:
             return self.profile_picture.url
         return static('main/images/default-profile.png')
+    
+    def get_email(self):
+        """Get email from user if available, otherwise from parent email field"""
+        if self.user and self.user.email:
+            return self.user.email
+        return self.email
 
     class Meta:
         verbose_name = 'Parent'
         verbose_name_plural = 'Parents'
-
-
 
 
 class ParentOTP(models.Model):
@@ -116,24 +121,33 @@ class ParentOTP(models.Model):
     otp = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False)
+    sent_to_email = models.EmailField()  # Track which email the OTP was sent to
     
     def __str__(self):
-        return f"{self.parent.name} - {self.otp}"
+        return f"{self.parent.name} - {self.otp} - {self.sent_to_email}"
     
     def is_valid(self):
         # OTP valid for 10 minutes
         return not self.is_used and (timezone.now() - self.created_at) < timedelta(minutes=10)
     
     @classmethod
-    def generate_otp(cls, parent):
-        # Delete any existing OTPs for this parent
-        cls.objects.filter(parent=parent).delete()
+    def generate_otp(cls, parent, email=None):
+        # Delete any existing OTPs for this parent that are expired
+        expired_time = timezone.now() - timedelta(minutes=10)
+        cls.objects.filter(parent=parent, created_at__lt=expired_time).delete()
+        
+        # Also delete any unused OTPs for this parent
+        cls.objects.filter(parent=parent, is_used=False).delete()
         
         # Generate a 6-digit OTP
         otp = str(random.randint(100000, 999999))
         
+        # Use provided email or get from parent
+        if not email:
+            email = parent.get_email()
+        
         # Create and return the OTP object
-        return cls.objects.create(parent=parent, otp=otp)
+        return cls.objects.create(parent=parent, otp=otp, sent_to_email=email)
 
 class Student(models.Model):
     GENDER_CHOICES = [
