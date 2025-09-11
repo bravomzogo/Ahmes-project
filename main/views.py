@@ -912,18 +912,15 @@ class ParentLoginView(View):
             'title': 'Parent Login'
         })
 
-# views.py
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
 from django.db.models import Q
+from .models import Parent, ParentOTP
+from .utils import send_otp_via_email
 import logging
 
-from .models import Parent, ParentOTP
-from .utils import send_otp_via_email  # make sure you have this utility
-
 logger = logging.getLogger(__name__)
-
 
 class ParentPasswordResetRequestView(View):
     template_name = 'academics/parent_password_reset_request.html'
@@ -932,7 +929,8 @@ class ParentPasswordResetRequestView(View):
         return render(request, self.template_name)
     
     def post(self, request):
-        email = request.POST.get('email')
+        email = request.POST.get('email').strip()
+        logger.info(f"Password reset requested for email: {email}")
         
         try:
             # Find parent by email (check both user email and parent email)
@@ -944,6 +942,12 @@ class ParentPasswordResetRequestView(View):
             # Get the actual email to use (prefer user email if available)
             send_to_email = parent.user.email if parent.user and parent.user.email else parent.email
             
+            # Use the email from the form submission to ensure we send to the correct address
+            if email != send_to_email:
+                logger.warning(f"Email mismatch: form={email}, parent={send_to_email}. Using form email.")
+                send_to_email = email
+            
+            logger.info(f"Generating OTP for parent {parent.name}, sending to: {send_to_email}")
             otp_obj = ParentOTP.generate_otp(parent, send_to_email)
             
             # Send OTP via Email
@@ -951,11 +955,13 @@ class ParentPasswordResetRequestView(View):
             
             if email_sent:
                 request.session['reset_parent_id'] = parent.id
+                request.session['reset_email'] = send_to_email  # Store the email for verification
                 messages.success(request, f'OTP has been sent to your email address: {send_to_email}')
-                logger.info(f"OTP sent to parent {parent.name} ({send_to_email})")
+                logger.info(f"OTP sent successfully to {send_to_email} for parent {parent.name}")
             else:
                 # Still continue the process but show a warning
                 request.session['reset_parent_id'] = parent.id
+                request.session['reset_email'] = send_to_email
                 messages.warning(request, 'OTP generated but there was an issue sending email. Please check the console for your OTP.')
                 logger.warning(f"OTP generated but email failed for {send_to_email}: {otp_obj.otp}")
             
@@ -964,7 +970,7 @@ class ParentPasswordResetRequestView(View):
         except Parent.DoesNotExist:
             messages.error(request, 'No account found with this email address.')
             logger.warning(f"Password reset attempt for unknown email: {email}")
-            return render(request, self.template_name)
+            return render(request, self.template_name, {'email': email})
         except Parent.MultipleObjectsReturned:
             # Handle case where email exists in both parent and user
             parents = Parent.objects.filter(
@@ -974,14 +980,20 @@ class ParentPasswordResetRequestView(View):
             parent = parents.first()  # Use the first one
             send_to_email = parent.user.email if parent.user and parent.user.email else parent.email
             
+            # Use the email from the form submission
+            if email != send_to_email:
+                send_to_email = email
+            
             otp_obj = ParentOTP.generate_otp(parent, send_to_email)
             email_sent = send_otp_via_email(send_to_email, otp_obj.otp)
             
             if email_sent:
                 request.session['reset_parent_id'] = parent.id
+                request.session['reset_email'] = send_to_email
                 messages.success(request, f'OTP has been sent to your email address: {send_to_email}')
             else:
                 request.session['reset_parent_id'] = parent.id
+                request.session['reset_email'] = send_to_email
                 messages.warning(request, 'OTP generated but email sending failed. Check console for OTP.')
             
             return redirect('parent_verify_otp')
@@ -994,11 +1006,15 @@ class ParentVerifyOTPView(View):
         if 'reset_parent_id' not in request.session:
             messages.error(request, 'Please request OTP first.')
             return redirect('parent_password_reset_request')
-        return render(request, self.template_name)
+        
+        # Show the email address where OTP was sent
+        email = request.session.get('reset_email', 'your email')
+        return render(request, self.template_name, {'email': email})
     
     def post(self, request):
         otp = request.POST.get('otp')
         parent_id = request.session.get('reset_parent_id')
+        email = request.session.get('reset_email')
         
         try:
             parent = Parent.objects.get(id=parent_id)
@@ -1013,14 +1029,18 @@ class ParentVerifyOTPView(View):
                 otp_obj.is_used = True
                 otp_obj.save()
                 request.session['otp_verified'] = True
+                messages.success(request, 'OTP verified successfully. You can now reset your password.')
                 return redirect('parent_reset_password')
             else:
                 messages.error(request, 'Invalid or expired OTP.')
-                return render(request, self.template_name)
+                return render(request, self.template_name, {'email': email})
                 
         except ParentOTP.DoesNotExist:
-            messages.error(request, 'Invalid OTP.')
-            return render(request, self.template_name)
+            messages.error(request, 'Invalid OTP or OTP has expired.')
+            return render(request, self.template_name, {'email': email})
+        except Parent.DoesNotExist:
+            messages.error(request, 'Invalid session. Please request OTP again.')
+            return redirect('parent_password_reset_request')
 
 
 class ParentPasswordResetView(View):
@@ -1045,19 +1065,28 @@ class ParentPasswordResetView(View):
             return render(request, self.template_name)
         
         parent_id = request.session.get('reset_parent_id')
-        parent = Parent.objects.get(id=parent_id)
-        user = parent.user
-        
-        user.set_password(password)
-        user.save()
-        
-        # Clear session data
-        request.session.pop('reset_parent_id', None)
-        request.session.pop('otp_verified', None)
-        
-        messages.success(request, 'Password reset successfully. You can now login with your new password.')
-        return redirect('parent_login')
-
+        try:
+            parent = Parent.objects.get(id=parent_id)
+            user = parent.user
+            
+            if not user:
+                messages.error(request, 'No user account associated with this parent.')
+                return render(request, self.template_name)
+            
+            user.set_password(password)
+            user.save()
+            
+            # Clear session data
+            request.session.pop('reset_parent_id', None)
+            request.session.pop('reset_email', None)
+            request.session.pop('otp_verified', None)
+            
+            messages.success(request, 'Password reset successfully. You can now login with your new password.')
+            return redirect('parent_login')
+            
+        except Parent.DoesNotExist:
+            messages.error(request, 'Invalid session. Please request password reset again.')
+            return redirect('parent_password_reset_request')
 
 class AcademicAdminLoginView(LoginView):
     template_name = 'academics/academic_admin_login.html'
