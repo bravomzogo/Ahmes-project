@@ -520,7 +520,7 @@ class Result(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     school_class = models.ForeignKey(SchoolClass, on_delete=models.CASCADE)
     term = models.CharField(max_length=1, choices=TERM_CHOICES)
-    academic_year = models.CharField(max_length=20)
+    # academic_year = models.CharField(max_length=20)
     week_number = models.PositiveSmallIntegerField()
     exam_score = models.DecimalField(max_digits=5, decimal_places=2)
     total_score = models.DecimalField(max_digits=5, decimal_places=2, editable=False)
@@ -532,7 +532,7 @@ class Result(models.Model):
     date_approved = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ('student','subject','term','academic_year','week_number')
+        unique_together = ('student','subject','term','week_number')
 
     def save(self, *args, **kwargs):
         self.total_score = self.exam_score  # only exam counts
