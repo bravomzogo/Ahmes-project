@@ -1,0 +1,168 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block title %}Inventory Dashboard | AHMES{% endblock %}
+{% block content %}
+<div class="wrapper">
+  {% comment %} {% include 'main/sidebar.html' %} {% endcomment %}
+  <div class="main-content">
+    <div class="container-fluid">
+      <br>
+      <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Inventory Dashboard</h1>
+        <a href="{% url 'add_inventory_item' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+          <i class="fas fa-plus fa-sm text-white-50"></i> Add New Item
+        </a>
+
+        
+      </div>
+
+      <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Items</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_items }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Low Stock Items</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ low_stock_items }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Out of Stock</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ out_of_stock_items }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Value</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">Tsh {{ total_value }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Inventory Categories</h6>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                {% for category in categories %}
+                <div class="col-lg-4 mb-4">
+                  <div class="card bg-light shadow-sm">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ category.get_name_display }}</h5>
+                      <p class="card-text">{{ category.description }}</p>
+                      <a href="{% url 'inventory_items_by_category' category.id %}" class="btn btn-primary btn-sm">View Items</a>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+              <h6 class="m-0 font-weight-bold text-primary">Recent Transactions</h6>
+              <a href="{% url 'inventory_transactions' %}" class="btn btn-sm btn-link">View All</a>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>Date</th>
+                      <th>Item</th>
+                      <th>Type</th>
+                      <th>Quantity</th>
+                      <th>Unit Price (Tsh)</th>
+                      <th>Total Value (Tsh)</th>
+                      <th>By</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for transaction in recent_transactions|slice:":5" %}
+                    <tr>
+                      <td>{{ transaction.created_at|date:"M d, Y" }}</td>
+                      <td>{{ transaction.item.name }}</td>
+                      <td>
+                        <span class="badge 
+                          {% if transaction.transaction_type == 'IN' %}badge-success
+                          {% elif transaction.transaction_type == 'OUT' %}badge-danger
+                          {% else %}badge-info{% endif %}">
+                          {{ transaction.get_transaction_type_display }}
+                        </span>
+                      </td>
+                      <td>{{ transaction.quantity }}</td>
+                      <td>{{ transaction.formatted_unit_price }}</td>
+                      <td>{{ transaction.formatted_total_value }}</td>
+                      <td>{{ transaction.created_by.username }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="7" class="text-center">No transactions yet</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <br>
+              <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary shadow-sm">
+          <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

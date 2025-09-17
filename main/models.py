@@ -645,3 +645,128 @@ class ActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.get_action_display()} by {self.user} at {self.timestamp}"
+    
+
+from django.db import models
+from django.conf import settings
+from decimal import Decimal
+
+class InventoryCategory(models.Model):
+    CATEGORY_CHOICES = [
+        ('FURNITURE', 'School Furniture'),
+        ('CONSTRUCTION', 'Construction (Kalakana)'),
+        ('SUPERMARKET', 'School Supermarket'),
+    ]
+    
+    name = models.CharField(max_length=50, choices=CATEGORY_CHOICES, unique=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.get_name_display()
+    
+    class Meta:
+        verbose_name_plural = 'Inventory Categories'
+        ordering = ['name']
+
+class InventoryItem(models.Model):
+    STATUS_CHOICES = [
+        ('AVAILABLE', 'Available'),
+        ('LOW_STOCK', 'Low Stock'),
+        ('OUT_OF_STOCK', 'Out of Stock'),
+        ('ORDERED', 'Ordered'),
+    ]
+    
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    category = models.ForeignKey(InventoryCategory, on_delete=models.CASCADE, related_name='items')
+    quantity = models.PositiveIntegerField(default=0)
+    unit = models.CharField(max_length=50, default='pcs')  # pieces, kg, liters, etc.
+    unit_price = models.DecimalField(max_digits=12, decimal_places=0, default=0)  # Price in Tsh
+    total_value = models.DecimalField(max_digits=14, decimal_places=0, editable=False, default=0)  # Tsh
+    minimum_stock = models.PositiveIntegerField(default=5)  
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='AVAILABLE')
+    location = models.CharField(max_length=200, blank=True)
+    supplier = models.CharField(max_length=200, blank=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='inventory_items_created')
+    last_updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='inventory_items_updated')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.name} ({self.category.get_name_display()})"
+    
+    def save(self, *args, **kwargs):
+        # Calculate total value
+        self.total_value = self.unit_price * self.quantity
+        
+        # Update status based on quantity
+        if self.quantity == 0:
+            self.status = 'OUT_OF_STOCK'
+        elif self.quantity <= self.minimum_stock:
+            self.status = 'LOW_STOCK'
+        else:
+            self.status = 'AVAILABLE'
+            
+        super().save(*args, **kwargs)
+    
+    def get_status_class(self):
+        if self.status == 'AVAILABLE':
+            return 'success'
+        elif self.status == 'LOW_STOCK':
+            return 'warning'
+        elif self.status == 'OUT_OF_STOCK':
+            return 'danger'
+        else:
+            return 'info'
+    
+    # Currency formatting methods
+    def formatted_unit_price(self):
+        return f"{self.unit_price:,.0f}"
+    
+    def formatted_total_value(self):
+        return f"{self.total_value:,.0f}"
+    
+    def formatted_quantity(self):
+        return f"{self.quantity:,}"
+
+class InventoryTransaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('IN', 'Stock In'),
+        ('OUT', 'Stock Out'),
+        ('ADJUST', 'Adjustment'),
+    ]
+    
+    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, related_name='transactions')
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    quantity = models.IntegerField()  # Positive for IN, Negative for OUT
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # Tsh at time of transaction
+    total_value = models.DecimalField(max_digits=14, decimal_places=2, editable=False)  # Tsh
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} - {self.item.name} ({self.quantity})"
+    
+    def save(self, *args, **kwargs):
+        # Calculate total value if unit_price is provided
+        if self.unit_price:
+            self.total_value = abs(self.quantity) * self.unit_price
+        else:
+            self.total_value = 0
+            
+        super().save(*args, **kwargs)
+    
+    # Currency formatting methods
+    def formatted_unit_price(self):
+        if self.unit_price:
+            return f"{self.unit_price:,.0f}"
+        return "0"
+    
+    def formatted_total_value(self):
+        return f"{self.total_value:,.0f}"
+    
+    def formatted_quantity(self):
+        return f"{abs(self.quantity):,}"

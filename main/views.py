@@ -7,7 +7,7 @@ from django.views import View
 
 from main.utils import send_otp_via_email
 
-from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, FeeStructure, Gallery, Level, Parent, ParentOTP, Payment, PushSubscription, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
+from .models import AcademicAnnouncement, AcademicCalendar, Campus, CourseCatalog, FeeStructure, Gallery, InventoryCategory, InventoryItem, InventoryTransaction, Level, Parent, ParentOTP, Payment, PushSubscription, Result, SchoolClass, Student, StaffMember, News, Comment, Subject, User
 from .forms import (GalleryForm, ResultApprovalForm, StaffRegistrationForm, 
                    StudentForm, StaffMemberForm, NewsForm, CommentForm, WeeklyResultForm)
 from django.contrib import messages
@@ -2194,3 +2194,229 @@ def activity_log(request):
     }
     
     return render(request, 'main/activity_log.html', context)
+
+
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.db.models import Sum, Q
+from decimal import Decimal
+from .models import InventoryCategory, InventoryItem, InventoryTransaction
+
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+@login_required
+@user_passes_test(is_admin)
+def inventory_dashboard(request):
+    categories = InventoryCategory.objects.all()
+    total_items = InventoryItem.objects.count()
+    low_stock_items = InventoryItem.objects.filter(status='LOW_STOCK').count()
+    out_of_stock_items = InventoryItem.objects.filter(status='OUT_OF_STOCK').count()
+    
+    # Calculate total inventory value
+    total_value_result = InventoryItem.objects.aggregate(total=Sum('total_value'))
+    total_value = total_value_result['total'] or Decimal('0.00')
+    
+    context = {
+        'categories': categories,
+        'total_items': total_items,
+        'low_stock_items': low_stock_items,
+        'out_of_stock_items': out_of_stock_items,
+        'total_value': f"{total_value:,.0f}",  # Format with commas, no decimals
+    }
+    return render(request, 'inventory/dashboard.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def inventory_items(request, category_id=None):
+    category = None
+    if category_id:
+        category = get_object_or_404(InventoryCategory, id=category_id)
+        items = InventoryItem.objects.filter(category=category)
+    else:
+        items = InventoryItem.objects.all()
+    
+    # Search functionality
+    query = request.GET.get('q')
+    if query:
+        items = items.filter(Q(name__icontains=query) | Q(description__icontains=query))
+    
+    # Add distinct() to prevent duplicates and order by name
+    items = items.distinct().order_by('name')
+    
+    context = {
+        'items': items,
+        'category': category,
+        'categories': InventoryCategory.objects.all(),
+    }
+    return render(request, 'inventory/items.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def add_inventory_item(request):
+    if request.method == 'POST':
+        # Process form data and create new inventory item
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        category_id = request.POST.get('category')
+        quantity = int(request.POST.get('quantity', 0))
+        unit = request.POST.get('unit', 'pcs')
+        unit_price = Decimal(request.POST.get('unit_price', 0))
+        minimum_stock = int(request.POST.get('minimum_stock', 5))
+        location = request.POST.get('location')
+        supplier = request.POST.get('supplier')
+        notes = request.POST.get('notes')
+        
+        category = get_object_or_404(InventoryCategory, id=category_id)
+        
+        item = InventoryItem(
+            name=name,
+            description=description,
+            category=category,
+            quantity=quantity,
+            unit=unit,
+            unit_price=unit_price,
+            minimum_stock=minimum_stock,
+            location=location,
+            supplier=supplier,
+            notes=notes,
+            created_by=request.user,
+            last_updated_by=request.user
+        )
+        item.save()
+        
+        # Create initial transaction if quantity > 0
+        if quantity > 0:
+            transaction = InventoryTransaction(
+                item=item,
+                transaction_type='IN',
+                quantity=quantity,
+                unit_price=unit_price,
+                notes='Initial stock',
+                created_by=request.user
+            )
+            transaction.save()
+        
+        messages.success(request, f'Item "{name}" added successfully!')
+        return redirect('inventory_items')
+    
+    categories = InventoryCategory.objects.all()
+    context = {
+        'categories': categories,
+    }
+    return render(request, 'inventory/add_item.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def edit_inventory_item(request, item_id):
+    item = get_object_or_404(InventoryItem, id=item_id)
+    
+    if request.method == 'POST':
+        # Process form data and update inventory item
+        item.name = request.POST.get('name')
+        item.description = request.POST.get('description')
+        category_id = request.POST.get('category')
+        item.unit = request.POST.get('unit', 'pcs')
+        item.unit_price = Decimal(request.POST.get('unit_price', 0))
+        item.minimum_stock = int(request.POST.get('minimum_stock', 5))
+        item.location = request.POST.get('location')
+        item.supplier = request.POST.get('supplier')
+        item.notes = request.POST.get('notes')
+        item.last_updated_by = request.user
+        
+        if category_id:
+            category = get_object_or_404(InventoryCategory, id=category_id)
+            item.category = category
+        
+        item.save()
+        
+        messages.success(request, f'Item "{item.name}" updated successfully!')
+        return redirect('inventory_items')
+    
+    categories = InventoryCategory.objects.all()
+    context = {
+        'item': item,
+        'categories': categories,
+    }
+    return render(request, 'inventory/edit_item.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def delete_inventory_item(request, item_id):
+    item = get_object_or_404(InventoryItem, id=item_id)
+    
+    if request.method == 'POST':
+        item_name = item.name
+        item.delete()
+        messages.success(request, f'Item "{item_name}" deleted successfully!')
+        return redirect('inventory_items')
+    
+    context = {
+        'item': item,
+    }
+    return render(request, 'inventory/delete_item.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def inventory_transactions(request, item_id=None):
+    if item_id:
+        item = get_object_or_404(InventoryItem, id=item_id)
+        transactions = InventoryTransaction.objects.filter(item=item)
+    else:
+        item = None
+        transactions = InventoryTransaction.objects.all()
+    
+    transactions = transactions.order_by('-created_at')
+    
+    context = {
+        'transactions': transactions,
+        'item': item,
+    }
+    return render(request, 'inventory/transactions.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def add_inventory_transaction(request, item_id):
+    item = get_object_or_404(InventoryItem, id=item_id)
+    
+    if request.method == 'POST':
+        transaction_type = request.POST.get('transaction_type')
+        quantity = int(request.POST.get('quantity', 0))
+        unit_price = request.POST.get('unit_price')
+        notes = request.POST.get('notes')
+        
+        if unit_price:
+            unit_price = Decimal(unit_price)
+        else:
+            unit_price = item.unit_price
+        
+        # Create transaction
+        transaction = InventoryTransaction(
+            item=item,
+            transaction_type=transaction_type,
+            quantity=quantity if transaction_type == 'IN' else -quantity,
+            unit_price=unit_price,
+            notes=notes,
+            created_by=request.user
+        )
+        transaction.save()
+        
+        # Update item quantity based on transaction
+        if transaction_type == 'IN':
+            item.quantity += quantity
+        elif transaction_type == 'OUT':
+            item.quantity = max(0, item.quantity - quantity)  # Prevent negative quantities
+        elif transaction_type == 'ADJUST':
+            item.quantity = quantity
+            
+        item.save()  # This will recalculate total_value correctly
+        
+        messages.success(request, f'Transaction recorded for "{item.name}"!')
+        return redirect('inventory_transactions', item_id=item.id)
+    
+    context = {
+        'item': item,
+    }
+    return render(request, 'inventory/add_transaction.html', context)

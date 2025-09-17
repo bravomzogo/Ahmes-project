@@ -127,6 +127,18 @@ path('ad/academic-calendars/delete/<int:pk>/', views.delete_academic_calendar, n
     path('parent/password-reset/', views.ParentPasswordResetRequestView.as_view(), name='parent_password_reset_request'),
     path('parent/verify-otp/', views.ParentVerifyOTPView.as_view(), name='parent_verify_otp'),
     path('parent/reset-password/', views.ParentPasswordResetView.as_view(), name='parent_reset_password'),
+
+
+     # Inventory URLs
+    path('inventory/', views.inventory_dashboard, name='inventory_dashboard'),
+    path('inventory/items/', views.inventory_items, name='inventory_items'),
+    path('inventory/items/category/<int:category_id>/', views.inventory_items, name='inventory_items_by_category'),
+    path('inventory/items/add/', views.add_inventory_item, name='add_inventory_item'),
+    path('inventory/items/edit/<int:item_id>/', views.edit_inventory_item, name='edit_inventory_item'),
+    path('inventory/items/delete/<int:item_id>/', views.delete_inventory_item, name='delete_inventory_item'),
+    path('inventory/transactions/', views.inventory_transactions, name='inventory_transactions'),
+    path('inventory/transactions/item/<int:item_id>/', views.inventory_transactions, name='inventory_item_transactions'),
+    path('inventory/transactions/add/<int:item_id>/', views.add_inventory_transaction, name='add_inventory_transaction'),
     
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

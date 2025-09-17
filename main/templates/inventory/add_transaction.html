@@ -1,0 +1,114 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block title %}Add Transaction | AHMES{% endblock %}
+{% block content %}
+<div class="wrapper">
+  {% comment %} {% include 'main/sidebar.html' %} {% endcomment %}
+  <div class="main-content">
+    <div class="container-fluid">
+      <br>
+      <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Add Transaction for {{ item.name }}</h1>
+        <a href="{% url 'inventory_item_transactions' item.id %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+          <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Transactions
+        </a>
+      </div>
+
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Item Information</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="border-left-primary border-bottom-primary p-3">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Current Stock</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ item.quantity }} {{ item.unit }}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border-left-info border-bottom-info p-3">
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Unit Price</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">Tsh {{ item.formatted_unit_price }}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border-left-success border-bottom-success p-3">
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Value</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">Tsh {{ item.formatted_total_value }}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border-left-{{ item.get_status_class }} border-bottom-{{ item.get_status_class }} p-3">
+                <div class="text-xs font-weight-bold text-{{ item.get_status_class }} text-uppercase mb-1">Status</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ item.get_status_display }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Transaction Details</h6>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="transaction_type">Transaction Type *</label>
+                  <select class="form-control" id="transaction_type" name="transaction_type" required>
+                    <option value="IN">Stock In (Add)</option>
+                    <option value="OUT">Stock Out (Remove)</option>
+                    <option value="ADJUST">Adjustment (Set Quantity)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="quantity">Quantity *</label>
+                  <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="unit_price">Unit Price (Tsh)</label>
+                  <input type="number" step="0.01" class="form-control" id="unit_price" name="unit_price" value="{{ item.formatted_unit_price }}">
+                  <small class="form-text text-muted">Leave blank to use current price</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="notes">Notes</label>
+              <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Reason for transaction, supplier info, etc."></textarea>
+            </div>
+<br>
+            <button type="submit" class="btn btn-primary">Record Transaction</button>
+            <a href="{% url 'inventory_item_transactions' item.id %}" class="btn btn-secondary">Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const transactionType = document.getElementById('transaction_type');
+    const quantityField = document.getElementById('quantity');
+    
+    transactionType.addEventListener('change', function() {
+      if (this.value === 'ADJUST') {
+        quantityField.placeholder = 'Set quantity to this value';
+        quantityField.min = 0;
+      } else {
+        quantityField.placeholder = '';
+        quantityField.min = 1;
+      }
+    });
+  });
+</script>
+{% endblock %}

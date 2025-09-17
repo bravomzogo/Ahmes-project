@@ -300,3 +300,55 @@ class PaymentAdmin(admin.ModelAdmin):
     list_filter = ('payment_method', 'status', 'payment_date', 'created_at')
     search_fields = ('control_number', 'student__first_name', 'student__last_name', 'transaction_reference', 'receipt_number')
     ordering = ('-payment_date',)
+
+
+
+
+from django.contrib import admin
+from .models import InventoryCategory, InventoryItem, InventoryTransaction
+
+@admin.register(InventoryCategory)
+class InventoryCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'created_at')
+    list_filter = ('name',)
+    search_fields = ('name', 'description')
+
+@admin.register(InventoryItem)
+class InventoryItemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'quantity', 'unit', 'unit_price', 'total_value', 'status', 'created_at')
+    list_filter = ('category', 'status', 'created_at')
+    search_fields = ('name', 'description', 'location', 'supplier')
+    readonly_fields = ('total_value', 'status', 'created_at', 'updated_at')
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description', 'category')
+        }),
+        ('Stock Information', {
+            'fields': ('quantity', 'unit', 'unit_price', 'total_value', 'minimum_stock', 'status')
+        }),
+        ('Additional Information', {
+            'fields': ('location', 'supplier', 'notes')
+        }),
+        ('Audit Information', {
+            'fields': ('created_by', 'last_updated_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.created_by = request.user
+        obj.last_updated_by = request.user
+        super().save_model(request, obj, form, change)
+
+@admin.register(InventoryTransaction)
+class InventoryTransactionAdmin(admin.ModelAdmin):
+    list_display = ('item', 'transaction_type', 'quantity', 'unit_price', 'total_value', 'created_by', 'created_at')
+    list_filter = ('transaction_type', 'created_at')
+    search_fields = ('item__name', 'notes')
+    readonly_fields = ('total_value', 'created_at')
+    
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)

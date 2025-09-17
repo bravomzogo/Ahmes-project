@@ -119,13 +119,61 @@
           </div>
         </div>
 
-        <!-- Pending Comments Card -->
+        <!-- Inventory Items Card -->
         <div class="col-xl-3 col-md-6 mb-4">
           <div class="card border-left-warning shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                    Inventory Items
+                  </div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ inventory_items_count }}
+                  </div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                </div>
+              </div>
+              <a href="{% url 'inventory_items' %}" class="small-box-footer mt-2">
+                Manage inventory <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Low Stock Items Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                    Low Stock Items
+                  </div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ low_stock_items_count }}
+                  </div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                </div>
+              </div>
+              <a href="{% url 'inventory_items' %}?status=LOW_STOCK" class="small-box-footer mt-2">
+                View items <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Comments Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                     Pending Comments
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -169,11 +217,11 @@
 
         <!-- Activity Log Card -->
         <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border-left-danger shadow h-100 py-2">
+          <div class="card border-left-secondary shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                  <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                     System Activities
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -214,10 +262,17 @@
                 <a href="{% url 'add_gallery' %}" class="btn btn-secondary btn-block">
                   <i class="fas fa-image mr-2"></i> Add Gallery Item
                 </a>
-                <a href="{% url 'manage_youtube_videos' %}" class="btn btn-dark btn-block">
+                <!-- Inventory Quick Actions -->
+                <a href="{% url 'add_inventory_item' %}" class="btn btn-warning btn-block">
+                  <i class="fas fa-box mr-2"></i> Add Inventory Item
+                </a>
+                <a href="{% url 'inventory_transactions' %}" class="btn btn-dark btn-block">
+                  <i class="fas fa-exchange-alt mr-2"></i> View Transactions
+                </a>
+                <a href="{% url 'manage_youtube_videos' %}" class="btn btn-danger btn-block">
                   <i class="fas fa-video mr-2"></i> Manage YouTube Videos
                 </a>
-                <a href="{% url 'activity_log' %}" class="btn btn-danger btn-block">
+                <a href="{% url 'activity_log' %}" class="btn btn-outline-primary btn-block">
                   <i class="fas fa-clipboard-list mr-2"></i> View Activity Log
                 </a>
               </div>
@@ -272,6 +327,82 @@
                     {% endfor %}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Summary Row -->
+      <div class="row">
+        <div class="col-lg-12 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+              <h6 class="m-0 font-weight-bold text-primary">Inventory Summary</h6>
+              <a href="{% url 'inventory_dashboard' %}" class="btn btn-sm btn-primary">View Full Dashboard</a>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <!-- Total Inventory Value -->
+                <div class="col-md-3 mb-3">
+                  <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                      <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                          <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total Value
+                          </div>
+                          <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            Tsh {{ total_value}}
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Out of Stock Items -->
+                <div class="col-md-3 mb-3">
+                  <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                      <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                          <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Out of Stock
+                          </div>
+                          <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ out_of_stock_count }}
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Categories Summary -->
+                <div class="col-md-6 mb-3">
+                  <div class="card h-100">
+                    <div class="card-body">
+                      <h6 class="card-title text-primary mb-3">Items by Category</h6>
+                      <div class="row">
+                        {% for cat in inventory_categories %}
+                        <div class="col-6 mb-2">
+                          <div class="d-flex justify-content-between">
+                            <span class="text-muted">{{ cat.name }}:</span>
+                            <span class="fw-bold">{{ cat.item_count }}</span>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -415,6 +546,15 @@
     background-color: #858796;
   }
 
+  .btn-block {
+    text-align: left;
+    padding: 0.75rem 1rem;
+  }
+
+  .btn-block i {
+    width: 20px;
+  }
+
   @media (max-width: 768px) {
     .sidebar {
       margin-left: -var(--sidebar-width);
@@ -444,4 +584,4 @@
     });
   });
 </script>
-{% endblock %}
+{% endblock %} 
