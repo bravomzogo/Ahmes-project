@@ -542,7 +542,7 @@ class StudentImportForm(forms.Form):
 class WeeklyResultForm(forms.ModelForm):
     class Meta:
         model = Result
-        fields = ['school_class', 'student', 'subject', 'term',  'week_number', 'exam_score']
+        fields = ['school_class', 'student', 'subject', 'term', 'academic_year', 'week_number', 'exam_score']
         widgets = {
             'academic_year': forms.TextInput(attrs={'placeholder': 'e.g., 2024-2025'}),
             'week_number': forms.NumberInput(attrs={'min': 1, 'max': 15}),
@@ -561,7 +561,7 @@ class WeeklyResultForm(forms.ModelForm):
             self.fields['student'].required = True
             self.fields['subject'].required = True
             self.fields['term'].required = True
-            # self.fields['academic_year'].required = True
+            self.fields['academic_year'].required = True
             self.fields['week_number'].required = True
             self.fields['exam_score'].required = True
             

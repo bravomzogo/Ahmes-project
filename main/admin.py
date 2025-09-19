@@ -179,8 +179,8 @@ class SubjectAdmin(admin.ModelAdmin):
 
 # Result Admin
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('student', 'subject', 'term',  'total_score', 'grade', 'is_approved')
-    list_filter = ('term', 'grade', 'is_approved')
+    list_display = ('student', 'subject', 'term', 'academic_year', 'total_score', 'grade', 'is_approved')
+    list_filter = ('term', 'academic_year', 'grade', 'is_approved')
     search_fields = ('student__first_name', 'student__last_name', 'subject__name')
     readonly_fields = ('total_score', 'grade', 'remark')
     raw_id_fields = ('student', 'teacher', 'approved_by')

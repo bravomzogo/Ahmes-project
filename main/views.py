@@ -1703,7 +1703,7 @@ def parent_view_results(request):
             if key not in results_by_year_term:
                 results_by_year_term[key] = []
             results_by_year_term[key].append(result)
-        
+
         results_by_student[student] = results_by_year_term
     
     return render(request, 'academics/parent_view_results.html', {
