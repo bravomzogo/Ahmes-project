@@ -2105,7 +2105,7 @@ def send_push_notification(user, title, message, url):
                 logger.warning(f"Deleting expired subscription ID {sub.id}")
                 sub.delete()
 
-        except json.JSONEncodeError as e:
+        except ValueError as e:
             failed_sends += 1
             logger.error(f"JSON encoding error: {str(e)}")
             
