@@ -2420,3 +2420,9 @@ def add_inventory_transaction(request, item_id):
         'item': item,
     }
     return render(request, 'inventory/add_transaction.html', context)
+
+
+
+
+
+

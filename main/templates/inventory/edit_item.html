@@ -1,5 +1,6 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% block loader %}{% endblock %} 
 {% block title %}Edit Inventory Item | AHMES{% endblock %}
 {% block content %}
 <div class="wrapper">
@@ -96,7 +97,7 @@
               <label for="notes">Notes</label>
               <textarea class="form-control" id="notes" name="notes" rows="2">{{ item.notes }}</textarea>
             </div>
-
+<br>
             <button type="submit" class="btn btn-primary">Update Item</button>
             <a href="{% url 'inventory_items' %}" class="btn btn-secondary">Cancel</a>
           </form>

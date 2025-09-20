@@ -1,5 +1,6 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% block loader %}{% endblock %} 
 {% block title %}Delete Inventory Item | AHMES{% endblock %}
 {% block content %}
 <div class="wrapper">
@@ -32,9 +33,9 @@
               <p class="card-text">
                 <strong>Category:</strong> {{ item.category.get_name_display }}<br>
                 <strong>Quantity:</strong> {{ item.quantity }} {{ item.unit }}<br>
-                <strong>Unit Price:</strong> Tsh {{ item.unit_price|floatformat:2 }}<br>
-                <strong>Total Value:</strong> Tsh {{ item.total_value|floatformat:2 }}<br>
-                <strong>Status:</strong> <span class="badge badge-{{ item.get_status_class }}">{{ item.get_status_display }}</span>
+                <strong>Unit Price:</strong> Tsh {{ item.formatted_unit_price}}<br>
+                <strong>Total Value:</strong> Tsh {{ item.formatted_total_value}}<br>
+                <strong>Status:</strong> <span class="badge badge-{{ item.get_status_class }}" style="color:black;">{{ item.get_status_display }}</span>
               </p>
             </div>
           </div>
